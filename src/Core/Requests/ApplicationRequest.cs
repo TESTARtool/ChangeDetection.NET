@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Testar.ChangeDetection.Core;
+namespace Testar.ChangeDetection.Core.Requests;
 
 public class ApplicationRequest : IRequest<Application>
 {
@@ -57,18 +57,18 @@ public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, App
 
     private class AbstractStateJson
     {
-        public string[] in_AbstractAction { get; set; }
-        public string[] out_AbstractAction { get; set; }
-        public string stateId { get; set; }
-        public string[] concreteStateIds { get; set; }
-        public bool isInitial { get; set; }
-        public int counter { get; set; }
+        public string[] In_AbstractAction { get; set; }
+        public string[] Out_AbstractAction { get; set; }
+        public string StateId { get; set; }
+        public string[] ConcreteStateIds { get; set; }
+        public bool IsInitial { get; set; }
+        public int Counter { get; set; }
     }
 
     private class ApplicationJson
     {
-        public string modelIdentifier { get; init; }
+        public string ModelIdentifier { get; init; }
 
-        public string[] abstractionAttributes { get; set; }
+        public string[] AbstractionAttributes { get; set; }
     }
 }

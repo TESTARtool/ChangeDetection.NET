@@ -1,5 +1,16 @@
 <Project>
-    <ItemGroup >
-        <Using Include="Microsoft.Extensions.Logging" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>10</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <Using Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Analyser.cs" Link="Analyser.cs" />
+    <PackageReference Include="SmartAnalyzers.CSharpExtensions.Annotations" Version="4.2.1" />
+  </ItemGroup>
 </Project>
