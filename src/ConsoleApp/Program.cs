@@ -15,7 +15,6 @@ await Host.CreateDefaultBuilder(args)
                 hostContext.Configuration.GetSection(OrientDbOptions.ConfigName));
 
         services.AddHttpClient();
-
         services.AddSingleton<IOrientDbCommand, OrientDbCommand>();
     })
 

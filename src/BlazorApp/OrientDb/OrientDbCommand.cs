@@ -1,28 +1,26 @@
-﻿using Microsoft.Extensions.Options;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Testar.ChangeDetection.Core;
 
-namespace Testar.ChangeDetection.Core.OrientDb;
+namespace Testar.ChangeDetection.BlazorApp.OrientDb;
 
 public interface IOrientDbCommand
 {
-    Task<TElement[]> ExecuteQueryAsync<TElement>(string sql);
+    Task<TElement[]> ExecuteQueryAsync<TElement>(string sql, OrientDbOptions orientDbOptions);
 
-    Task<byte[]> ExecuteDocumentAsync(OrientDbId id);
+    Task<byte[]> ExecuteDocumentAsync(OrientDbId id, OrientDbOptions orientDbOptions);
 }
 
 public class OrientDbCommand : IOrientDbCommand
 {
     private readonly IHttpClientFactory clientFactory;
-    private readonly IOptionsSnapshot<OrientDbOptions> orientDbOptions;
     private readonly ILogger<OrientDbId> logger;
     private readonly JsonSerializerOptions jsonSerializerOptions;
 
-    public OrientDbCommand(IHttpClientFactory clientFactory, IOptionsSnapshot<OrientDbOptions> options, ILogger<OrientDbId> logger)
+    public OrientDbCommand(IHttpClientFactory clientFactory, ILogger<OrientDbId> logger)
     {
         this.clientFactory = clientFactory;
-        this.orientDbOptions = options;
         this.logger = logger;
 
         jsonSerializerOptions = new JsonSerializerOptions
@@ -31,9 +29,9 @@ public class OrientDbCommand : IOrientDbCommand
         };
     }
 
-    public async Task<TElement[]> ExecuteQueryAsync<TElement>(string sql)
+    public async Task<TElement[]> ExecuteQueryAsync<TElement>(string sql, OrientDbOptions orientDbOptions)
     {
-        var client = CreateQueryClient();
+        var client = CreateQueryClient(orientDbOptions);
 
         var response = await client.GetAsync(sql);
         response.EnsureSuccessStatusCode();
@@ -48,9 +46,9 @@ public class OrientDbCommand : IOrientDbCommand
         return orientDbResult.Result.Deserialize<TElement[]>(jsonSerializerOptions) ?? Array.Empty<TElement>();
     }
 
-    public async Task<byte[]> ExecuteDocumentAsync(OrientDbId id)
+    public async Task<byte[]> ExecuteDocumentAsync(OrientDbId id, OrientDbOptions orientDbOptions)
     {
-        var client = CreateDocumentClient();
+        var client = CreateDocumentClient(orientDbOptions);
 
         var response = await client.GetAsync(id.Value.Replace("#", "").Trim());
         response.EnsureSuccessStatusCode();
@@ -65,19 +63,20 @@ public class OrientDbCommand : IOrientDbCommand
             : Convert.FromBase64String(orientDbResult.Value);
     }
 
-    private HttpClient CreateQueryClient() => CreateOrientDbClient(new Uri($"query/{orientDbOptions.Value.DatabaseName}/sql"));
+    private HttpClient CreateQueryClient(OrientDbOptions orientDbOptions) => CreateOrientDbClient($"query/{orientDbOptions.DatabaseName}/sql/", orientDbOptions);
 
-    private HttpClient CreateDocumentClient() => CreateOrientDbClient(new Uri($"document/{orientDbOptions.Value.DatabaseName}/"));
+    private HttpClient CreateDocumentClient(OrientDbOptions orientDbOptions) => CreateOrientDbClient($"document/{orientDbOptions.DatabaseName}/", orientDbOptions);
 
-    private HttpClient CreateOrientDbClient(Uri uri)
+    private HttpClient CreateOrientDbClient(string uri, OrientDbOptions orientDbOptions)
     {
-        var orientDbUrl = new Uri(orientDbOptions.Value.Url, uri);
+        var orientDbUrl = new Uri(orientDbOptions.Url, uri);
 
-        var base64EncodedAuthenticationString = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{orientDbOptions.Value.UserName}:{orientDbOptions.Value.Password}"));
+        var base64EncodedAuthenticationString = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{orientDbOptions.UserName}:{orientDbOptions.Password}"));
         var client = clientFactory.CreateClient();
 
         client.BaseAddress = orientDbUrl;
         client.DefaultRequestHeaders.Clear();
+
         client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
         client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);

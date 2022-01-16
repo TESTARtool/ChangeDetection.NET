@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Testar.ChangeDetection.Core;
 
 namespace Testar.ChangeDetection.ConsoleApp;
 
@@ -8,28 +6,21 @@ internal sealed class ConsoleHostedService : IHostedService
 {
     private readonly ILogger logger;
     private readonly IHostApplicationLifetime appLifetime;
-    private readonly IOrientDbCommand orientDbCommand;
-    private readonly OrientDbOptions orientDbOptions;
     private Task? applicationTask;
     private int? exitCode;
 
     public ConsoleHostedService(
         ILogger<ConsoleHostedService> logger,
-        IHostApplicationLifetime appLifetime,
-        IOrientDbCommand orientDbCommand
+        IHostApplicationLifetime appLifetime
         )
     {
         this.logger = logger;
         this.appLifetime = appLifetime;
-        this.orientDbCommand = orientDbCommand;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug("Starting with arguments: {args}", string.Join(" ", Environment.GetCommandLineArgs()));
-        }
+        logger.LogApplicationArguments(string.Join(" ", Environment.GetCommandLineArgs()));
 
         CancellationTokenSource? _cancellationTokenSource = null;
 

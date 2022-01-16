@@ -1,0 +1,47 @@
+﻿@page "/counter"
+@using Microsoft.Extensions.Options
+@using System.Text.Json
+@using Testar.ChangeDetection.BlazorApp.OrientDb;
+@inject IOrientDbCommand orientDbCommand;
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private async Task IncrementCount()
+    {
+        var options = new OrientDbOptions
+        {
+            DatabaseName = "testar",
+            UserName = "testar",
+            Password = "testar",
+            Url = new Uri("http://localhost:2480/", UriKind.Absolute)
+        };
+        try{
+            var items =
+                await orientDbCommand.ExecuteQueryAsync<ApplicationJson>("SELECT FROM AbstractStateModel", options);
+        }
+        catch(Exception ex)
+        {
+            var x = ex.Message;
+        }
+
+        currentCount++;
+    }
+
+    private class ApplicationJson
+    {
+        public string ModelIdentifier { get; init; }
+        public string ApplicationName { get; init; }
+        public string ApplicationVersion { get; init; }
+
+        public string[] AbstractionAttributes { get; set; }
+    }
+}
