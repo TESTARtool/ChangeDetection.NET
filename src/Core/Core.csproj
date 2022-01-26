@@ -3,16 +3,30 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Testar.ChangeDetection.Core</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+    <None Remove="Strategy\AbstractStateComparison\AddedStateTemplate.html" />
+    <None Remove="Strategy\AbstractStateComparison\DisappearedStateTemplate.html" />
+    <None Remove="Strategy\AbstractStateComparison\Template.html" />
+    <None Remove="Strategy\WidgetTreeInitialState\Template.html" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Strategy\WidgetTreeInitialState\" />
+    <EmbeddedResource Include="Strategy\AbstractStateComparison\AddedStateTemplate.html" />
+    <EmbeddedResource Include="Strategy\AbstractStateComparison\DisappearedStateTemplate.html" />
+    <EmbeddedResource Include="Strategy\AbstractStateComparison\Template.html" />
+    <EmbeddedResource Include="Strategy\WidgetTreeInitialState\Template.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="11.0.0" />
+    <PackageReference Include="MediatR" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+    <PackageReference Include="System.Linq.Async" Version="5.1.0" />
+    <PackageReference Include="XMLUnit.Core" Version="2.9.1" />
   </ItemGroup>
 
 </Project>

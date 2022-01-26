@@ -7,3 +7,4 @@ public record ConcreteActionId(string Value);
 public record ConcreteIDCustom(string Value);
 public record OrientDbId(string Value);
 public record AbstractStateId(string Value);
+public record WidgetId(string Value);

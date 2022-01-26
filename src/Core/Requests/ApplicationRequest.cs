@@ -20,7 +20,7 @@ public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, App
     public async Task<Application> Handle(ApplicationRequest request, CancellationToken cancellationToken)
     {
         var application = await GetApplicationAsync(request);
-        var sql = $"SELECT FROM AbstractState WHERE modelIdentifier = '{application.modelIdentifier}'";
+        var sql = $"SELECT FROM AbstractState WHERE modelIdentifier = '{application.ModelIdentifier}'";
 
         var states = await orientDbCommand.ExecuteQueryAsync<AbstractStateJson>(sql);
 
@@ -28,17 +28,17 @@ public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, App
         {
             ApplicationName = request.ApplicationName,
             ApplicationVersion = request.ApplicationVersion,
-            ModelIdentifier = new ModelIdentifier(application.modelIdentifier),
-            AbstractionAttributes = application.abstractionAttributes,
+            ModelIdentifier = new ModelIdentifier(application.ModelIdentifier),
+            AbstractionAttributes = application.AbstractionAttributes,
             AbstractStates = states.Select(x => new AbstractState
             {
-                ConcreteStateIds = x.concreteStateIds.Select(x => new ConcreteStateId(x)).ToArray(),
-                Counter = x.counter,
-                IsInitial = x.isInitial,
-                ModelIdentifier = new ModelIdentifier(application.modelIdentifier),
-                StateId = new AbstractStateId(x.stateId),
-                InAbstractActions = x.in_AbstractAction.Select(x => new AbstractActionId(x)).ToArray(),
-                OutAbstractActions = x.out_AbstractAction.Select(x => new AbstractActionId(x)).ToArray()
+                ConcreteStateIds = x.ConcreteStateIds.Select(x => new ConcreteStateId(x)).ToArray(),
+                Counter = x.Counter,
+                IsInitial = x.IsInitial,
+                ModelIdentifier = new ModelIdentifier(application.ModelIdentifier),
+                StateId = new AbstractStateId(x.StateId),
+                InAbstractActions = x.In_AbstractAction.Select(x => new AbstractActionId(x)).ToArray(),
+                OutAbstractActions = x.Out_AbstractAction.Select(x => new AbstractActionId(x)).ToArray()
             }).ToArray()
         };
     }

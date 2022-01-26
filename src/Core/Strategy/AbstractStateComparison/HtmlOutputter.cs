@@ -1,0 +1,1 @@
+﻿namespace Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;

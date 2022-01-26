@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+﻿using MediatR;
+using Microsoft.Extensions.Hosting;
 using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Requests;
+using Testar.ChangeDetection.Core.Strategy;
 
 namespace Testar.ChangeDetection.ConsoleApp;
 
@@ -8,20 +10,32 @@ internal sealed class ConsoleHostedService : IHostedService
 {
     private readonly ILogger logger;
     private readonly IHostApplicationLifetime appLifetime;
+    private readonly IChangeDetectionStrategy strategy;
+    private readonly IMediator mediator;
     private readonly IOrientDbCommand orientDbCommand;
-    private readonly OrientDbOptions orientDbOptions;
     private Task? applicationTask;
     private int? exitCode;
 
     public ConsoleHostedService(
         ILogger<ConsoleHostedService> logger,
         IHostApplicationLifetime appLifetime,
-        IOrientDbCommand orientDbCommand
+        IChangeDetectionStrategy strategy,
+        IMediator mediator
         )
     {
         this.logger = logger;
         this.appLifetime = appLifetime;
-        this.orientDbCommand = orientDbCommand;
+        this.strategy = strategy;
+        this.mediator = mediator;
+    }
+
+    public async Task RunAsync()
+    {
+        var control = await mediator.Send(new ApplicationRequest { ApplicationName = "wpfApp", ApplicationVersion = "1.0.0" });
+        var test = await mediator.Send(new ApplicationRequest { ApplicationName = "wpfApp", ApplicationVersion = "2.0.0" });
+        var fileHandler = new FileHandler(control, test);
+
+        await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -43,8 +57,7 @@ internal sealed class ConsoleHostedService : IHostedService
                 {
                     Console.WriteLine("Hello World!");
 
-                    //   var query = await orientDbCommand.ExecuteQuery("SELECT FROM AbstractStateModel");
-                    await Task.Delay(1000);
+                    await RunAsync();
 
                     exitCode = 0;
                 }
@@ -87,5 +100,33 @@ internal sealed class ConsoleHostedService : IHostedService
 
         // Exit code may be null if the user cancelled via Ctrl+C/SIGTERM
         Environment.ExitCode = exitCode.GetValueOrDefault(-1);
+    }
+
+    public class FileHandler : IFileOutputHandler
+    {
+        private readonly string rootFolder;
+
+        public FileHandler(Application control, Application test)
+        {
+            var folderName = $"{control.ApplicationName}_{control.ApplicationVersion}_Diff_{test.ApplicationName}_{test.ApplicationVersion}";
+
+            rootFolder = Path.Combine("out", folderName);
+        }
+
+        public string GetFilePath(string fileName)
+        {
+            return Path.Combine(rootFolder, fileName);
+        }
+    }
+
+    public class WidgetTreeJson
+    {
+        public string[] In_isChildOf { get; set; } = Array.Empty<string>();
+
+        public string[] Out_isChildOf { get; set; } = Array.Empty<string>();
+        public string Role { get; set; }
+        public string Title { get; set; }
+
+        public Dictionary<string, string> Properties { get; set; } = new();
     }
 }

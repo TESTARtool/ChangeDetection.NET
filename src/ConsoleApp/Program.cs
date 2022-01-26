@@ -1,9 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
 using Testar.ChangeDetection.ConsoleApp;
-using Testar.ChangeDetection.Core.OrientDb;
+using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Strategy;
+using Testar.ChangeDetection.Core.Strategy.WidgetTreeInitialState;
 
 await Host.CreateDefaultBuilder(args)
     .UseContentRoot(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
@@ -17,6 +20,21 @@ await Host.CreateDefaultBuilder(args)
         services.AddHttpClient();
 
         services.AddSingleton<IOrientDbCommand, OrientDbCommand>();
+        services.AddSingleton<IChangeDetectionStrategy, WidgetTreeInitialStateStrategy>();
+        services.AddAutoMapper(configActions =>
+        {
+            configActions.ReplaceMemberName("_", string.Empty);
+            configActions.CreateMap<WidgetJson, Widget>();
+            configActions.CreateMap<string, AbstractActionId>().ConvertUsing(x => new AbstractActionId(x));
+            configActions.CreateMap<string, ModelIdentifier>().ConvertUsing(x => new ModelIdentifier(x));
+            configActions.CreateMap<string, ConcreteStateId>().ConvertUsing(x => new ConcreteStateId(x));
+            configActions.CreateMap<string, ConcreteActionId>().ConvertUsing(x => new ConcreteActionId(x));
+            configActions.CreateMap<string, ConcreteIDCustom>().ConvertUsing(x => new ConcreteIDCustom(x));
+            configActions.CreateMap<string, OrientDbId>().ConvertUsing(x => new OrientDbId(x));
+            configActions.CreateMap<string, AbstractStateId>().ConvertUsing(x => new AbstractStateId(x));
+            configActions.CreateMap<string, WidgetId>().ConvertUsing(x => new WidgetId(x));
+        });
+        services.AddMediatR(typeof(OrientDbCommand).Assembly);
     })
 
     .ConfigureAppConfiguration((hostContext, config) =>

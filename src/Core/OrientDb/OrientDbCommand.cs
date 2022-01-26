@@ -18,12 +18,18 @@ public class OrientDbCommand : IOrientDbCommand
     private readonly IHttpClientFactory clientFactory;
     private readonly ILogger<OrientDbId> logger;
     private readonly OrientDbOptions orientDbOptions;
+    private readonly JsonSerializerOptions jsonOptions;
 
     public OrientDbCommand(IHttpClientFactory clientFactory, IOptions<OrientDbOptions> options, ILogger<OrientDbId> logger)
     {
         this.clientFactory = clientFactory;
         this.logger = logger;
         this.orientDbOptions = options.Value;
+
+        this.jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+        };
     }
 
     public async Task<TElement[]> ExecuteQueryAsync<TElement>(string sql)
@@ -40,7 +46,7 @@ public class OrientDbCommand : IOrientDbCommand
 
         logger.LogExecutionPlan(sql, orientDbResult.ExecutionPlan);
 
-        return orientDbResult.Result.Deserialize<TElement[]>() ?? Array.Empty<TElement>();
+        return orientDbResult.Result.Deserialize<TElement[]>(jsonOptions) ?? Array.Empty<TElement>();
     }
 
     public async Task<byte[]> ExecuteDocumentAsync(OrientDbId id)
@@ -52,7 +58,7 @@ public class OrientDbCommand : IOrientDbCommand
 
         using var stream = await response.Content.ReadAsStreamAsync();
 
-        var orientDbResult = await JsonSerializer.DeserializeAsync<OrientDbDocumentResult>(stream)
+        var orientDbResult = await JsonSerializer.DeserializeAsync<OrientDbDocumentResult>(stream, jsonOptions)
             ?? throw new Exception("Unable to parse query result to JsonElement");
 
         return string.IsNullOrWhiteSpace(orientDbResult.Value)
@@ -60,11 +66,11 @@ public class OrientDbCommand : IOrientDbCommand
             : Convert.FromBase64String(orientDbResult.Value);
     }
 
-    private HttpClient CreateQueryClient() => CreateOrientDbClient(new Uri($"query/{orientDbOptions.DatabaseName}/sql"));
+    private HttpClient CreateQueryClient() => CreateOrientDbClient($"query/{orientDbOptions.DatabaseName}/sql/");
 
-    private HttpClient CreateDocumentClient() => CreateOrientDbClient(new Uri($"document/{orientDbOptions.DatabaseName}/"));
+    private HttpClient CreateDocumentClient() => CreateOrientDbClient($"document/{orientDbOptions.DatabaseName}/");
 
-    private HttpClient CreateOrientDbClient(Uri uri)
+    private HttpClient CreateOrientDbClient(string uri)
     {
         var orientDbUrl = new Uri(orientDbOptions.Url, uri);
 
@@ -85,13 +91,12 @@ public class OrientDbCommand : IOrientDbCommand
         [JsonPropertyName("executionPlan")]
         public JsonElement ExecutionPlan { get; set; }
 
-        [JsonPropertyName("executionPlan")]
+        [JsonPropertyName("result")]
         public JsonElement Result { get; set; }
     }
 
     private class OrientDbDocumentResult
     {
-        [JsonPropertyName("value")]
         public string Value { get; set; }
     }
 }
