@@ -32,7 +32,6 @@ public class WidgetTreeInitialStateStrategy : IChangeDetectionStrategy
 
         var widgetTreeControl = await GetWidgetTreeFromConcreteStateIdAsync(controlConcreteId);
         var controlXmlFilePath = TransformToXml(widgetTreeControl, controlConcreteId, fileOutputHandler);
-        // var controlScreenshotPath =
 
         var widgetTreeTest = await GetWidgetTreeFromConcreteStateIdAsync(testConcreteId);
         var testXmlFilePath = TransformToXml(widgetTreeControl, controlConcreteId, fileOutputHandler);

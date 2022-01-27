@@ -1,4 +1,6 @@
-﻿namespace Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
+﻿using System.Text;
+
+namespace Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
 public interface IHtmlOutputter
 {
@@ -34,6 +36,51 @@ public class HtmlOutputter : IHtmlOutputter
         var path = fileOutputHandler.GetFilePath(fileName);
 
         await File.WriteAllTextAsync(path, html);
+    }
+
+    private void AddImageOrWidgetTreeComparison(Application control, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
+    {
+    }
+
+    private string CapitalizeWordsAndRemoveSpaces(string attribute)
+    {
+        var words = attribute.Split(' ');
+        var capitalizeWord = new StringBuilder();
+        foreach (var word in words)
+        {
+            var fist = word.Substring(0, 1).ToUpper();
+            var rest = word.Substring(1);
+            capitalizeWord.Append(fist);
+            capitalizeWord.Append(rest);
+        }
+
+        return capitalizeWord.ToString().Trim();
+    }
+
+    private HashSet<ITag> AbstractAttributesTags(Application control)
+    {
+        // Update Set object "abstractAttributesTags" with the Tags
+        // we need to check for Widget Tree difference
+        var mangementTags = control.AbstractionAttributes
+            .Select(CapitalizeWordsAndRemoveSpaces)
+            .Select(x => StateManagementTags.GetTagFromSettingsString(x))
+            .Where(x => x is not null)
+            .ToHashSet();
+
+        var uiAmappings = mangementTags
+            .Select(x => UIAMapping.GetMappedStateTag(x!))
+            .Where(x => x is not null)
+            .ToList();
+
+        var wdMapping = mangementTags
+            .Select(x => WebTagsMapping.GetMappedStateTag(x!))
+            .Where(x => x is not null)
+            .ToList();
+
+        var tags = uiAmappings.Union(wdMapping)
+            .ToHashSet();
+
+        return tags;
     }
 
     private async IAsyncEnumerable<string> ChangedStatesHtmlAsync(DeltaState[] states, string templateName, IFileOutputHandler fileOutputHandler)
