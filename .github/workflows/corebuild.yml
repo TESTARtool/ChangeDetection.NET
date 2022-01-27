@@ -10,18 +10,23 @@ jobs:
     steps:
     - name: Checkout GitHub actions
       uses: actions/checkout@v2
+
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
+
     - name: Install dependencies
-      run: dotnet restore "./myApp"
+      run: dotnet restore "./ChangeDetection.sln"
+
     - name: Build code
-      run: dotnet build "./myApp" --configuration Release --no- restore
+      run: dotnet build "./ChangeDetection.sln" --configuration Release --no- restore
+
     - name: Publish application
-      run: dotnet publish "./myApp" -c Release -o myApp
+      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -o myApp
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
        name: my-artifact
-       path: "./myApp" 
+       path: "./ChangeDetection.sln" 
