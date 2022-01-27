@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "/Compare:ControlName=wpfApp /Compare:ControlVersion=1.0.0 /Compare:TestName=wpfApp /Compare:TestVersion=2.0.0"
+    }
+  }
+}
