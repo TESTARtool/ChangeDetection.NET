@@ -23,10 +23,19 @@ jobs:
       run: dotnet build "./ChangeDetection.sln" --configuration Release --no-restore
 
     - name: Publish application
-      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -o myApp
+      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -o App
+
+    - name: Publish application Self Contained
+      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release --self-contained -o AppSelf
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
-       name: my-artifact
-       path: "./ChangeDetection.sln" 
+       name: ConsoleApp
+       path: "./src/ConsoleApp/App" 
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+       name: ConsoleAppSelf
+       path: "./src/ConsoleApp/AppSelf" 
