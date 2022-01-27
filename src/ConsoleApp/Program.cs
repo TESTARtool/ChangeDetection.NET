@@ -6,6 +6,7 @@ using System.Reflection;
 using Testar.ChangeDetection.ConsoleApp;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Strategy;
+using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 using Testar.ChangeDetection.Core.Strategy.WidgetTreeInitialState;
 
 await Host.CreateDefaultBuilder(args)
@@ -20,7 +21,13 @@ await Host.CreateDefaultBuilder(args)
         services.AddHttpClient();
 
         services.AddSingleton<IOrientDbCommand, OrientDbCommand>();
-        services.AddSingleton<IChangeDetectionStrategy, WidgetTreeInitialStateStrategy>();
+        //services.AddSingleton<IChangeDetectionStrategy, WidgetTreeInitialStateStrategy>();
+
+        services
+            .AddSingleton<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
+            .AddSingleton<IFindStateDifferences, FindStateDifferences>()
+            .AddSingleton<IHtmlOutputter, HtmlOutputter>();
+
         services.AddAutoMapper(configActions =>
         {
             configActions.ReplaceMemberName("_", string.Empty);

@@ -12,7 +12,6 @@ internal sealed class ConsoleHostedService : IHostedService
     private readonly IHostApplicationLifetime appLifetime;
     private readonly IChangeDetectionStrategy strategy;
     private readonly IMediator mediator;
-    private readonly IOrientDbCommand orientDbCommand;
     private Task? applicationTask;
     private int? exitCode;
 
@@ -36,6 +35,8 @@ internal sealed class ConsoleHostedService : IHostedService
         var fileHandler = new FileHandler(control, test);
 
         await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
+
+        var usedFiles = fileHandler.UsedPaths;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -104,29 +105,28 @@ internal sealed class ConsoleHostedService : IHostedService
 
     public class FileHandler : IFileOutputHandler
     {
-        private readonly string rootFolder;
-
         public FileHandler(Application control, Application test)
         {
             var folderName = $"{control.ApplicationName}_{control.ApplicationVersion}_Diff_{test.ApplicationName}_{test.ApplicationVersion}";
 
-            rootFolder = Path.Combine("out", folderName);
+            RootFolder = Path.Combine("out", folderName);
+
+            if (Directory.Exists(RootFolder))
+            {
+                Directory.Delete(RootFolder, recursive: true);
+            }
+
+            Directory.CreateDirectory(RootFolder);
         }
+
+        public HashSet<string> UsedPaths { get; } = new();
+        public string RootFolder { get; }
 
         public string GetFilePath(string fileName)
         {
-            return Path.Combine(rootFolder, fileName);
+            var path = Path.Combine(RootFolder, fileName);
+            UsedPaths.Add(path);
+            return path;
         }
-    }
-
-    public class WidgetTreeJson
-    {
-        public string[] In_isChildOf { get; set; } = Array.Empty<string>();
-
-        public string[] Out_isChildOf { get; set; } = Array.Empty<string>();
-        public string Role { get; set; }
-        public string Title { get; set; }
-
-        public Dictionary<string, string> Properties { get; set; } = new();
     }
 }

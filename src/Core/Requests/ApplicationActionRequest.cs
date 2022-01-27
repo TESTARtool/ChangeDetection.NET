@@ -42,7 +42,7 @@ public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, Ap
 
     public async Task<ActionJson> AbstractAction(ApplicationActionRequest request)
     {
-        var actions = await dbCommand.ExecuteQueryAsync<ActionJson>($"SELECT FROM AbstractAction where actionId = '{request.AbstractActionId.Value}'");
+        var actions = await dbCommand.ExecuteQueryAsync<ActionJson>($"SELECT FROM AbstractAction WHERE @rid = '{request.AbstractActionId.Value.Replace("#", "").Trim()}'");
 
         return actions.FirstOrDefault()
             ?? throw new Exception($"Unable to find actions with Id '{request.AbstractActionId.Value}'");
