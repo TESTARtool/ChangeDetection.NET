@@ -20,7 +20,7 @@ jobs:
       run: dotnet restore "./ChangeDetection.sln"
 
     - name: Build code
-      run: dotnet build "./ChangeDetection.sln" --configuration Release --no- restore
+      run: dotnet build "./ChangeDetection.sln" --configuration Release --no-restore
 
     - name: Publish application
       run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -o myApp
