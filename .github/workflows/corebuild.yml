@@ -26,7 +26,7 @@ jobs:
       run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -o App
 
     - name: Publish application Self Contained
-      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release --self-contained -o AppSelf
+      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release --self-contained -r win-x86 -o AppSelf
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
