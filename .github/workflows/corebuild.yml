@@ -32,10 +32,10 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
        name: ConsoleApp
-       path: "./src/ConsoleApp/App" 
+       path: "./App" 
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
        name: ConsoleAppSelf
-       path: "./src/ConsoleApp/AppSelf" 
+       path: "./AppSelf" 
