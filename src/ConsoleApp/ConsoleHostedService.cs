@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Requests;
 using Testar.ChangeDetection.Core.Strategy;
@@ -12,6 +13,7 @@ internal sealed class ConsoleHostedService : IHostedService
     private readonly IHostApplicationLifetime appLifetime;
     private readonly IChangeDetectionStrategy strategy;
     private readonly IMediator mediator;
+    private readonly CompareOptions compareOptions;
     private Task? applicationTask;
     private int? exitCode;
 
@@ -19,19 +21,21 @@ internal sealed class ConsoleHostedService : IHostedService
         ILogger<ConsoleHostedService> logger,
         IHostApplicationLifetime appLifetime,
         IChangeDetectionStrategy strategy,
-        IMediator mediator
+        IMediator mediator,
+        IOptions<CompareOptions> compareOptions
         )
     {
         this.logger = logger;
         this.appLifetime = appLifetime;
         this.strategy = strategy;
         this.mediator = mediator;
+        this.compareOptions = compareOptions.Value;
     }
 
     public async Task RunAsync()
     {
-        var control = await mediator.Send(new ApplicationRequest { ApplicationName = "wpfApp", ApplicationVersion = "1.0.0" });
-        var test = await mediator.Send(new ApplicationRequest { ApplicationName = "wpfApp", ApplicationVersion = "2.0.0" });
+        var control = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.ControlName, ApplicationVersion = compareOptions.ControlVersion });
+        var test = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.TestName, ApplicationVersion = compareOptions.TestVersion });
         var fileHandler = new FileHandler(control, test);
 
         await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
@@ -56,8 +60,6 @@ internal sealed class ConsoleHostedService : IHostedService
             {
                 try
                 {
-                    Console.WriteLine("Hello World!");
-
                     await RunAsync();
 
                     exitCode = 0;

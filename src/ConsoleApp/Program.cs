@@ -7,7 +7,6 @@ using Testar.ChangeDetection.ConsoleApp;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
-using Testar.ChangeDetection.Core.Strategy.WidgetTreeInitialState;
 
 await Host.CreateDefaultBuilder(args)
     .UseContentRoot(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
@@ -17,6 +16,9 @@ await Host.CreateDefaultBuilder(args)
 
         services.Configure<OrientDbOptions>(
                 hostContext.Configuration.GetSection(OrientDbOptions.ConfigName));
+
+        services.Configure<CompareOptions>(
+            hostContext.Configuration.GetSection(CompareOptions.ConfigName));
 
         services.AddHttpClient();
 
@@ -31,7 +33,6 @@ await Host.CreateDefaultBuilder(args)
         services.AddAutoMapper(configActions =>
         {
             configActions.ReplaceMemberName("_", string.Empty);
-            configActions.CreateMap<WidgetJson, Widget>();
             configActions.CreateMap<string, AbstractActionId>().ConvertUsing(x => new AbstractActionId(x));
             configActions.CreateMap<string, ModelIdentifier>().ConvertUsing(x => new ModelIdentifier(x));
             configActions.CreateMap<string, ConcreteStateId>().ConvertUsing(x => new ConcreteStateId(x));
