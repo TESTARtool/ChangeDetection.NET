@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using System.Diagnostics;
 using Testar.ChangeDetection.Core.Requests;
 
 namespace Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
@@ -29,7 +30,7 @@ public class FindStateDifferences : IFindStateDifferences
         {
             var concreteState = await GetConcreteStateEntities(addedState).ToListAsync();
             var outgoingDeltaActions = await GetDeltaAction(addedState.OutAbstractActions, ActionType.Outgoing);
-            var incommingDeltaActions = await GetDeltaAction(addedState.OutAbstractActions, ActionType.Incomming);
+            var incommingDeltaActions = await GetDeltaAction(addedState.InAbstractActions, ActionType.Incomming);
 
             yield return new DeltaState
             {
@@ -51,7 +52,7 @@ public class FindStateDifferences : IFindStateDifferences
         {
             var concreteState = await GetConcreteStateEntities(removedState).ToListAsync();
             var outgoingDeltaActions = await GetDeltaAction(removedState.OutAbstractActions, ActionType.Outgoing);
-            var incommingDeltaActions = await GetDeltaAction(removedState.OutAbstractActions, ActionType.Incomming);
+            var incommingDeltaActions = await GetDeltaAction(removedState.InAbstractActions, ActionType.Incomming);
 
             yield return new DeltaState
             {
@@ -63,7 +64,7 @@ public class FindStateDifferences : IFindStateDifferences
         }
     }
 
-    private async Task<List<DeltaAction>> GetDeltaAction(AbstractActionId[] actionIds, ActionType actionType)
+    private async Task<List<DeltaAction>> GetDeltaAction(OrientDbId[] actionIds, ActionType actionType)
     {
         var returns = new List<DeltaAction>();
 
@@ -78,7 +79,7 @@ public class FindStateDifferences : IFindStateDifferences
             var actions = (await mediator.Send(request))
                 .Select(x => new DeltaAction
                 {
-                    ActionId = id,
+                    ActionId = x.AbstractActionId,
                     Description = x.Description,
                     ActionType = actionType,
                 }).ToList();
@@ -108,11 +109,34 @@ public class DeltaState
     public IEnumerable<ConcreteState> ConcreteStates { get; set; }
     public List<DeltaAction> OutgoingDeltaActions { get; set; }
     public List<DeltaAction> IncommingDeltaActions { get; set; }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is DeltaState state &&
+               EqualityComparer<AbstractStateId>.Default.Equals(StateId, state.StateId);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(StateId);
+    }
 }
 
+[DebuggerDisplay("value: {ActionId} - {Description}")]
 public class DeltaAction
 {
     public AbstractActionId ActionId { get; set; }
     public string Description { get; set; }
     public ActionType ActionType { get; set; }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is DeltaAction action &&
+               EqualityComparer<string>.Default.Equals(ActionId.Value, action.ActionId.Value);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(ActionId.Value);
+    }
 }

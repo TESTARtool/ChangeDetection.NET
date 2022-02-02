@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Requests;
 using Testar.ChangeDetection.Core.Strategy;
+using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
 namespace Testar.ChangeDetection.ConsoleApp;
 
@@ -13,6 +14,7 @@ internal sealed class ConsoleHostedService : IHostedService
     private readonly IHostApplicationLifetime appLifetime;
     private readonly IChangeDetectionStrategy strategy;
     private readonly IMediator mediator;
+    private readonly IStateModelDifferenceJsonWidget widgetTree;
     private readonly CompareOptions compareOptions;
     private Task? applicationTask;
     private int? exitCode;
@@ -22,18 +24,22 @@ internal sealed class ConsoleHostedService : IHostedService
         IHostApplicationLifetime appLifetime,
         IChangeDetectionStrategy strategy,
         IMediator mediator,
-        IOptions<CompareOptions> compareOptions
+        IOptions<CompareOptions> compareOptions,
+        IStateModelDifferenceJsonWidget widgetTree
         )
     {
         this.logger = logger;
         this.appLifetime = appLifetime;
         this.strategy = strategy;
         this.mediator = mediator;
+        this.widgetTree = widgetTree;
         this.compareOptions = compareOptions.Value;
     }
 
     public async Task RunAsync()
     {
+        //  var json = await widgetTree.FetchWidgetTreeAsync(new ConcreteIDCustom("SCCwqefeo1352629465196"));
+
         var control = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.ControlName, ApplicationVersion = compareOptions.ControlVersion });
         var test = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.TestName, ApplicationVersion = compareOptions.TestVersion });
         var fileHandler = new FileHandler(control, test);

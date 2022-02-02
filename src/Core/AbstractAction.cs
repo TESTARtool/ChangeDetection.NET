@@ -1,6 +1,6 @@
 ﻿namespace Testar.ChangeDetection.Core;
 
-public class ApplicationAction
+public class AbstractAction
 {
     public AbstractActionId AbstractActionId { get; set; }
     public ConcreteActionId ConcreteActionId { get; set; }

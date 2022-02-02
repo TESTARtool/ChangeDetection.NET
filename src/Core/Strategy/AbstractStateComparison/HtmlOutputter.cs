@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using Testar.ChangeDetection.Core.ImageComparison;
 
 namespace Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
@@ -10,10 +12,14 @@ public interface IHtmlOutputter
 public class HtmlOutputter : IHtmlOutputter
 {
     private readonly IOrientDbCommand orientDbCommand;
+    private readonly ICompareImages compareImages;
+    private readonly IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget;
 
-    public HtmlOutputter(IOrientDbCommand orientDbCommand)
+    public HtmlOutputter(IOrientDbCommand orientDbCommand, ICompareImages compareImages, IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget)
     {
         this.orientDbCommand = orientDbCommand;
+        this.compareImages = compareImages;
+        this.stateModelDifferenceJsonWidget = stateModelDifferenceJsonWidget;
     }
 
     public async Task SaveOutToHtmlAsync(DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
@@ -25,12 +31,15 @@ public class HtmlOutputter : IHtmlOutputter
         var disappearedStatesHtml = await ChangedStatesHtmlAsync(removedStates, "DisappearedStateTemplate.html", fileOutputHandler).ToListAsync();
         var addedAbstractStatesHtml = await ChangedStatesHtmlAsync(addedStates, "AddedStateTemplate.html", fileOutputHandler).ToListAsync();
 
+        var imageOrWidgetTreeComparison = await AddImageOrWidgetTreeComparisonAsync(addedStates, removedStates, fileOutputHandler);
+
         var html = template
             .Replace("{{NumberOfDisappearedAbstractStates}}", removedStates.Length.ToString())
             .Replace("{{NumberOfNewAbstractStates}}", addedStates.Length.ToString())
             .Replace("{{DissappearedAbstractStates}}", string.Join(Environment.NewLine, disappearedStatesHtml))
             .Replace("{{AddedAbstractStates}}", string.Join(Environment.NewLine, addedAbstractStatesHtml))
-            ;
+            .Replace("{{ImageOrWidgetTreeComparison}}", imageOrWidgetTreeComparison);
+        ;
 
         var fileName = "DifferenceReport.html";
         var path = fileOutputHandler.GetFilePath(fileName);
@@ -38,8 +47,69 @@ public class HtmlOutputter : IHtmlOutputter
         await File.WriteAllTextAsync(path, html);
     }
 
-    private void AddImageOrWidgetTreeComparison(Application control, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
+    private async Task<string> AddImageOrWidgetTreeComparisonAsync(DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
     {
+        var html = new StringBuilder();
+
+        foreach (var addedState in addedStates)
+        {
+            var incommingAddedActions = addedState.IncommingDeltaActions;
+
+            foreach (var removedState in removedStates)
+            {
+                var incommingRemovedActions = removedState.IncommingDeltaActions;
+
+                var intersection = incommingAddedActions.Intersect(incommingRemovedActions, new DeltaActionComparere());
+
+                if (intersection.Any())
+                {
+                    var newConcreteStateFileName = addedState.ConcreteStates.First().ConcreteIDCustom.Value;
+                    var removedConcreteState = removedState.ConcreteStates.First().ConcreteIDCustom.Value;
+
+                    var comparisonBytes = compareImages.Comparer
+                        (
+                        fileOutputHandler.GetFilePath(newConcreteStateFileName + ".png"),
+                        fileOutputHandler.GetFilePath(removedConcreteState + ".png")
+                        );
+
+                    if (comparisonBytes.Length > 0)
+                    {
+                        var imageDiff = $"{newConcreteStateFileName}_diff_{removedConcreteState}.png";
+                        await File.WriteAllBytesAsync(fileOutputHandler.GetFilePath(imageDiff), comparisonBytes);
+
+                        var imgs = $"<p><img src='{newConcreteStateFileName + ".png"}' alt='control image' />" +
+                            $"<img src='{removedConcreteState + ".png"}' alt='test image' />" +
+                            $"<img src='{imageDiff}' alt='diff image' /></p>";
+
+                        html.AppendLine(imgs);
+                    }
+
+                    var intersectionTexts = intersection.Select(x => $"{x.ActionId.Value}, {x.Description}");
+
+                    var actionDesc = string.Join(",", intersectionTexts);
+
+                    html.AppendLine($"<p style='color:blue;'>We have reached this State with Action: {actionDesc}</p>");
+
+                    var newWidgets = await stateModelDifferenceJsonWidget.GetNewWidgets(removedState, addedState, fileOutputHandler).ToArrayAsync();
+
+                    foreach (var widget in newWidgets)
+                    {
+                        html.AppendLine($"<p>This Widget is completely new in the new Model: {widget.AbstractIDCustom}</p>");
+                        html.AppendLine($"<p>UIAName:{widget.UIAName} UIAControlType:{widget.UIAControlType}</p>");
+                    }
+                }
+            }
+        }
+
+        return html.ToString();
+
+        // Widget Tree Abstract Properties Difference
+        // StateModelDifferenceJsonWidget stateModelDifferenceJsonWidget = new StateModelDifferenceJsonWidget(modelDifferenceDatabase, abstractAttributesTags);
+        // List<String> widgetTreeDifference = stateModelDifferenceJsonWidget.jsonWidgetTreeDifference(dissStateModelOne, newStateModelTwo);
+        // for (String widgetInformation : widgetTreeDifference)
+        // {
+        //     differenceHTML.addSpecificWidgetInfo(widgetInformation);
+        // }
     }
 
     private string CapitalizeWordsAndRemoveSpaces(string attribute)
@@ -77,10 +147,11 @@ public class HtmlOutputter : IHtmlOutputter
             .Where(x => x is not null)
             .ToList();
 
-        var tags = uiAmappings.Union(wdMapping)
+        var tags = uiAmappings
+            .Union(wdMapping)
             .ToHashSet();
 
-        return tags;
+        return tags!;
     }
 
     private async IAsyncEnumerable<string> ChangedStatesHtmlAsync(DeltaState[] states, string templateName, IFileOutputHandler fileOutputHandler)
@@ -100,6 +171,7 @@ public class HtmlOutputter : IHtmlOutputter
                 .ToList();
 
             yield return html
+                .Replace("{{AbstractStateId}}", state.StateId.Value)
                 .Replace("{{OutgoingActions}}", string.Join(Environment.NewLine, outgoingActions))
                 .Replace("{{AbstractStateScreenshot}}", screenshotFileName)
                 ;
@@ -115,5 +187,22 @@ public class HtmlOutputter : IHtmlOutputter
         await File.WriteAllBytesAsync(filePath, screenshotBytes);
 
         return fileName;
+    }
+
+    private class DeltaActionComparere : IEqualityComparer<DeltaAction>
+    {
+        public bool Equals(DeltaAction? x, DeltaAction? y)
+        {
+            if (x is null && y is null) return true;
+            if (x is null && y is not null) return false;
+            if (x is not null && y is null) return false;
+
+            return x.ActionId == y.ActionId;
+        }
+
+        public int GetHashCode([DisallowNull] DeltaAction obj)
+        {
+            return obj.ActionId.GetHashCode();
+        }
     }
 }

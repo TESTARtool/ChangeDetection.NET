@@ -2,12 +2,12 @@
 
 namespace Testar.ChangeDetection.Core.Requests;
 
-public class ApplicationActionRequest : IRequest<ApplicationAction[]>
+public class ApplicationActionRequest : IRequest<AbstractAction[]>
 {
-    public AbstractActionId AbstractActionId { get; set; }
+    public OrientDbId AbstractActionId { get; set; }
 }
 
-public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, ApplicationAction[]>
+public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, AbstractAction[]>
 {
     private readonly IOrientDbCommand dbCommand;
 
@@ -16,20 +16,20 @@ public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, Ap
         this.dbCommand = dbCommand;
     }
 
-    public async Task<ApplicationAction[]> Handle(ApplicationActionRequest request, CancellationToken cancellationToken)
+    public async Task<AbstractAction[]> Handle(ApplicationActionRequest request, CancellationToken cancellationToken)
     {
         var action = await AbstractAction(request);
 
-        var actions = new List<ApplicationAction>();
+        var actions = new List<AbstractAction>();
 
-        foreach (var id in action.ConcreteActionIds)
+        foreach (var concreteActionId in action.ConcreteActionIds)
         {
-            var sql = $"SELECT `Desc`, actionId FROM ConcreteAction WHERE actionId = '{id}'";
+            var sql = $"SELECT `Desc` FROM ConcreteAction WHERE actionId = '{concreteActionId}'";
             var concreteActions = (await dbCommand.ExecuteQueryAsync<ConcreteActionJson>(sql))
-                .Select(x => new ApplicationAction
+                .Select(x => new AbstractAction
                 {
-                    AbstractActionId = request.AbstractActionId,
-                    ConcreteActionId = new ConcreteActionId(id),
+                    AbstractActionId = new AbstractActionId(action.ActionId),
+                    ConcreteActionId = new ConcreteActionId(concreteActionId),
                     Description = x.Desc,
                 })
                 .ToList();
@@ -44,12 +44,13 @@ public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, Ap
     {
         var actions = await dbCommand.ExecuteQueryAsync<ActionJson>($"SELECT FROM AbstractAction WHERE @rid = '{request.AbstractActionId.Value.Replace("#", "").Trim()}'");
 
-        return actions.FirstOrDefault()
+        return actions.SingleOrDefault()
             ?? throw new Exception($"Unable to find actions with Id '{request.AbstractActionId.Value}'");
     }
 
     public class ActionJson
     {
+        public string ActionId { get; set; }
         public string[] ConcreteActionIds { get; set; }
     }
 

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using System.Reflection;
 using Testar.ChangeDetection.ConsoleApp;
 using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
@@ -28,6 +29,8 @@ await Host.CreateDefaultBuilder(args)
         services
             .AddSingleton<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
             .AddSingleton<IFindStateDifferences, FindStateDifferences>()
+            .AddSingleton<ICompareImages, EasySameDimensionsPixelByPixelImageComparison>()
+            .AddSingleton<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
             .AddSingleton<IHtmlOutputter, HtmlOutputter>();
 
         services.AddAutoMapper(configActions =>
