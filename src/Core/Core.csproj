@@ -2,17 +2,33 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>10</LangVersion>
     <RootNamespace>Testar.ChangeDetection.Core</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Strategy\AbstractStateComparison\AddedStateTemplate.html" />
+    <None Remove="Strategy\AbstractStateComparison\DisappearedStateTemplate.html" />
+    <None Remove="Strategy\AbstractStateComparison\Template.html" />
+    <None Remove="Strategy\WidgetTreeInitialState\Template.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Strategy\AbstractStateComparison\AddedStateTemplate.html" />
+    <EmbeddedResource Include="Strategy\AbstractStateComparison\DisappearedStateTemplate.html" />
+    <EmbeddedResource Include="Strategy\AbstractStateComparison\Template.html" />
+    <EmbeddedResource Include="Strategy\WidgetTreeInitialState\Template.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="11.0.0" />
     <PackageReference Include="MediatR" Version="10.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
-    <PackageReference Include="SmartAnalyzers.CSharpExtensions.Annotations" Version="4.2.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="SkiaSharp" Version="2.80.3" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    <PackageReference Include="XMLUnit.Core" Version="2.9.1" />
   </ItemGroup>
 
 </Project>

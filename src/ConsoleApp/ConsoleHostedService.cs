@@ -1,4 +1,10 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using MediatR;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Requests;
+using Testar.ChangeDetection.Core.Strategy;
+using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
 namespace Testar.ChangeDetection.ConsoleApp;
 
@@ -6,21 +12,49 @@ internal sealed class ConsoleHostedService : IHostedService
 {
     private readonly ILogger logger;
     private readonly IHostApplicationLifetime appLifetime;
+    private readonly IChangeDetectionStrategy strategy;
+    private readonly IMediator mediator;
+    private readonly IStateModelDifferenceJsonWidget widgetTree;
+    private readonly CompareOptions compareOptions;
     private Task? applicationTask;
     private int? exitCode;
 
     public ConsoleHostedService(
         ILogger<ConsoleHostedService> logger,
-        IHostApplicationLifetime appLifetime
+        IHostApplicationLifetime appLifetime,
+        IChangeDetectionStrategy strategy,
+        IMediator mediator,
+        IOptions<CompareOptions> compareOptions,
+        IStateModelDifferenceJsonWidget widgetTree
         )
     {
         this.logger = logger;
         this.appLifetime = appLifetime;
+        this.strategy = strategy;
+        this.mediator = mediator;
+        this.widgetTree = widgetTree;
+        this.compareOptions = compareOptions.Value;
+    }
+
+    public async Task RunAsync()
+    {
+        //  var json = await widgetTree.FetchWidgetTreeAsync(new ConcreteIDCustom("SCCwqefeo1352629465196"));
+
+        var control = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.ControlName, ApplicationVersion = compareOptions.ControlVersion });
+        var test = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.TestName, ApplicationVersion = compareOptions.TestVersion });
+        var fileHandler = new FileHandler(control, test);
+
+        await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
+
+        var usedFiles = fileHandler.UsedPaths;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        logger.LogApplicationArguments(string.Join(" ", Environment.GetCommandLineArgs()));
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug("Starting with arguments: {args}", string.Join(" ", Environment.GetCommandLineArgs()));
+        }
 
         CancellationTokenSource? _cancellationTokenSource = null;
 
@@ -32,10 +66,7 @@ internal sealed class ConsoleHostedService : IHostedService
             {
                 try
                 {
-                    Console.WriteLine("Hello World!");
-
-                    //   var query = await orientDbCommand.ExecuteQuery("SELECT FROM AbstractStateModel");
-                    await Task.Delay(1000);
+                    await RunAsync();
 
                     exitCode = 0;
                 }
@@ -78,5 +109,32 @@ internal sealed class ConsoleHostedService : IHostedService
 
         // Exit code may be null if the user cancelled via Ctrl+C/SIGTERM
         Environment.ExitCode = exitCode.GetValueOrDefault(-1);
+    }
+
+    public class FileHandler : IFileOutputHandler
+    {
+        public FileHandler(Application control, Application test)
+        {
+            var folderName = $"{control.ApplicationName}_{control.ApplicationVersion}_Diff_{test.ApplicationName}_{test.ApplicationVersion}";
+
+            RootFolder = Path.Combine("out", folderName);
+
+            if (Directory.Exists(RootFolder))
+            {
+                Directory.Delete(RootFolder, recursive: true);
+            }
+
+            Directory.CreateDirectory(RootFolder);
+        }
+
+        public HashSet<string> UsedPaths { get; } = new();
+        public string RootFolder { get; }
+
+        public string GetFilePath(string fileName)
+        {
+            var path = Path.Combine(RootFolder, fileName);
+            UsedPaths.Add(path);
+            return path;
+        }
     }
 }

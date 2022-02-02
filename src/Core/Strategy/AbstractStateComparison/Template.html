@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>TESTAR State Model difference report</title>
+    <style>
+        .container {
+            display: flex;
+        }
+
+        .float {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h2> Disappeared Abstract States: {{NumberOfDisappearedAbstractStates}} </h2>
+    <div class="container">
+        <!-- For each addDisappearedAbstractState -->
+        {{DissappearedAbstractStates}}
+    </div>
+    <h2> New Abstract States: {{NumberOfNewAbstractStates}}</h2>
+    <div class="container">
+        <!-- For each addNewState -->
+        {{AddedAbstractStates}}
+    </div>
+    <h2> Specific State changes </h2>
+    {{ImageOrWidgetTreeComparison}}
+</body>
+</html>

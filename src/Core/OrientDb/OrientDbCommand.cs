@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Testar.ChangeDetection.Core.OrientDb;
 
@@ -15,17 +16,17 @@ public interface IOrientDbCommand
 public class OrientDbCommand : IOrientDbCommand
 {
     private readonly IHttpClientFactory clientFactory;
-    private readonly IOptionsSnapshot<OrientDbOptions> orientDbOptions;
     private readonly ILogger<OrientDbId> logger;
-    private readonly JsonSerializerOptions jsonSerializerOptions;
+    private readonly OrientDbOptions orientDbOptions;
+    private readonly JsonSerializerOptions jsonOptions;
 
-    public OrientDbCommand(IHttpClientFactory clientFactory, IOptionsSnapshot<OrientDbOptions> options, ILogger<OrientDbId> logger)
+    public OrientDbCommand(IHttpClientFactory clientFactory, IOptions<OrientDbOptions> options, ILogger<OrientDbId> logger)
     {
         this.clientFactory = clientFactory;
-        this.orientDbOptions = options;
         this.logger = logger;
+        this.orientDbOptions = options.Value;
 
-        jsonSerializerOptions = new JsonSerializerOptions
+        this.jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
         };
@@ -40,12 +41,12 @@ public class OrientDbCommand : IOrientDbCommand
 
         using var stream = await response.Content.ReadAsStreamAsync();
 
-        var orientDbResult = (await JsonSerializer.DeserializeAsync<OrientDbResult>(stream, jsonSerializerOptions))
+        var orientDbResult = await JsonSerializer.DeserializeAsync<OrientDbResult>(stream)
             ?? throw new Exception("Unable to parse query result to JsonElement");
 
         logger.LogExecutionPlan(sql, orientDbResult.ExecutionPlan);
 
-        return orientDbResult.Result.Deserialize<TElement[]>(jsonSerializerOptions) ?? Array.Empty<TElement>();
+        return orientDbResult.Result.Deserialize<TElement[]>(jsonOptions) ?? Array.Empty<TElement>();
     }
 
     public async Task<byte[]> ExecuteDocumentAsync(OrientDbId id)
@@ -57,7 +58,7 @@ public class OrientDbCommand : IOrientDbCommand
 
         using var stream = await response.Content.ReadAsStreamAsync();
 
-        var orientDbResult = (await JsonSerializer.DeserializeAsync<OrientDbDocumentResult>(stream))
+        var orientDbResult = await JsonSerializer.DeserializeAsync<OrientDbDocumentResult>(stream, jsonOptions)
             ?? throw new Exception("Unable to parse query result to JsonElement");
 
         return string.IsNullOrWhiteSpace(orientDbResult.Value)
@@ -65,15 +66,15 @@ public class OrientDbCommand : IOrientDbCommand
             : Convert.FromBase64String(orientDbResult.Value);
     }
 
-    private HttpClient CreateQueryClient() => CreateOrientDbClient(new Uri($"query/{orientDbOptions.Value.DatabaseName}/sql"));
+    private HttpClient CreateQueryClient() => CreateOrientDbClient($"query/{orientDbOptions.DatabaseName}/sql/");
 
-    private HttpClient CreateDocumentClient() => CreateOrientDbClient(new Uri($"document/{orientDbOptions.Value.DatabaseName}/"));
+    private HttpClient CreateDocumentClient() => CreateOrientDbClient($"document/{orientDbOptions.DatabaseName}/");
 
-    private HttpClient CreateOrientDbClient(Uri uri)
+    private HttpClient CreateOrientDbClient(string uri)
     {
-        var orientDbUrl = new Uri(orientDbOptions.Value.Url, uri);
+        var orientDbUrl = new Uri(orientDbOptions.Url, uri);
 
-        var base64EncodedAuthenticationString = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{orientDbOptions.Value.UserName}:{orientDbOptions.Value.Password}"));
+        var base64EncodedAuthenticationString = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{orientDbOptions.UserName}:{orientDbOptions.Password}"));
         var client = clientFactory.CreateClient();
 
         client.BaseAddress = orientDbUrl;
@@ -87,8 +88,10 @@ public class OrientDbCommand : IOrientDbCommand
 
     private class OrientDbResult
     {
+        [JsonPropertyName("executionPlan")]
         public JsonElement ExecutionPlan { get; set; }
 
+        [JsonPropertyName("result")]
         public JsonElement Result { get; set; }
     }
 

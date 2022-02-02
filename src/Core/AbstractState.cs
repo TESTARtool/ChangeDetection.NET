@@ -7,6 +7,6 @@ public class AbstractState
     public ModelIdentifier ModelIdentifier { get; init; }
     public bool IsInitial { get; init; }
     public int Counter { get; init; }
-    public AbstractActionId[] InAbstractActions { get; init; }
-    public AbstractActionId[] OutAbstractActions { get; init; }
+    public OrientDbId[] InAbstractActions { get; init; }
+    public OrientDbId[] OutAbstractActions { get; init; }
 }

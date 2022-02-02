@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Testar.ChangeDetection.Core;
+namespace Testar.ChangeDetection.Core.Requests;
 
 public class ApplicationRequest : IRequest<Application>
 {
@@ -37,8 +37,8 @@ public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, App
                 IsInitial = x.IsInitial,
                 ModelIdentifier = new ModelIdentifier(application.ModelIdentifier),
                 StateId = new AbstractStateId(x.StateId),
-                InAbstractActions = x.In_AbstractAction.Select(x => new AbstractActionId(x)).ToArray(),
-                OutAbstractActions = x.Out_AbstractAction.Select(x => new AbstractActionId(x)).ToArray()
+                InAbstractActions = x.In_AbstractAction.Select(x => new OrientDbId(x)).ToArray(),
+                OutAbstractActions = x.Out_AbstractAction.Select(x => new OrientDbId(x)).ToArray()
             }).ToArray()
         };
     }

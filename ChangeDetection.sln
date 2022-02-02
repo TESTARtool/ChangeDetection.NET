@@ -17,6 +17,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "src\Core\Core.csproj", "{63CF1F8F-50AD-4454-B633-4FD110F2B076}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorApp", "src\BlazorApp\BlazorApp.csproj", "{72B5BE45-06CA-4E26-9332-BC9C689271DF}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{B4DCF5FB-4A4C-4A4D-B197-E54C4F62A794}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{EDE99C8E-68C7-4D90-9720-09ABC7F7BD5D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\corebuild.yml = .github\workflows\corebuild.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +50,8 @@ Global
 		{3AD96B75-87E5-452B-8C54-5899021C7E0E} = {0E8CA887-438A-4FB6-B5B3-560262B375BD}
 		{63CF1F8F-50AD-4454-B633-4FD110F2B076} = {0E8CA887-438A-4FB6-B5B3-560262B375BD}
 		{72B5BE45-06CA-4E26-9332-BC9C689271DF} = {0E8CA887-438A-4FB6-B5B3-560262B375BD}
+		{B4DCF5FB-4A4C-4A4D-B197-E54C4F62A794} = {615CDA6A-575C-44F8-B9D2-1113A1809511}
+		{EDE99C8E-68C7-4D90-9720-09ABC7F7BD5D} = {B4DCF5FB-4A4C-4A4D-B197-E54C4F62A794}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {569557B1-CD66-4592-AC3D-24F48FAB711D}
