@@ -197,7 +197,7 @@ public class HtmlOutputter : IHtmlOutputter
             if (x is null && y is not null) return false;
             if (x is not null && y is null) return false;
 
-            return x.ActionId == y.ActionId;
+            return x!.ActionId == y!.ActionId;
         }
 
         public int GetHashCode([DisallowNull] DeltaAction obj)

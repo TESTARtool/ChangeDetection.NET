@@ -1,4 +1,10 @@
 name: .NET Core
+
+env:
+  MAJOR: 1
+  MINOR: 0
+  PATCH: 0
+  
 on:
   push:
     branches: [ features/init-commit ]
@@ -11,7 +17,7 @@ jobs:
     - name: Checkout GitHub actions
       uses: actions/checkout@v2
 
-    - name: Setup .NET Core
+    - name: Setup .NET Core 6.0.x
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
@@ -22,20 +28,38 @@ jobs:
     - name: Build code
       run: dotnet build "./ChangeDetection.sln" --configuration Release --no-restore
 
-    - name: Publish application
-      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -o App
+    - name: Publish ConsoleApp for win-x86
+      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -r win-x86 -p:PublishSingleFile=true --self-contained true -o win-x86
 
-    - name: Publish application Self Contained
-      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release --self-contained -r win-x86 -o AppSelf
+    - name: Publish ConsoleApp for win-x64
+      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -o win-x64
 
-    - name: Upload Artifacts
+    - name: Publish ConsoleApp for linux-x64
+      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -r linux-x64 -p:PublishSingleFile=true --self-contained true -o linux-x64
+
+    - name: Publish ConsoleApp for osx-x64
+      run: dotnet publish "./src/ConsoleApp/ConsoleApp.csproj" -c Release -r osx-x64 -p:PublishSingleFile=true --self-contained true -o osx-x64
+
+    - name: Upload win-x86 Artifacts
       uses: actions/upload-artifact@v2
       with:
-       name: ConsoleApp
-       path: "./App" 
+       name: ConsoleApp win-x86
+       path: "./win-x86" 
 
-    - name: Upload Artifacts
+    - name: Upload win-x64 Artifacts
       uses: actions/upload-artifact@v2
       with:
-       name: ConsoleAppSelf
-       path: "./AppSelf" 
+       name: ConsoleApp win-x64
+       path: "./win-x64" 
+
+    - name: Upload linux-x64 Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+       name: ConsoleApp linux-x64
+       path: "./linux-x64" 
+
+    - name: Upload osx-x64 Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+       name: ConsoleApp osx-x64
+       path: "./osx-x64" 
