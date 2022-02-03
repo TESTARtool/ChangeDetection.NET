@@ -1,14 +1,13 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Requests;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
 namespace Testar.ChangeDetection.ConsoleApp;
 
-internal sealed class ConsoleHostedService : IHostedService
+internal sealed partial class ConsoleHostedService : IHostedService
 {
     private readonly ILogger logger;
     private readonly IHostApplicationLifetime appLifetime;
@@ -109,32 +108,5 @@ internal sealed class ConsoleHostedService : IHostedService
 
         // Exit code may be null if the user cancelled via Ctrl+C/SIGTERM
         Environment.ExitCode = exitCode.GetValueOrDefault(-1);
-    }
-
-    public class FileHandler : IFileOutputHandler
-    {
-        public FileHandler(Application control, Application test)
-        {
-            var folderName = $"{control.ApplicationName}_{control.ApplicationVersion}_Diff_{test.ApplicationName}_{test.ApplicationVersion}";
-
-            RootFolder = Path.Combine("out", folderName);
-
-            if (Directory.Exists(RootFolder))
-            {
-                Directory.Delete(RootFolder, recursive: true);
-            }
-
-            Directory.CreateDirectory(RootFolder);
-        }
-
-        public HashSet<string> UsedPaths { get; } = new();
-        public string RootFolder { get; }
-
-        public string GetFilePath(string fileName)
-        {
-            var path = Path.Combine(RootFolder, fileName);
-            UsedPaths.Add(path);
-            return path;
-        }
     }
 }

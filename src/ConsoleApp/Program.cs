@@ -28,7 +28,7 @@ await Host.CreateDefaultBuilder(args)
         services
             .AddSingleton<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
             .AddSingleton<IFindStateDifferences, FindStateDifferences>()
-            .AddSingleton<ICompareImages, EasySameDimensionsPixelByPixelImageComparison>()
+            .AddSingleton<ICompareImages, SkiaSharpEasySameDimensionsPixelByPixelImageComparison>()
             .AddSingleton<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
             .AddSingleton<IHtmlOutputter, HtmlOutputter>();
 

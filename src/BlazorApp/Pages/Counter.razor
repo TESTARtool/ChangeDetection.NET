@@ -1,40 +1,58 @@
 ﻿@page "/counter"
+@using MediatR
 @using Microsoft.Extensions.Options
 @using System.Text.Json
-@using Testar.ChangeDetection.BlazorApp.OrientDb;
+@using Testar.ChangeDetection.BlazarApp
+@using Testar.ChangeDetection.Core.Requests
+@using Testar.ChangeDetection.Core.Strategy
+@inject IChangeDetectionStrategy strategy;
 @inject IOrientDbCommand orientDbCommand;
 
-<PageTitle>Counter</PageTitle>
+@inject IMediator mediator;
+@using System.IO
+@inject IJSRuntime JS
 
-<h1>Counter</h1>
+<PageTitle>TESTAR Change Detection</PageTitle>
 
-<p role="status">Current count: @currentCount</p>
+<h1>TESTAR Change Detection</h1>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Compare simple_model and download results</button>
 
 @code {
-    private int currentCount = 0;
-
     private async Task IncrementCount()
     {
         // TODO: Following should come from user input
         var options = new OrientDbOptions
         {
-            DatabaseName = "testar",
+            DatabaseName = "testar2",
             UserName = "testar",
             Password = "testar",
             Url = new Uri("http://localhost:2480/", UriKind.Absolute)
         };
         try{
-            var items =
-                await orientDbCommand.ExecuteQueryAsync<ApplicationJson>("SELECT FROM AbstractStateModel", options);
+
+            var ControlName = "simpel_model";
+            var TestName = "simpel_model";
+
+            var ControlVersion = "1.0.0";
+            var TestVersion = "2.0.0";
+
+            var control = await mediator.Send(new ApplicationRequest { ApplicationName = ControlName, ApplicationVersion = ControlVersion });
+            var test = await mediator.Send(new ApplicationRequest { ApplicationName = TestName, ApplicationVersion = TestVersion });
+            var fileHandler = new FileHandler(control, test);
+
+            await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
+
+            var fileStream = fileHandler.DownloadOutputAsZip();
+            var fileName = "output.zip";
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
         catch(Exception ex)
         {
             var x = ex.Message;
         }
-
-        currentCount++;
     }
 
     private class ApplicationJson
