@@ -6,7 +6,7 @@ namespace Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
 public interface IHtmlOutputter
 {
-    Task SaveOutToHtmlAsync(DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler);
+    Task SaveOutToHtmlAsync(Application application, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler);
 }
 
 public class HtmlOutputter : IHtmlOutputter
@@ -22,7 +22,7 @@ public class HtmlOutputter : IHtmlOutputter
         this.stateModelDifferenceJsonWidget = stateModelDifferenceJsonWidget;
     }
 
-    public async Task SaveOutToHtmlAsync(DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
+    public async Task SaveOutToHtmlAsync(Application application, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
     {
         var template = ResourceFiles.Get("Template.html")
             .InNamespace(typeof(HtmlOutputter).Namespace ?? "")
@@ -31,7 +31,7 @@ public class HtmlOutputter : IHtmlOutputter
         var disappearedStatesHtml = await ChangedStatesHtmlAsync(removedStates, "DisappearedStateTemplate.html", fileOutputHandler).ToListAsync();
         var addedAbstractStatesHtml = await ChangedStatesHtmlAsync(addedStates, "AddedStateTemplate.html", fileOutputHandler).ToListAsync();
 
-        var imageOrWidgetTreeComparison = await AddImageOrWidgetTreeComparisonAsync(addedStates, removedStates, fileOutputHandler);
+        var imageOrWidgetTreeComparison = await AddImageOrWidgetTreeComparisonAsync(application, addedStates, removedStates, fileOutputHandler);
 
         var html = template
             .Replace("{{NumberOfDisappearedAbstractStates}}", removedStates.Length.ToString())
@@ -47,8 +47,10 @@ public class HtmlOutputter : IHtmlOutputter
         await File.WriteAllTextAsync(path, html);
     }
 
-    private async Task<string> AddImageOrWidgetTreeComparisonAsync(DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
+    private async Task<string> AddImageOrWidgetTreeComparisonAsync(Application application, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
     {
+        var tags = AbstractAttributesTags(application);
+
         var html = new StringBuilder();
 
         foreach (var addedState in addedStates)
@@ -95,21 +97,26 @@ public class HtmlOutputter : IHtmlOutputter
                     foreach (var widget in newWidgets)
                     {
                         html.AppendLine($"<p>This Widget is completely new in the new Model: {widget.AbstractIDCustom}</p>");
-                        html.AppendLine($"<p>UIAName:{widget.UIAName} UIAControlType:{widget.UIAControlType}</p>");
+                        html.Append("<p>");
+
+                        foreach (var tag in tags)
+                        {
+                            var propertyValue = typeof(WidgetJson).GetProperty(tag.Name)?.GetValue(widget);
+                            if (propertyValue is not null)
+                            {
+                                html.Append($"{tag.Name}: {propertyValue}");
+                            }
+                        }
+
+                        html.Append("</p>");
+
+                        // html.AppendLine($"<p>UIAName:{widget.UIAName} UIAControlType:{widget.UIAControlType}</p>");
                     }
                 }
             }
         }
 
         return html.ToString();
-
-        // Widget Tree Abstract Properties Difference
-        // StateModelDifferenceJsonWidget stateModelDifferenceJsonWidget = new StateModelDifferenceJsonWidget(modelDifferenceDatabase, abstractAttributesTags);
-        // List<String> widgetTreeDifference = stateModelDifferenceJsonWidget.jsonWidgetTreeDifference(dissStateModelOne, newStateModelTwo);
-        // for (String widgetInformation : widgetTreeDifference)
-        // {
-        //     differenceHTML.addSpecificWidgetInfo(widgetInformation);
-        // }
     }
 
     private string CapitalizeWordsAndRemoveSpaces(string attribute)

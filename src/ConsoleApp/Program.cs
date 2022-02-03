@@ -10,20 +10,16 @@ using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
-Console.WriteLine(@"  _____ _____ ____ _____  _    ____  _");
-Console.WriteLine(@" |_   _| ____/ ___|_   _|/ \  |  _ \| |");
-Console.WriteLine(@"   | | |  _| \___ \ | | / _ \ | |_) | |");
-Console.WriteLine(@"   | | | |___ ___) || |/ ___ \|  _ <|_|");
-Console.WriteLine(@"   |_| |_____|____/ |_/_/   \_\_| \_(_)");
+Console.WriteLine(@" _____ _____ ____ _____  _    ____  _  ");
+Console.WriteLine(@"|_   _| ____/ ___|_   _|/ \  |  _ \| | ");
+Console.WriteLine(@"  | | |  _| \___ \ | | / _ \ | |_) | | ");
+Console.WriteLine(@"  | | | |___ ___) || |/ ___ \|  _ <|_| ");
+Console.WriteLine(@"  |_| |_____|____/ |_/_/   \_\_| \_(_) ");
 Console.WriteLine();
-Console.WriteLine($"ChangeDetection.NET 1.0.0-cl1");
-
-Console.ReadKey();
-
-var context = AppContext.BaseDirectory;
+Console.WriteLine($"ChangeDetection.NET");
 
 await Host.CreateDefaultBuilder(args)
-    .UseContentRoot(Path.GetDirectoryName(System.AppContext.BaseDirectory))
+    .UseContentRoot(Path.GetDirectoryName(AppContext.BaseDirectory))
     .ConfigureServices((hostContext, services) =>
     {
         services.AddHostedService<ConsoleHostedService>();
@@ -44,6 +40,7 @@ await Host.CreateDefaultBuilder(args)
         }
         else
         {
+            // SkiaLibrary is as of today unsupported on Non Windows platforms
             services.AddSingleton<ICompareImages, NoImageComparison>();
         }
 

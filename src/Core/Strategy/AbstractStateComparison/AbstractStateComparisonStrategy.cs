@@ -24,6 +24,6 @@ public class AbstractStateComparisonStrategy : IChangeDetectionStrategy
         var addedStates = await findStateDifferences.FindAddedState(control, test).ToArrayAsync();
         var removedStates = await findStateDifferences.FindRemovedState(control, test).ToArrayAsync();
 
-        await htmlOutputter.SaveOutToHtmlAsync(addedStates, removedStates, fileOutputHandler);
+        await htmlOutputter.SaveOutToHtmlAsync(control, addedStates, removedStates, fileOutputHandler);
     }
 }

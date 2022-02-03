@@ -40,7 +40,10 @@ internal sealed class ConsoleHostedService : IHostedService
 
         await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
 
-        var usedFiles = fileHandler.UsedPaths;
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.WriteLine("Change detection completed");
+        Console.WriteLine($"Results can be viewed at location: {fileHandler.RootFolder}");
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
