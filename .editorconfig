@@ -1,0 +1,33 @@
+# To learn more about .editorconfig see https://aka.ms/editorconfigdocs
+root = true
+# All files
+[*]
+indent_style = space
+indent_size = 4
+
+# Xml files
+[*.{xml,csproj}]
+indent_style = space
+indent_size = 2
+
+# YML and YAML files
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.props]
+indent_size = 2
+
+[*.json]
+indent_size = 2
+
+[*.cs]
+dotnet_diagnostic.CA1062.severity = none # nullable referece types is enabled.
+dotnet_diagnostic.CA1303.severity = none # strings are not localised, only at UI level
+dotnet_diagnostic.CA1724.severity = none # Conflicting names are allowed in different namespaces
+csharp_style_namespace_declarations=file_scoped:suggestion
+csharp_style_var_elsewhere=true:suggestion
+csharp_style_var_when_type_is_apparent=true:suggestion
+csharp_style_var_for_built_in_types=true:suggestion
+dotnet_diagnostic.CSE007.severity=silent
+dotnet_diagnostic.CSE005.severity=silent
