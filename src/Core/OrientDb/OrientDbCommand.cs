@@ -74,6 +74,8 @@ public class OrientDbCommand : IOrientDbCommand
     {
         var orientDbUrl = new Uri(orientDbOptions.Url, uri);
 
+        logger.LogInformation($"{orientDbOptions.UserName}:{orientDbOptions.Password}");
+
         var base64EncodedAuthenticationString = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{orientDbOptions.UserName}:{orientDbOptions.Password}"));
         var client = clientFactory.CreateClient();
 
