@@ -12,6 +12,7 @@ internal sealed partial class ConsoleHostedService : IHostedService
     private readonly IHostApplicationLifetime appLifetime;
     private readonly IChangeDetectionStrategy strategy;
     private readonly IMediator mediator;
+    private readonly IOrientDbLoginService loginService;
     private readonly CompareOptions compareOptions;
     private Task? applicationTask;
     private int? exitCode;
@@ -21,18 +22,22 @@ internal sealed partial class ConsoleHostedService : IHostedService
         IHostApplicationLifetime appLifetime,
         IChangeDetectionStrategy strategy,
         IMediator mediator,
-        IOptions<CompareOptions> compareOptions
+        IOptions<CompareOptions> compareOptions,
+        IOrientDbLoginService loginService
         )
     {
         this.logger = logger;
         this.appLifetime = appLifetime;
         this.strategy = strategy;
         this.mediator = mediator;
+        this.loginService = loginService;
         this.compareOptions = compareOptions.Value;
     }
 
     public async Task RunAsync()
     {
+        // var session = loginService.LoginAsync()
+
         var control = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.ControlName, ApplicationVersion = compareOptions.ControlVersion });
         var test = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.TestName, ApplicationVersion = compareOptions.TestVersion });
         var fileHandler = new FileHandler(control, test);

@@ -5,18 +5,30 @@
 @using Testar.ChangeDetection.BlazarApp
 @using Testar.ChangeDetection.Core.Requests
 @using Testar.ChangeDetection.Core.Strategy
+@using System.IO
 @inject IChangeDetectionStrategy strategy;
 @inject IOrientDbCommand orientDbCommand;
 
 @inject IMediator mediator;
-@using System.IO
 @inject IJSRuntime JS
+
+@attribute [Authorize]
 
 <PageTitle>TESTAR Change Detection</PageTitle>
 
 <h1>TESTAR Change Detection</h1>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Compare simple_model and download results</button>
+<p></p>
+
+<AuthorizeView>
+    <Authorized>
+        <span>You're authorized! :)</span>
+    </Authorized>
+    <NotAuthorized>
+        <span>You're not authorized, buddy</span>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private async Task IncrementCount()

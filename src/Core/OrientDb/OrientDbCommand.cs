@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Testar.ChangeDetection.Core.OrientDb;
@@ -17,15 +14,14 @@ public class OrientDbCommand : IOrientDbCommand
 {
     private readonly IHttpClientFactory clientFactory;
     private readonly ILogger<OrientDbId> logger;
-    private readonly OrientDbOptions orientDbOptions;
+    private readonly IOrientDbSessionProvider orientDbSessionProvider;
     private readonly JsonSerializerOptions jsonOptions;
 
-    public OrientDbCommand(IHttpClientFactory clientFactory, IOptions<OrientDbOptions> options, ILogger<OrientDbId> logger)
+    public OrientDbCommand(IHttpClientFactory clientFactory, ILogger<OrientDbId> logger, IOrientDbSessionProvider orientDbSessionProvider)
     {
         this.clientFactory = clientFactory;
         this.logger = logger;
-        this.orientDbOptions = options.Value;
-
+        this.orientDbSessionProvider = orientDbSessionProvider;
         this.jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
@@ -34,9 +30,13 @@ public class OrientDbCommand : IOrientDbCommand
 
     public async Task<TElement[]> ExecuteQueryAsync<TElement>(string sql)
     {
-        var client = CreateQueryClient();
+        var session = await orientDbSessionProvider.GetSessionAsync();
+        var client = clientFactory.CreateOrientDbHttpClient(session.OrientDbUrl);
+        client.DefaultRequestHeaders.Add("Cookie", session.SessionId);
 
-        var response = await client.GetAsync(sql);
+        var url = $"query/{session.DatabaseName}/sql/{sql}";
+
+        var response = await client.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
         using var stream = await response.Content.ReadAsStreamAsync();
@@ -51,9 +51,14 @@ public class OrientDbCommand : IOrientDbCommand
 
     public async Task<byte[]> ExecuteDocumentAsync(OrientDbId id)
     {
-        var client = CreateDocumentClient();
+        var session = await orientDbSessionProvider.GetSessionAsync();
 
-        var response = await client.GetAsync(id.Value.Replace("#", "").Trim());
+        var client = clientFactory.CreateOrientDbHttpClient(session.OrientDbUrl);
+        client.DefaultRequestHeaders.Add("Cookie", session.SessionId);
+
+        var url = $"document/{session.DatabaseName}/{id.Value.Replace("#", "").Trim()}";
+
+        var response = await client.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
         using var stream = await response.Content.ReadAsStreamAsync();
@@ -64,28 +69,6 @@ public class OrientDbCommand : IOrientDbCommand
         return string.IsNullOrWhiteSpace(orientDbResult.Value)
             ? Array.Empty<byte>()
             : Convert.FromBase64String(orientDbResult.Value);
-    }
-
-    private HttpClient CreateQueryClient() => CreateOrientDbClient($"query/{orientDbOptions.DatabaseName}/sql/");
-
-    private HttpClient CreateDocumentClient() => CreateOrientDbClient($"document/{orientDbOptions.DatabaseName}/");
-
-    private HttpClient CreateOrientDbClient(string uri)
-    {
-        var orientDbUrl = new Uri(orientDbOptions.Url, uri);
-
-        logger.LogInformation($"{orientDbOptions.UserName}:{orientDbOptions.Password}");
-
-        var base64EncodedAuthenticationString = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{orientDbOptions.UserName}:{orientDbOptions.Password}"));
-        var client = clientFactory.CreateClient();
-
-        client.BaseAddress = orientDbUrl;
-        client.DefaultRequestHeaders.Clear();
-        client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-        client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
-
-        return client;
     }
 
     private class OrientDbResult

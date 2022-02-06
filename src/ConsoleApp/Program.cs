@@ -24,25 +24,22 @@ await Host.CreateDefaultBuilder(args)
     {
         services.AddHostedService<ConsoleHostedService>();
 
-        services.Configure<OrientDbOptions>(
-                hostContext.Configuration.GetSection(OrientDbOptions.ConfigName));
-
         services.Configure<CompareOptions>(
             hostContext.Configuration.GetSection(CompareOptions.ConfigName));
 
         services.AddHttpClient();
 
-        services.AddSingleton<IOrientDbCommand, OrientDbCommand>();
-
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            services.AddSingleton<ICompareImages, EasySameDimensionsPixelByPixelImageComparison>();
+            services.AddSingleton<ICompareImages, SkiaSharpEasySameDimensionsPixelByPixelImageComparison>();
         }
         else
         {
             // SkiaLibrary is as of today unsupported on Non Windows platforms
             services.AddSingleton<ICompareImages, NoImageComparison>();
         }
+
+        services.AddOrientDb<CustomOrientDbSessionProvider>();
 
         services
             .AddSingleton<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()

@@ -17,6 +17,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "src\Core\Core.csproj", "{63CF1F8F-50AD-4454-B633-4FD110F2B076}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorApp", "src\BlazorApp\BlazorApp.csproj", "{72B5BE45-06CA-4E26-9332-BC9C689271DF}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{B4DCF5FB-4A4C-4A4D-B197-E54C4F62A794}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{EDE99C8E-68C7-4D90-9720-09ABC7F7BD5D}"
