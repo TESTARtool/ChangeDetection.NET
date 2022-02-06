@@ -33,14 +33,6 @@
 @code {
     private async Task IncrementCount()
     {
-        // TODO: Following should come from user input
-        var options = new OrientDbOptions
-        {
-            DatabaseName = "testar2",
-            UserName = "testar",
-            Password = "testar",
-            Url = new Uri("http://localhost:2480/", UriKind.Absolute)
-        };
         try{
 
             var ControlName = "simpel_model";
@@ -65,14 +57,5 @@
         {
             var x = ex.Message;
         }
-    }
-
-    private class ApplicationJson
-    {
-        public string ModelIdentifier { get; init; }
-        public string ApplicationName { get; init; }
-        public string ApplicationVersion { get; init; }
-
-        public string[] AbstractionAttributes { get; set; }
     }
 }

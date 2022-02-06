@@ -10,18 +10,25 @@ public interface IOrientDbCommand
     Task<byte[]> ExecuteDocumentAsync(OrientDbId id);
 }
 
+public interface IOrientDbSignInProvider
+{
+    Task EnhanceHttpClient(HttpClient httpClient);
+
+    Task<string?> GetDatabaseNameAsync();
+}
+
 public class OrientDbCommand : IOrientDbCommand
 {
     private readonly IHttpClientFactory clientFactory;
     private readonly ILogger<OrientDbId> logger;
-    private readonly IOrientDbSessionProvider orientDbSessionProvider;
+    private readonly IOrientDbSignInProvider orientDbSignInProvider;
     private readonly JsonSerializerOptions jsonOptions;
 
-    public OrientDbCommand(IHttpClientFactory clientFactory, ILogger<OrientDbId> logger, IOrientDbSessionProvider orientDbSessionProvider)
+    public OrientDbCommand(IHttpClientFactory clientFactory, ILogger<OrientDbId> logger, IOrientDbSignInProvider orientDbSignInProvider)
     {
         this.clientFactory = clientFactory;
         this.logger = logger;
-        this.orientDbSessionProvider = orientDbSessionProvider;
+        this.orientDbSignInProvider = orientDbSignInProvider;
         this.jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
@@ -30,11 +37,12 @@ public class OrientDbCommand : IOrientDbCommand
 
     public async Task<TElement[]> ExecuteQueryAsync<TElement>(string sql)
     {
-        var session = await orientDbSessionProvider.GetSessionAsync();
-        var client = clientFactory.CreateOrientDbHttpClient(session.OrientDbUrl);
-        client.DefaultRequestHeaders.Add("Cookie", session.SessionId);
+        var databaseName = await orientDbSignInProvider.GetDatabaseNameAsync();
+        var client = clientFactory.CreateOrientDbHttpClient();
 
-        var url = $"query/{session.DatabaseName}/sql/{sql}";
+        await orientDbSignInProvider.EnhanceHttpClient(client);
+
+        var url = $"query/{databaseName}/sql/{sql}";
 
         var response = await client.GetAsync(url);
         response.EnsureSuccessStatusCode();
@@ -51,12 +59,13 @@ public class OrientDbCommand : IOrientDbCommand
 
     public async Task<byte[]> ExecuteDocumentAsync(OrientDbId id)
     {
-        var session = await orientDbSessionProvider.GetSessionAsync();
+        var databaseName = await orientDbSignInProvider.GetDatabaseNameAsync();
 
-        var client = clientFactory.CreateOrientDbHttpClient(session.OrientDbUrl);
-        client.DefaultRequestHeaders.Add("Cookie", session.SessionId);
+        var client = clientFactory.CreateOrientDbHttpClient();
 
-        var url = $"document/{session.DatabaseName}/{id.Value.Replace("#", "").Trim()}";
+        await orientDbSignInProvider.EnhanceHttpClient(client);
+
+        var url = $"document/{databaseName}/{id.Value.Replace("#", "").Trim()}";
 
         var response = await client.GetAsync(url);
         response.EnsureSuccessStatusCode();

@@ -1,8 +1,8 @@
 ﻿internal class CustomOrientDbSessionProvider : IOrientDbSessionProvider
 {
-    private OrientDbSession session;
+    private OrientDbSession? session = null;
 
-    public Task<OrientDbSession> GetSessionAsync()
+    public Task<OrientDbSession?> GetSessionAsync()
     {
         return Task.FromResult(session);
     }

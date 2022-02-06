@@ -14,26 +14,23 @@ public class User
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {
     private readonly ILocalStorageService localStorageService;
-    private readonly IOrientDbSessionProvider sessionProvider;
 
-    public CustomAuthStateProvider(ILocalStorageService localStorageService, IOrientDbSessionProvider sessionProvider)
+    public CustomAuthStateProvider(ILocalStorageService localStorageService)
     {
         this.localStorageService = localStorageService;
-        this.sessionProvider = sessionProvider;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var username = await localStorageService.GetItemAsync<string>("username");
-        var session = await sessionProvider.GetSessionAsync();
 
         if (!string.IsNullOrWhiteSpace(username))
         {
-            var identity = new ClaimsIdentity(new[]
+            var claims = new[]
             {
                 new Claim(ClaimTypes.Name, username)
-            }, "OrientDb");
-
+            };
+            var identity = new ClaimsIdentity(claims, "OrientDb");
             var state = new AuthenticationState(new ClaimsPrincipal(identity));
 
             NotifyAuthenticationStateChanged(Task.FromResult(state));

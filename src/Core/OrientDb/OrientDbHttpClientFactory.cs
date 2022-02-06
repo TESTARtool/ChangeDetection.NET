@@ -4,11 +4,9 @@ public static class OrientDbHttpClientFactory
 {
     public static readonly string OrientDbHttpClient = nameof(OrientDbHttpClient);
 
-    public static HttpClient CreateOrientDbHttpClient(this IHttpClientFactory factory, Uri orientDbUrl)
+    public static HttpClient CreateOrientDbHttpClient(this IHttpClientFactory factory)
     {
         var client = factory.CreateClient(OrientDbHttpClient);
-
-        client.BaseAddress = orientDbUrl;
 
         return client;
     }

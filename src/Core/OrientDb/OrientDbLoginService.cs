@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Security;
 using System.Text;
 
@@ -9,23 +10,27 @@ public interface IOrientDbLoginService
     Task<OrientDbSession> LoginAsync(Uri orientDb, string databaseName, string username, string password);
 
     Task DisconnectAsync(OrientDbSession session);
+
+    Task<bool> ValidateCredentialsAsync(string database);
 }
 
 public sealed class OrientDbLoginService : IOrientDbLoginService
 {
     private readonly ILogger<OrientDbLoginService> logger;
+    private readonly IOrientDbSignInProvider orientDbSignInProvider;
     private readonly IHttpClientFactory httpClientFactory;
 
-    public OrientDbLoginService(ILogger<OrientDbLoginService> logger, IHttpClientFactory httpClientFactory)
+    public OrientDbLoginService(ILogger<OrientDbLoginService> logger, IOrientDbSignInProvider orientDbSignInProvider, IHttpClientFactory httpClientFactory)
     {
         this.logger = logger;
+        this.orientDbSignInProvider = orientDbSignInProvider;
         this.httpClientFactory = httpClientFactory;
     }
 
     public async Task DisconnectAsync(OrientDbSession session)
     {
-        var client = httpClientFactory.CreateOrientDbHttpClient(session.OrientDbUrl);
-        client.DefaultRequestHeaders.Add("Cookie", session.SessionId);
+        var client = httpClientFactory.CreateOrientDbHttpClient();
+        await orientDbSignInProvider.EnhanceHttpClient(client);
 
         var response = await client.GetAsync("disconnect");
 
@@ -34,7 +39,7 @@ public sealed class OrientDbLoginService : IOrientDbLoginService
 
     public async Task<OrientDbSession> LoginAsync(Uri orientDbUrl, string databaseName, string username, string password)
     {
-        var client = httpClientFactory.CreateOrientDbHttpClient(orientDbUrl);
+        var client = httpClientFactory.CreateOrientDbHttpClient();
 
         var base64EncodedAuthenticationString = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{username}:{password}"));
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
@@ -49,6 +54,16 @@ public sealed class OrientDbLoginService : IOrientDbLoginService
         logger.LogOrientDbCookie(sessionId);
 
         return new OrientDbSession(orientDbUrl, sessionId, databaseName);
+    }
+
+    public async Task<bool> ValidateCredentialsAsync(string databaseName)
+    {
+        var client = httpClientFactory.CreateOrientDbHttpClient();
+        await orientDbSignInProvider.EnhanceHttpClient(client);
+
+        var response = await client.GetAsync($"connect/{databaseName}");
+
+        return response.StatusCode == HttpStatusCode.NoContent;
     }
 
     internal static string ParseSessionId(HttpResponseHeaders headers)

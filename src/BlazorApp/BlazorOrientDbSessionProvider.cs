@@ -1,6 +1,7 @@
 ﻿using Blazored.LocalStorage;
+using System.Net.Http.Headers;
 
-internal class BlazorOrientDbSessionProvider : IOrientDbSessionProvider
+internal class BlazorOrientDbSessionProvider : IOrientDbSignInProvider
 {
     private readonly ILocalStorageService localStorageService;
 
@@ -9,12 +10,20 @@ internal class BlazorOrientDbSessionProvider : IOrientDbSessionProvider
         this.localStorageService = localStorageService;
     }
 
-    public async Task<OrientDbSession> GetSessionAsync()
+    public async Task EnhanceHttpClient(HttpClient httpClient)
     {
-        var url = await localStorageService.GetItemAsStringAsync("orientdb-url");
-        var session = await localStorageService.GetItemAsStringAsync("orientdb-session");
-        var databaseName = await localStorageService.GetItemAsStringAsync("testar-database");
+        var session = await localStorageService.GetItemAsStringAsync("session");
+        var url = await localStorageService.GetItemAsync<Uri>("orientdb-url");
 
-        return new OrientDbSession(new Uri(url), session, databaseName);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", session);
+        httpClient.DefaultRequestHeaders.Add("Connection", "close");
+
+        httpClient.BaseAddress = url;
+    }
+
+    public async Task<string?> GetDatabaseNameAsync()
+    {
+        var databaseName = await localStorageService.GetItemAsStringAsync("testar-database");
+        return databaseName;
     }
 }

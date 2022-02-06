@@ -18,10 +18,9 @@ builder.Services
     .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
     .AddHttpClient();
 
-builder.Services.AddOrientDb<BlazorOrientDbSessionProvider>();
-
-builder.Services.AddHttpClient();
-builder.Services.AddSingleton<IOrientDbCommand, OrientDbCommand>();
+builder.Services
+    .AddScoped<IOrientDbSignInProvider, BlazorOrientDbSessionProvider>()
+    .AddOrientDb();
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddAuthorizationCore();
