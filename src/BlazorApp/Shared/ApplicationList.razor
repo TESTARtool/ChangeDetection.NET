@@ -1,53 +1,75 @@
-﻿@using BlazorApp.ViewModels
-@using MediatR
-@using Testar.ChangeDetection.Core
-@using Testar.ChangeDetection.Core.Requests
-@inject IMediator mediator;
+﻿@inject IMediator mediator;
+@inject IChangeDetectionStrategy strategy;
+@inject IJSRuntime JS
 
 <h3>Available Models</h3>
+<EditForm Model="@applicationListViewModel" OnValidSubmit="ExecuteChangeDetection" >
 
-<EditForm Model="applications">
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th scope="col"></th>
-                <th scope="col">Identifier</th>
-                <th scope="col">Application Name</th>
-                <th scope="col">Application Version</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach(var application in applications)
+    <div class="list-group">
+        @foreach(var application in applicationListViewModel.Applications)
         {
-            <tr>
-                <td scope="row">
-                    <InputCheckbox @bind-value="application.IsSelected" onselect="SelectionChanged" />
-                </td>
-                <td>@application.ModelIdentifier.Value</td>
-                <td>@application.ApplicationName</td>
-                <td>@application.ApplicationVersion</td>
-            </tr>    
-        }  
-        </tbody>
-    </table>
+            <label class="list-group-item">
+                <InputCheckbox @bind-Value="application.IsSelected"/>
+            
+                <span>@application.ApplicationName</span>
+            </label>
+        }
+    </div>
+
+    <button type="submit" disabled="@applicationListViewModel.Disable" 
+    class="btn btn-primary">Execute Change Detection</button>
+
 </EditForm>
 
 @code {
-    ApplicationViewModel[] applications = Array.Empty<ApplicationViewModel>();
+    ApplicationListViewModel applicationListViewModel = new();
 
-    private void SelectionChanged()
+    public void SelectionChanged()
     {
-        var count = applications.Count(x => x.IsSelected);
+        var count = applicationListViewModel.Applications.Count(x => x.IsSelected);
 
         Console.WriteLine(count);
+    }
+
+    private async void ExecuteChangeDetection()
+    {
+        if (applicationListViewModel.HasTwoSelected)
+        {
+            var applications = applicationListViewModel.Applications
+                .Where(x => x.IsSelected)
+                .Take(2)
+                .ToArray();
+
+            var control = await mediator.Send(new ApplicationRequest
+            {
+                ApplicationName = applications[0].ApplicationName,
+                ApplicationVersion = applications[0].ApplicationVersion
+            });
+
+            var test = await mediator.Send(new ApplicationRequest
+            { 
+                ApplicationName = applications[1].ApplicationName, 
+                ApplicationVersion = applications[1].ApplicationVersion
+            });
+            
+            var fileHandler = new FileHandler(control, test);
+
+            await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
+
+            var fileStream = fileHandler.DownloadOutputAsZip();
+            var fileName = "output.zip";
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
         var models = await mediator.Send(new AllApplicationRequest());
 
-        applications = models
-            .Select(x => new ApplicationViewModel
+        applicationListViewModel.Applications = models
+            .Select(x => new ApplicationViewModel(applicationListViewModel)
             {
                 ApplicationName = x.ApplicationName,
                 ApplicationVersion = x.ApplicationVersion,

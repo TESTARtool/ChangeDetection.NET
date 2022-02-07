@@ -26,11 +26,11 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 builder.Services.AddAuthorizationCore();
 
 builder.Services
-    .AddSingleton<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
-    .AddSingleton<IFindStateDifferences, FindStateDifferences>()
-    .AddSingleton<ICompareImages, SkipImageComparison>() // SkiaSharp isn't supporting BlazorApp at the moment; https://github.com/mono/SkiaSharp/issues/1219
-    .AddSingleton<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
-    .AddSingleton<IHtmlOutputter, HtmlOutputter>();
+    .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
+    .AddScoped<IFindStateDifferences, FindStateDifferences>()
+    .AddScoped<ICompareImages, SkipImageComparison>() // SkiaSharp isn't supporting BlazorApp at the moment; https://github.com/mono/SkiaSharp/issues/1219
+    .AddScoped<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
+    .AddScoped<IHtmlOutputter, HtmlOutputter>();
 
 builder.Services.AddMediatR(typeof(OrientDbCommand).Assembly);
 builder.Services.AddBlazoredLocalStorage();
