@@ -2,10 +2,7 @@
 
 public interface IChangeDetectionStrategy
 {
-    Task ExecuteChangeDetectionAsync(Application control, Application test, IFileOutputHandler fileOutputHandler);
-}
+    string Name { get; }
 
-public interface IFileOutputHandler
-{
-    string GetFilePath(string fileName);
+    Task ExecuteChangeDetectionAsync(Application control, Application test, IFileOutputHandler fileOutputHandler);
 }

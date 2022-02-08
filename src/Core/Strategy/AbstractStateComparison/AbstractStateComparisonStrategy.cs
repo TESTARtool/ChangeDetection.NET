@@ -11,6 +11,8 @@ public class AbstractStateComparisonStrategy : IChangeDetectionStrategy
         this.htmlOutputter = htmlOutputter;
     }
 
+    public string Name => "Proof Of concept - Abstract State Comparison";
+
     public async Task ExecuteChangeDetectionAsync(Application control, Application test, IFileOutputHandler fileOutputHandler)
     {
         var abstractStatesEqual = control.AbstractionAttributes.SequenceEqual(test.AbstractionAttributes);

@@ -3,26 +3,101 @@
 @inject IJSRuntime JS
 
 <h3>Available Models</h3>
-<EditForm Model="@applicationListViewModel" OnValidSubmit="ExecuteChangeDetection" >
+@*<EditForm Model="@applicationListViewModel" OnValidSubmit="ExecuteChangeDetection" >
+*@
 
-    <div class="list-group">
-        @foreach(var application in applicationListViewModel.Applications)
+    <div class="row">
+        <div class="col-8">
+            <div class="list-group">
+                @foreach(var application in applicationListViewModel.Applications)
+                {
+                  <div class="list-group-item">
+                      <div class="d-flex w-100 justify-content-between">
+                          <h5 class="mb-1">@application.ApplicationName</h5>
+                          <small class="text-muted">@application.ModelIdentifier.Value</small>
+                      </div>
+                      <p class="mb-1">@application.ApplicationVersion</p>
+                      <div class="d-flex w-100 justify-content-between">
+                        <small class="text-muted">@string.Join(", ", application.AbstractionAttributes)</small>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary btn-sm" @onclick="(e) => SetAsControl(e, application)">Add as control</button>
+                            <button type="submit" class="btn btn-primary btn-sm" @onclick="(e) => SetAsTest(e, application)" >Add as test</button>
+                        </div>
+                      </div>
+                  </div>
+                }
+            </div>
+
+            <br/>
+
+            <button type="submit" disabled="@applicationListViewModel.Disable" 
+            class="btn btn-primary">Execute Change Detection</button>
+
+        </div>
+        <div class="col-4">
+      
+            <div class="card">
+                <div class="card-header">
+                Compare
+              </div>
+                @if (controlApplication != null)
         {
-            <label class="list-group-item">
-                <InputCheckbox @bind-Value="application.IsSelected"/>
-            
-                <span>@application.ApplicationName</span>
-            </label>
+              <div class="card-body">
+                <h5 class="card-title">@controlApplication.ApplicationName</h5>
+                <p class="card-text">@controlApplication.ApplicationVersion</p>
+              </div>
         }
+            </div>
+
+        
+            <div class="card">
+                <div class="card-header">
+                With
+              </div>
+              @if (testApplication != null)
+                {
+                      <div class="card-body">
+                        <h5 class="card-title">@testApplication.ApplicationName</h5>
+                        <p class="card-text">@testApplication.ApplicationVersion</p>
+                      </div>
+                }
+
+            </div>
+        </div>
     </div>
-
-    <button type="submit" disabled="@applicationListViewModel.Disable" 
-    class="btn btn-primary">Execute Change Detection</button>
-
-</EditForm>
 
 @code {
     ApplicationListViewModel applicationListViewModel = new();
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    private ApplicationViewModel? controlApplication { get; set; } = null;
+    private ApplicationViewModel? testApplication { get; set; } = null;
+
+    private EventCallback SetAsControl(MouseEventArgs s, ApplicationViewModel application)
+    {
+        Console.WriteLine("control: "+ application.ApplicationName);
+        controlApplication = application;
+
+        if (controlApplication == testApplication)
+        {
+            testApplication = null;
+        }
+
+        return EventCallback.Empty;
+    }
+
+    private EventCallback SetAsTest(MouseEventArgs s, ApplicationViewModel application)
+    {
+        Console.WriteLine("test:" + application.ApplicationName);
+        testApplication = application;
+
+        if (controlApplication == testApplication)
+        {
+            controlApplication = null;
+        }
+
+        return EventCallback.Empty;
+    }
 
     public void SelectionChanged()
     {
@@ -35,6 +110,15 @@
     {
         if (applicationListViewModel.HasTwoSelected)
         {
+            var options = new ModalOptions
+            {
+                HideCloseButton = false,
+                DisableBackgroundCancel = true,
+                HideHeader = true
+            };
+
+            var loading = Modal.Show<Loading>(string.Empty, options);
+
             var applications = applicationListViewModel.Applications
                 .Where(x => x.IsSelected)
                 .Take(2)
@@ -51,7 +135,7 @@
                 ApplicationName = applications[1].ApplicationName, 
                 ApplicationVersion = applications[1].ApplicationVersion
             });
-            
+
             var fileHandler = new FileHandler(control, test);
 
             await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
@@ -61,6 +145,8 @@
             using var streamRef = new DotNetStreamReference(stream: fileStream);
 
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+
+            loading.Close();
         }
     }
 

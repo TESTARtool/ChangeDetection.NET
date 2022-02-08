@@ -2,6 +2,7 @@ global using Microsoft.AspNetCore.Components.Authorization;
 
 using BlazorApp;
 using Blazored.LocalStorage;
+using Blazored.Modal;
 using MediatR;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -34,5 +35,6 @@ builder.Services
 
 builder.Services.AddMediatR(typeof(OrientDbCommand).Assembly);
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddBlazoredModal();
 
 await builder.Build().RunAsync();

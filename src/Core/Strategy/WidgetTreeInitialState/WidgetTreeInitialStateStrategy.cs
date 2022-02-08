@@ -18,6 +18,8 @@ public class WidgetTreeInitialStateStrategy : IChangeDetectionStrategy
         this.mapper = mapper;
     }
 
+    public string Name => "Widget Tree Initial State";
+
     public async Task ExecuteChangeDetectionAsync(Application control, Application test, IFileOutputHandler fileOutputHandler)
     {
         var controlConcreteId = control.AbstractStates
