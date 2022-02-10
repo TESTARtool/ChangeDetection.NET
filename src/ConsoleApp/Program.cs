@@ -24,31 +24,31 @@ await Host.CreateDefaultBuilder(args)
     {
         services.AddHostedService<ConsoleHostedService>();
 
-        services.Configure<OrientDbOptions>(
-                hostContext.Configuration.GetSection(OrientDbOptions.ConfigName));
-
         services.Configure<CompareOptions>(
             hostContext.Configuration.GetSection(CompareOptions.ConfigName));
 
         services.AddHttpClient();
 
-        services.AddSingleton<IOrientDbCommand, OrientDbCommand>();
-
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            services.AddSingleton<ICompareImages, EasySameDimensionsPixelByPixelImageComparison>();
+            services.AddScoped<ICompareImages, SkiaSharpEasySameDimensionsPixelByPixelImageComparison>();
         }
         else
         {
             // SkiaLibrary is as of today unsupported on Non Windows platforms
-            services.AddSingleton<ICompareImages, NoImageComparison>();
+            services.AddScoped<ICompareImages, NoImageComparison>();
         }
 
         services
-            .AddSingleton<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
-            .AddSingleton<IFindStateDifferences, FindStateDifferences>()
-            .AddSingleton<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
-            .AddSingleton<IHtmlOutputter, HtmlOutputter>();
+            .AddScoped<IOrientDbSignInProvider, ConsoleAppOrientDbSignInProvider>()
+            .AddOrientDb()
+            .Configure<OrientDbOptions>(hostContext.Configuration.GetSection(OrientDbOptions.ConfigName));
+
+        services
+            .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
+            .AddScoped<IFindStateDifferences, FindStateDifferences>()
+            .AddScoped<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
+            .AddScoped<IHtmlOutputter, HtmlOutputter>();
 
         services.AddAutoMapper(configActions =>
         {
@@ -67,9 +67,9 @@ await Host.CreateDefaultBuilder(args)
 
     .ConfigureAppConfiguration((hostContext, config) =>
     {
-        config.AddCommandLine(args);
         config.AddJsonFile("appsettings.json");
         config.AddEnvironmentVariables();
         config.AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true); // this one needs to be optional because it can be provided somewhere else
+        config.AddCommandLine(args);
     })
     .RunConsoleAsync();

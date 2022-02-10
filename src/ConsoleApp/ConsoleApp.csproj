@@ -8,6 +8,10 @@
     <LangVersion>10</LangVersion>
     <RootNamespace>Testar.ChangeDetection.ConsoleApp</RootNamespace>
     <UserSecretsId>01e5f654-4d0e-4ca4-a078-77c80376b679</UserSecretsId>
+    <!--<PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishReadyToRun>true</PublishReadyToRun>-->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 

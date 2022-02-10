@@ -1,0 +1,84 @@
+﻿@page "/login"
+@using System.Text
+@inject ILocalStorageService localStorage;
+@inject NavigationManager NavigationManager;
+@inject AuthenticationStateProvider AuthStateProvider;
+@inject IOrientDbLoginService loginService;
+
+<h3>Login</h3>
+
+<EditForm Model="user" OnSubmit="HandleLogin">
+    <div class="form-group">
+        <label for="url">OrientDB Url</label>
+        <InputText id="url" @bind-Value="user.OrientDbUrl" type="url" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="url">Testar database name</label>
+        <InputText id="databasename" @bind-Value="user.DatabaseName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="username">Username</label>
+        <InputText id="username" @bind-Value="user.UserName" type="username" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <InputText id="password" @bind-Value="user.Password" type="password" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Login</button>
+
+</EditForm>
+
+
+@code
+{
+    private User user = new User();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = await localStorage.GetItemAsync<Uri>("orientdb-url");
+        var username = await localStorage.GetItemAsStringAsync("username");
+        var testarDatabase = await localStorage.GetItemAsStringAsync("testar-database");
+
+        user.OrientDbUrl = url.ToString();
+        user.UserName = username;
+        user.DatabaseName = testarDatabase;
+
+        await base.OnInitializedAsync();
+    }
+
+
+    private async void HandleLogin()
+    {
+        try
+        {
+            var userpass = $"{user.UserName}:{user.Password}";
+            var userpassBase64 = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(userpass));
+            await localStorage.SetItemAsStringAsync("session", userpassBase64);
+
+            await localStorage.SetItemAsync<Uri>("orientdb-url", new Uri(user.OrientDbUrl));
+
+            var isValid = await loginService.ValidateCredentialsAsync(user.DatabaseName);
+
+            if (isValid)
+            {
+                await localStorage.SetItemAsStringAsync("username", user.UserName);
+                await localStorage.SetItemAsStringAsync("testar-database", user.DatabaseName);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+
+                NavigationManager.NavigateTo("");
+            }
+            else
+            {
+                await localStorage.RemoveItemAsync("session");
+            }
+        } 
+        catch(Exception ex)
+        {
+            throw;
+        }
+    }
+}

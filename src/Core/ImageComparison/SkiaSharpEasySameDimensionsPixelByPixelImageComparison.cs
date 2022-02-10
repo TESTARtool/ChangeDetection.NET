@@ -2,7 +2,7 @@
 
 namespace Testar.ChangeDetection.Core.ImageComparison;
 
-public class EasySameDimensionsPixelByPixelImageComparison : ICompareImages
+public class SkiaSharpEasySameDimensionsPixelByPixelImageComparison : ICompareImages
 {
     public byte[] Comparer(string controlFileName, string testFileName)
     {

@@ -1,18 +1,18 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Requests;
 using Testar.ChangeDetection.Core.Strategy;
 
 namespace Testar.ChangeDetection.ConsoleApp;
 
-internal sealed class ConsoleHostedService : IHostedService
+internal sealed partial class ConsoleHostedService : IHostedService
 {
     private readonly ILogger logger;
     private readonly IHostApplicationLifetime appLifetime;
     private readonly IChangeDetectionStrategy strategy;
     private readonly IMediator mediator;
+    private readonly IOrientDbLoginService loginService;
     private readonly CompareOptions compareOptions;
     private Task? applicationTask;
     private int? exitCode;
@@ -22,18 +22,22 @@ internal sealed class ConsoleHostedService : IHostedService
         IHostApplicationLifetime appLifetime,
         IChangeDetectionStrategy strategy,
         IMediator mediator,
-        IOptions<CompareOptions> compareOptions
+        IOptions<CompareOptions> compareOptions,
+        IOrientDbLoginService loginService
         )
     {
         this.logger = logger;
         this.appLifetime = appLifetime;
         this.strategy = strategy;
         this.mediator = mediator;
+        this.loginService = loginService;
         this.compareOptions = compareOptions.Value;
     }
 
     public async Task RunAsync()
     {
+        // var session = loginService.LoginAsync()
+
         var control = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.ControlName, ApplicationVersion = compareOptions.ControlVersion });
         var test = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.TestName, ApplicationVersion = compareOptions.TestVersion });
         var fileHandler = new FileHandler(control, test);
@@ -106,32 +110,5 @@ internal sealed class ConsoleHostedService : IHostedService
 
         // Exit code may be null if the user cancelled via Ctrl+C/SIGTERM
         Environment.ExitCode = exitCode.GetValueOrDefault(-1);
-    }
-
-    public class FileHandler : IFileOutputHandler
-    {
-        public FileHandler(Application control, Application test)
-        {
-            var folderName = $"{control.ApplicationName}_{control.ApplicationVersion}_Diff_{test.ApplicationName}_{test.ApplicationVersion}";
-
-            RootFolder = Path.Combine("out", folderName);
-
-            if (Directory.Exists(RootFolder))
-            {
-                Directory.Delete(RootFolder, recursive: true);
-            }
-
-            Directory.CreateDirectory(RootFolder);
-        }
-
-        public HashSet<string> UsedPaths { get; } = new();
-        public string RootFolder { get; }
-
-        public string GetFilePath(string fileName)
-        {
-            var path = Path.Combine(RootFolder, fileName);
-            UsedPaths.Add(path);
-            return path;
-        }
     }
 }

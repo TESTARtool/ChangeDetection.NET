@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Testar.ChangeDetection.Core.OrientDb;
@@ -13,19 +10,25 @@ public interface IOrientDbCommand
     Task<byte[]> ExecuteDocumentAsync(OrientDbId id);
 }
 
+public interface IOrientDbSignInProvider
+{
+    Task EnhanceHttpClient(HttpClient httpClient);
+
+    Task<string?> GetDatabaseNameAsync();
+}
+
 public class OrientDbCommand : IOrientDbCommand
 {
     private readonly IHttpClientFactory clientFactory;
     private readonly ILogger<OrientDbId> logger;
-    private readonly OrientDbOptions orientDbOptions;
+    private readonly IOrientDbSignInProvider orientDbSignInProvider;
     private readonly JsonSerializerOptions jsonOptions;
 
-    public OrientDbCommand(IHttpClientFactory clientFactory, IOptions<OrientDbOptions> options, ILogger<OrientDbId> logger)
+    public OrientDbCommand(IHttpClientFactory clientFactory, ILogger<OrientDbId> logger, IOrientDbSignInProvider orientDbSignInProvider)
     {
         this.clientFactory = clientFactory;
         this.logger = logger;
-        this.orientDbOptions = options.Value;
-
+        this.orientDbSignInProvider = orientDbSignInProvider;
         this.jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
@@ -34,9 +37,14 @@ public class OrientDbCommand : IOrientDbCommand
 
     public async Task<TElement[]> ExecuteQueryAsync<TElement>(string sql)
     {
-        var client = CreateQueryClient();
+        var databaseName = await orientDbSignInProvider.GetDatabaseNameAsync();
+        var client = clientFactory.CreateOrientDbHttpClient();
 
-        var response = await client.GetAsync(sql);
+        await orientDbSignInProvider.EnhanceHttpClient(client);
+
+        var url = $"query/{databaseName}/sql/{sql}";
+
+        var response = await client.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
         using var stream = await response.Content.ReadAsStreamAsync();
@@ -51,9 +59,15 @@ public class OrientDbCommand : IOrientDbCommand
 
     public async Task<byte[]> ExecuteDocumentAsync(OrientDbId id)
     {
-        var client = CreateDocumentClient();
+        var databaseName = await orientDbSignInProvider.GetDatabaseNameAsync();
 
-        var response = await client.GetAsync(id.Value.Replace("#", "").Trim());
+        var client = clientFactory.CreateOrientDbHttpClient();
+
+        await orientDbSignInProvider.EnhanceHttpClient(client);
+
+        var url = $"document/{databaseName}/{id.Value.Replace("#", "").Trim()}";
+
+        var response = await client.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
         using var stream = await response.Content.ReadAsStreamAsync();
@@ -64,28 +78,6 @@ public class OrientDbCommand : IOrientDbCommand
         return string.IsNullOrWhiteSpace(orientDbResult.Value)
             ? Array.Empty<byte>()
             : Convert.FromBase64String(orientDbResult.Value);
-    }
-
-    private HttpClient CreateQueryClient() => CreateOrientDbClient($"query/{orientDbOptions.DatabaseName}/sql/");
-
-    private HttpClient CreateDocumentClient() => CreateOrientDbClient($"document/{orientDbOptions.DatabaseName}/");
-
-    private HttpClient CreateOrientDbClient(string uri)
-    {
-        var orientDbUrl = new Uri(orientDbOptions.Url, uri);
-
-        logger.LogInformation($"{orientDbOptions.UserName}:{orientDbOptions.Password}");
-
-        var base64EncodedAuthenticationString = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{orientDbOptions.UserName}:{orientDbOptions.Password}"));
-        var client = clientFactory.CreateClient();
-
-        client.BaseAddress = orientDbUrl;
-        client.DefaultRequestHeaders.Clear();
-        client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-        client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
-
-        return client;
     }
 
     private class OrientDbResult

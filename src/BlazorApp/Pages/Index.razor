@@ -1,0 +1,20 @@
+﻿@page "/"
+@inject ISyncLocalStorageService LocalStorageService
+
+<PageTitle>Index</PageTitle>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <h1>Hello, world!!</h1>
+        Please sign in.
+    </NotAuthorized>
+    <Authorized>
+        <h1>Welcome back, @LocalStorageService.GetItemAsString("username")!!</h1>
+        
+        <ApplicationList />
+    </Authorized>
+</AuthorizeView>
+
+@code{
+
+}
