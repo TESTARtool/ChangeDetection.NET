@@ -1,11 +1,11 @@
 ﻿using Blazored.LocalStorage;
 using System.Net.Http.Headers;
 
-internal class BlazorOrientDbSessionProvider : IOrientDbSignInProvider
+internal sealed class BlazorOrientDbSignInProvider : IOrientDbSignInProvider
 {
     private readonly ILocalStorageService localStorageService;
 
-    public BlazorOrientDbSessionProvider(ILocalStorageService localStorageService)
+    public BlazorOrientDbSignInProvider(ILocalStorageService localStorageService)
     {
         this.localStorageService = localStorageService;
     }

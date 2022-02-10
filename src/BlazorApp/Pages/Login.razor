@@ -39,11 +39,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var url = await localStorage.GetItemAsStringAsync("orientdb-url");
+        var url = await localStorage.GetItemAsync<Uri>("orientdb-url");
         var username = await localStorage.GetItemAsStringAsync("username");
         var testarDatabase = await localStorage.GetItemAsStringAsync("testar-database");
 
-        user.OrientDbUrl = url;
+        user.OrientDbUrl = url.ToString();
         user.UserName = username;
         user.DatabaseName = testarDatabase;
 

@@ -1,7 +1,34 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Testar.ChangeDetection.Core;
+﻿using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Strategy;
 
 namespace BlazorApp.ViewModels;
+
+public interface IStrategyBuilder
+{
+    string[] Names();
+
+    public IChangeDetectionStrategy GetStrategyByName(string name);
+}
+
+public class AllStrats : IStrategyBuilder
+{
+    private readonly IEnumerable<IChangeDetectionStrategy> strategies;
+
+    public AllStrats(IEnumerable<IChangeDetectionStrategy> strategies)
+    {
+        this.strategies = strategies;
+    }
+
+    public IChangeDetectionStrategy GetStrategyByName(string name)
+    {
+        return strategies.SingleOrDefault(x => x.Name == name) ?? throw new ArgumentException("Strategy not found", nameof(name));
+    }
+
+    public string[] Names()
+    {
+        return strategies.Select(x => x.Name).ToArray();
+    }
+}
 
 public class ApplicationListViewModel
 {

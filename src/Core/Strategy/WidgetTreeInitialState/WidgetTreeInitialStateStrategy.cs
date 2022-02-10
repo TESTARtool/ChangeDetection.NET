@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Org.XmlUnit.Builder;
+﻿using Org.XmlUnit.Builder;
 using Org.XmlUnit.Diff;
 using System.Text;
 using System.Text.Json;
@@ -10,12 +9,12 @@ namespace Testar.ChangeDetection.Core.Strategy.WidgetTreeInitialState;
 public class WidgetTreeInitialStateStrategy : IChangeDetectionStrategy
 {
     private readonly IOrientDbCommand orientDbCommand;
-    private readonly IMapper mapper;
+    //private readonly IMapper mapper;
 
-    public WidgetTreeInitialStateStrategy(IOrientDbCommand orientDbCommand, IMapper mapper)
+    public WidgetTreeInitialStateStrategy(IOrientDbCommand orientDbCommand)//, IMapper mapper)
     {
         this.orientDbCommand = orientDbCommand;
-        this.mapper = mapper;
+        //  this.mapper = mapper;
     }
 
     public string Name => "Widget Tree Initial State";

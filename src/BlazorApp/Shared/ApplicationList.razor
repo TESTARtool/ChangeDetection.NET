@@ -1,5 +1,5 @@
 ﻿@inject IMediator mediator;
-@inject IChangeDetectionStrategy strategy;
+@inject IStrategyBuilder strategies;
 @inject IJSRuntime JS
 
 <h3>Available Models</h3>
@@ -22,6 +22,7 @@
                         <div class="btn-group">
                             <button type="submit" class="btn btn-primary btn-sm" @onclick="(e) => SetAsControl(e, application)">Add as control</button>
                             <button type="submit" class="btn btn-primary btn-sm" @onclick="(e) => SetAsTest(e, application)" >Add as test</button>
+                            <button type="submit" class="btn btn-secondary btn-sm">Open model</button>
                         </div>
                       </div>
                   </div>
@@ -30,38 +31,41 @@
 
             <br/>
 
-            <button type="submit" disabled="@applicationListViewModel.Disable" 
-            class="btn btn-primary">Execute Change Detection</button>
+           
 
         </div>
         <div class="col-4">
-      
             <div class="card">
-                <div class="card-header">
-                Compare
-              </div>
+                <div class="card-header">Compare</div>
                 @if (controlApplication != null)
-        {
-              <div class="card-body">
-                <h5 class="card-title">@controlApplication.ApplicationName</h5>
-                <p class="card-text">@controlApplication.ApplicationVersion</p>
-              </div>
-        }
+                {
+                    <div class="card-body">
+                        <h5 class="card-title">@controlApplication.ApplicationName</h5>
+                        <p class="card-text">@controlApplication.ApplicationVersion</p>
+                    </div>
+                }
             </div>
 
-        
             <div class="card">
-                <div class="card-header">
-                With
-              </div>
-              @if (testApplication != null)
+                <div class="card-header">With</div>
+                @if (testApplication != null)
                 {
-                      <div class="card-body">
+                    <div class="card-body">
                         <h5 class="card-title">@testApplication.ApplicationName</h5>
                         <p class="card-text">@testApplication.ApplicationVersion</p>
-                      </div>
+                    </div>
                 }
+            </div>
 
+            <div class="card">
+                <select class="form-select" aria-label="Select strategy" @bind="@strategyName">
+                @foreach(var strat in strategies.Names())
+                {
+                    <option>@strat</option>
+                }
+                </select>
+                 <button type="submit" disabled="@disableExecution" @onclick="() => ExecuteChangeDetection()"
+            class="btn btn-primary">Execute Change Detection</button>
             </div>
         </div>
     </div>
@@ -72,10 +76,18 @@
 
     private ApplicationViewModel? controlApplication { get; set; } = null;
     private ApplicationViewModel? testApplication { get; set; } = null;
+    private bool disableExecution { get; set; } = true;
+    private string? strategyName { get; set; } = "Proof Of concept - Abstract State Comparison";
+
+    private EventCallback SetAsStrategy(EventArgs s, string name)
+    {
+        strategyName = name;
+
+        return EventCallback.Empty;
+    }
 
     private EventCallback SetAsControl(MouseEventArgs s, ApplicationViewModel application)
     {
-        Console.WriteLine("control: "+ application.ApplicationName);
         controlApplication = application;
 
         if (controlApplication == testApplication)
@@ -83,18 +95,21 @@
             testApplication = null;
         }
 
+        disableExecution = (controlApplication is null || testApplication is null);
+
         return EventCallback.Empty;
     }
 
     private EventCallback SetAsTest(MouseEventArgs s, ApplicationViewModel application)
     {
-        Console.WriteLine("test:" + application.ApplicationName);
         testApplication = application;
 
         if (controlApplication == testApplication)
         {
             controlApplication = null;
         }
+
+        disableExecution = (controlApplication is null || testApplication is null);
 
         return EventCallback.Empty;
     }
@@ -108,40 +123,37 @@
 
     private async void ExecuteChangeDetection()
     {
-        if (applicationListViewModel.HasTwoSelected)
+        if (controlApplication is not null && testApplication is not null && strategyName is not null)
         {
+            var strategy = strategies.GetStrategyByName(strategyName);
+
             var options = new ModalOptions
-            {
-                HideCloseButton = false,
-                DisableBackgroundCancel = true,
-                HideHeader = true
-            };
+                {
+                    HideCloseButton = false,
+                    DisableBackgroundCancel = true,
+                    HideHeader = true
+                };
 
             var loading = Modal.Show<Loading>(string.Empty, options);
 
-            var applications = applicationListViewModel.Applications
-                .Where(x => x.IsSelected)
-                .Take(2)
-                .ToArray();
-
             var control = await mediator.Send(new ApplicationRequest
-            {
-                ApplicationName = applications[0].ApplicationName,
-                ApplicationVersion = applications[0].ApplicationVersion
-            });
+                {
+                    ApplicationName = controlApplication.ApplicationName,
+                    ApplicationVersion = controlApplication.ApplicationVersion
+                });
 
             var test = await mediator.Send(new ApplicationRequest
-            { 
-                ApplicationName = applications[1].ApplicationName, 
-                ApplicationVersion = applications[1].ApplicationVersion
-            });
+                {
+                    ApplicationName = testApplication.ApplicationName,
+                    ApplicationVersion = testApplication.ApplicationVersion
+                });
 
             var fileHandler = new FileHandler(control, test);
 
             await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
 
             var fileStream = fileHandler.DownloadOutputAsZip();
-            var fileName = "output.zip";
+            var fileName = $"{controlApplication.ApplicationName}_{controlApplication.ApplicationVersion}_diff_{testApplication.ApplicationName}_{testApplication.ApplicationVersion}.zip";
             using var streamRef = new DotNetStreamReference(stream: fileStream);
 
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
