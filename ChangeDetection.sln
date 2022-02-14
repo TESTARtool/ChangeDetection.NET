@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\corebuild.yml = .github\workflows\corebuild.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChangeDetection.Server", "src\ChangeDetection.Server\ChangeDetection.Server.csproj", "{5E9D8722-8369-4445-80BD-29DE0CCF057F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{72B5BE45-06CA-4E26-9332-BC9C689271DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72B5BE45-06CA-4E26-9332-BC9C689271DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72B5BE45-06CA-4E26-9332-BC9C689271DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E9D8722-8369-4445-80BD-29DE0CCF057F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E9D8722-8369-4445-80BD-29DE0CCF057F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E9D8722-8369-4445-80BD-29DE0CCF057F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E9D8722-8369-4445-80BD-29DE0CCF057F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{72B5BE45-06CA-4E26-9332-BC9C689271DF} = {0E8CA887-438A-4FB6-B5B3-560262B375BD}
 		{B4DCF5FB-4A4C-4A4D-B197-E54C4F62A794} = {615CDA6A-575C-44F8-B9D2-1113A1809511}
 		{EDE99C8E-68C7-4D90-9720-09ABC7F7BD5D} = {B4DCF5FB-4A4C-4A4D-B197-E54C4F62A794}
+		{5E9D8722-8369-4445-80BD-29DE0CCF057F} = {0E8CA887-438A-4FB6-B5B3-560262B375BD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {569557B1-CD66-4592-AC3D-24F48FAB711D}
