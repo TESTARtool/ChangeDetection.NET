@@ -24,8 +24,11 @@ builder.Services
     .AddScoped<IOrientDbSignInProvider, BlazorOrientDbSignInProvider>()
     .AddOrientDb();
 
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-builder.Services.AddAuthorizationCore();
+builder.Services
+    .AddScoped<IAuthService, AuthService>()
+    .AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>()
+    .AddAuthorizationCore()
+    ;
 
 builder.Services
     .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()

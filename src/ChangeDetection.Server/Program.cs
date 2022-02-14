@@ -6,6 +6,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors(config =>
+{
+    config.AddPolicy(name: "myCors", builder =>
+    {
+        builder
+            .WithOrigins("https://localhost:7206")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers();
 //builder.Services.AddIdentityCore<OrientDbUser>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -42,6 +53,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("myCors");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -57,13 +70,6 @@ public class ConsoleAppOrientDbSignInProvider : IOrientDbSignInProvider
 
     public Task EnhanceHttpClient(HttpClient httpClient)
     {
-        //var base64EncodedAuthenticationString = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{options.Username}:{options.Password}"));
-
-        //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
-        //httpClient.DefaultRequestHeaders.Add("Connection", "close");
-
-        //httpClient.BaseAddress = options.Url;
-
         return Task.CompletedTask;
     }
 

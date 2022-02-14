@@ -3,16 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Testar.ChangeDetection.Core;
 
 namespace ChangeDetection.Server.Controllers;
-
-public class LoginModel
-{
-    public string Username { get; set; }
-
-    public string Password { get; set; }
-
-}
 
 [Route("api/[controller]")]
 [ApiController]

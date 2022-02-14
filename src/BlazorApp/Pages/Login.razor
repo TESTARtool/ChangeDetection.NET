@@ -1,84 +1,72 @@
 ﻿@page "/login"
-@using System.Text
-@inject ILocalStorageService localStorage;
 @inject NavigationManager NavigationManager;
-@inject AuthenticationStateProvider AuthStateProvider;
-@inject IOrientDbLoginService loginService;
+@inject IAuthService authService;
 
-<h3>Login</h3>
-
-<EditForm Model="user" OnSubmit="HandleLogin">
-    <div class="form-group">
-        <label for="url">OrientDB Url</label>
-        <InputText id="url" @bind-Value="user.OrientDbUrl" type="url" class="form-control" />
+@if (ShowErrors)
+{
+    <div class="alert alert-danger" role="alert">
+        <p>@Error</p>
     </div>
+}
+<div class="text-center">
+    <div class="form-signin">
+        <EditForm Model="user" OnSubmit="HandleLogin">
+        <img class="mb-4" src="images/testar_logo.png" alt="Testar logo" >
+        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
 
-    <div class="form-group">
-        <label for="url">Testar database name</label>
-        <InputText id="databasename" @bind-Value="user.DatabaseName" class="form-control" />
+            <DataAnnotationsValidator />
+            <div class="form-floating">
+                <InputText id="url" class="form-control" @bind-Value="user.ServerUrl" type="url" placeholder="url"  />
+                <label for="url" >Server URL</label>
+            </div>
+
+            <div class="form-floating">
+                <InputText id="username" @bind-Value="user.UserName" type="username" class="form-control"
+                            placeholder="username" />
+                <label for="username">Username</label>
+            </div>
+
+            <div class="form-floating">
+                <InputText id="password" @bind-Value="user.Password" type="password" class="form-control"
+                placeholder="password"/>
+                <label for="password">Password</label>
+            </div>
+            <br/>
+
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Sign In</button>
+
+        </EditForm>
     </div>
-
-    <div class="form-group">
-        <label for="username">Username</label>
-        <InputText id="username" @bind-Value="user.UserName" type="username" class="form-control" />
-    </div>
-
-    <div class="form-group">
-        <label for="password">Password</label>
-        <InputText id="password" @bind-Value="user.Password" type="password" class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Login</button>
-
-</EditForm>
-
+</div>
 
 @code
 {
+    private bool ShowErrors { get; set; }
+    private string Error { get; set; }
     private User user = new User();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var url = await localStorage.GetItemAsync<Uri>("orientdb-url");
-        var username = await localStorage.GetItemAsStringAsync("username");
-        var testarDatabase = await localStorage.GetItemAsStringAsync("testar-database");
-
-        user.OrientDbUrl = url.ToString();
-        user.UserName = username;
-        user.DatabaseName = testarDatabase;
-
-        await base.OnInitializedAsync();
-    }
-
 
     private async void HandleLogin()
     {
         try
         {
-            var userpass = $"{user.UserName}:{user.Password}";
-            var userpassBase64 = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(userpass));
-            await localStorage.SetItemAsStringAsync("session", userpassBase64);
+            ShowErrors = false;
 
-            await localStorage.SetItemAsync<Uri>("orientdb-url", new Uri(user.OrientDbUrl));
+            var success = await authService.LoginAsync(user);
 
-            var isValid = await loginService.ValidateCredentialsAsync(user.DatabaseName);
-
-            if (isValid)
+            if (success)
             {
-                await localStorage.SetItemAsStringAsync("username", user.UserName);
-                await localStorage.SetItemAsStringAsync("testar-database", user.DatabaseName);
-                await AuthStateProvider.GetAuthenticationStateAsync();
-
-                NavigationManager.NavigateTo("");
+                NavigationManager.NavigateTo("/");
             }
             else
             {
-                await localStorage.RemoveItemAsync("session");
+                Error = "Unable to sign in. Please check the data";
+                ShowErrors = true;
             }
         } 
         catch(Exception ex)
         {
-            throw;
+            Error = ex.Message;
+            ShowErrors = true;
         }
     }
 }
