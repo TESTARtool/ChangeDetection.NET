@@ -1,3 +1,4 @@
+using ChangeDetection.Server.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -17,30 +18,32 @@ builder.Services.AddCors(config =>
     });
 });
 
+builder.Services.Configure<JwtTokenGeneratorOptions>(
+    builder.Configuration.GetSection(JwtTokenGeneratorOptions.ConfigName));
+
 builder.Services.AddControllers();
-//builder.Services.AddIdentityCore<OrientDbUser>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<IOrientDbSignInProvider, ConsoleAppOrientDbSignInProvider>();
 builder.Services.AddOrientDb();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["JwtIssuer"],
-                ValidAudience = builder.Configuration["JwtAudience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSecurityKey"]))
-            };
-        });
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["JwtTokenGenerator:JwtIssuer"],
+            ValidAudience = builder.Configuration["JwtTokenGenerator:JwtAudience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtTokenGenerator:JwtSecurityKey"])),
+        };
+    });
 
 var app = builder.Build();
 

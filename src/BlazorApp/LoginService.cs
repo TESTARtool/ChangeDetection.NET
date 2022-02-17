@@ -30,26 +30,31 @@ public class AuthService : IAuthService
 
     public async Task<bool> LoginAsync(User user)
     {
-        var loginAsJson = JsonSerializer.Serialize(new LoginModel
+        if (user.UserName is not null && user.Password is not null)
         {
-            Username = user.UserName,
-            Password = user.Password
-        });
+            var loginAsJson = JsonSerializer.Serialize(new LoginModel
+            {
+                Username = user.UserName,
+                Password = user.Password
+            });
 
-        var response = await httpClient.PostAsync($"{user.ServerUrl}/api/Login", new StringContent(loginAsJson, Encoding.UTF8, "application/json"));
+            var response = await httpClient.PostAsync($"{user.ServerUrl}/api/Login", new StringContent(loginAsJson, Encoding.UTF8, "application/json"));
 
-        if (!response.IsSuccessStatusCode)
-        {
-            return false;
+            if (!response.IsSuccessStatusCode)
+            {
+                return false;
+            }
+
+            var token = await response.Content.ReadAsStringAsync();
+
+            await localStorage.SetItemAsync("authToken", token);
+            ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsAuthenticated(user.UserName);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+
+            return true;
         }
 
-        var token = await response.Content.ReadAsStringAsync();
-
-        await localStorage.SetItemAsync("authToken", token);
-        ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsAuthenticated(user.UserName);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
-
-        return true;
+        return false;
     }
 
     public async Task LogoutAsync()

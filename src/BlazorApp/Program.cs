@@ -7,6 +7,7 @@ using Blazored.Modal;
 using MediatR;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
@@ -29,6 +30,9 @@ builder.Services
     .AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>()
     .AddAuthorizationCore()
     ;
+
+builder.Services
+    .AddScoped<IGraphService, GraphService>();
 
 builder.Services
     .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()

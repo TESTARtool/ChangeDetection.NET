@@ -1,13 +1,12 @@
-﻿function loadGraphCanvas(graphLocation, elementName) {
+﻿function loadGraphCanvas(graph) {
     // global object that will hold some config values
     let appStatus = {};
     appStatus.graph = {};
+    console.log(graph);
     let cy = cytoscape({
         container: document.getElementById("cy"),
 
-        elements: fetch("graph.json").then(function (response) {
-            return response.json();
-        }),
+        elements: JSON.parse(graph),
 
         style: [ // the stylesheet for the graph
             {

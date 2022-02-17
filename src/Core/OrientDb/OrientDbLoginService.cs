@@ -57,7 +57,7 @@ public sealed class OrientDbLoginService : IOrientDbLoginService
 
     internal static string ParseSessionId(HttpResponseHeaders headers)
     {
-        // In the response header a cookie is set from the server
+        // In the response header a cookie is set from the orientdb server
         // example: OSESSIONID=OS1644099715572-7340936222054740501; Path=/; HttpOnly
 
         var values = headers.GetValues("Set-Cookie")
@@ -69,6 +69,6 @@ public sealed class OrientDbLoginService : IOrientDbLoginService
             throw new SecurityException("Did not receive a session id from OrientDb server");
         }
 
-        return values[1].Trim();
+        return values[0].Trim();
     }
 }
