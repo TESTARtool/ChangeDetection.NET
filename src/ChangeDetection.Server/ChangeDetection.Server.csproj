@@ -7,7 +7,7 @@
     <UserSecretsId>fb8365ba-43b7-4f2a-b06d-436cb57d6d56</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
-    <RootNamespace>Testar.ChangeDetection.ConsoleApp</RootNamespace>
+    <RootNamespace>Testar.ChangeDetection.Server</RootNamespace>
     <AssemblyName>Testar.ChangeDetection.Server</AssemblyName>
   </PropertyGroup>
 

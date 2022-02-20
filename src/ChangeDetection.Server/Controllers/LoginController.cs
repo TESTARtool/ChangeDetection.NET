@@ -5,42 +5,29 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Server.OrientDb;
 
-namespace ChangeDetection.Server.Controllers;
-
-public class JwtTokenGeneratorOptions
-{
-    public const string ConfigName = "JwtTokenGenerator";
-
-    public string JwtSecurityKey { get; set; }
-    public string JwtIssuer { get; set; }
-    public string JwtAudience { get; set; }
-    public int JwtExpiryInSeconds { get; set; }
-}
+namespace Testar.ChangeDetection.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class LoginController : Controller
 {
-    private readonly IConfiguration configuration;
-    private readonly IOrientDbLoginService orientDbLoginService;
-    private readonly JwtTokenGeneratorOptions options;
+    private readonly JwtTokenGeneratorOptions jwtOptions;
+    private readonly OrientDbHttpClient orientDbHttpClient;
 
-    public LoginController(IConfiguration configuration, IOrientDbLoginService orientDbLoginService,
-        IOptions<JwtTokenGeneratorOptions> options)
+    public LoginController(OrientDbHttpClient orientDbHttpClient, IOptions<JwtTokenGeneratorOptions> options)
     {
-        this.configuration = configuration;
-        this.orientDbLoginService = orientDbLoginService;
-        this.options = options.Value;
+        this.jwtOptions = options.Value;
+        this.orientDbHttpClient = orientDbHttpClient;
     }
 
     [HttpPost]
     public async Task<IActionResult> Login([FromBody] LoginModel login)
     {
-        var orientDb = configuration["OrientDbServerUrl"];
-        var databaseName = configuration["StateDatabaseName"];
-
-        var result = await orientDbLoginService.LoginAsync(new Uri(orientDb), databaseName, login.Username, login.Password);
+        var result = await orientDbHttpClient
+            .WithUsernameAndPassword(login.Username, login.Password)
+            .LoginAsync(Database.StateDatabase);
 
         if (result is null)
         {
@@ -53,14 +40,11 @@ public class LoginController : Controller
             new Claim("OrientDbSession", result.SessionId),
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.JwtSecurityKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.JwtSecurityKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expiry = DateTime.Now.AddSeconds(options.JwtExpiryInSeconds);
+        var expiry = DateTime.Now.AddSeconds(jwtOptions.JwtExpiryInSeconds);
 
-        var token = new JwtSecurityToken(
-
-            options.JwtIssuer,
-            options.JwtAudience,
+        var token = new JwtSecurityToken(jwtOptions.JwtIssuer, jwtOptions.JwtAudience,
             claims,
             expires: expiry,
             signingCredentials: creds

@@ -1,15 +1,20 @@
-using ChangeDetection.Server.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Testar.ChangeDetection.Server;
+using Testar.ChangeDetection.Server.OrientDb;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.Configure<JwtTokenGeneratorOptions>(
+    builder.Configuration.GetSection(JwtTokenGeneratorOptions.ConfigName));
 
-builder.Services.AddCors(config =>
+builder.Services.Configure<OrientDbOptions>(
+    builder.Configuration.GetSection(OrientDbOptions.ConfigName));
+
+builder.Services.AddCors(setup =>
 {
-    config.AddPolicy(name: "myCors", builder =>
+    setup.AddPolicy(name: "myCors", builder =>
     {
         builder
             .WithOrigins("https://localhost:7206")
@@ -18,13 +23,9 @@ builder.Services.AddCors(config =>
     });
 });
 
-builder.Services.Configure<JwtTokenGeneratorOptions>(
-    builder.Configuration.GetSection(JwtTokenGeneratorOptions.ConfigName));
-
+builder.Services.AddHttpClient<OrientDbHttpClient>();
 builder.Services.AddControllers();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddSingleton<IOrientDbSignInProvider, ConsoleAppOrientDbSignInProvider>();
-builder.Services.AddOrientDb();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -50,6 +51,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -64,20 +66,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-public class ConsoleAppOrientDbSignInProvider : IOrientDbSignInProvider
-{
-    public ConsoleAppOrientDbSignInProvider()
-    {
-    }
-
-    public Task EnhanceHttpClient(HttpClient httpClient)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task<string?> GetDatabaseNameAsync()
-    {
-        return Task.FromResult((string?)"testar");
-    }
-}
