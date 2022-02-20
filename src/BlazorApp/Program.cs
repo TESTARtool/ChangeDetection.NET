@@ -21,6 +21,8 @@ builder.Services
     .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
     .AddHttpClient();
 
+builder.Services.AddHttpClient<ChangeDetectionHttpClient>();
+
 builder.Services
     .AddScoped<IOrientDbSignInProvider, BlazorOrientDbSignInProvider>()
     .AddOrientDb();

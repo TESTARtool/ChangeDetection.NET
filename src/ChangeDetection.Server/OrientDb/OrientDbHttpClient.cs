@@ -72,7 +72,6 @@ public class OrientDbHttpClient
 
         var response = await client.SendAsync(httpContent);
 
-        var text = await response.Content.ReadAsStringAsync();
         using var stream = await response.Content.ReadAsStreamAsync();
 
         var orientDbResult = await JsonSerializer.DeserializeAsync<OrientDbResult>(stream, jsonOptions)

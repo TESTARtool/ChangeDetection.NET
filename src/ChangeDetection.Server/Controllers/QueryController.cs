@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Server.OrientDb;
 
 namespace Testar.ChangeDetection.Server.Controllers;
 

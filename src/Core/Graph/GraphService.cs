@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace Testar.ChangeDetection.Core.Graph;
 
@@ -170,6 +170,9 @@ public class GraphService : IGraphService
             elements.Add(new Element(Element.GroupNodes, new Vertex("AbstractLayer"), "Parent"));
         }
 
+        var nodesCommand = new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
+            .AddParameter("modelIdentifier", modelIdentifier.Value);
+
         var nodesSql = $"SELECT FROM AbstractState WHERE modelIdentifier = '{modelIdentifier.Value}'";
         var nodes = await FetchNodes(nodesSql, "AbstractState", showCompoundGraph ? "AbstractLayer" : null, modelIdentifier)
             .ToArrayAsync();
@@ -285,5 +288,54 @@ public class GraphService : IGraphService
         return id.Id
             .Replace("#", "")
             .Replace(":", "_");
+    }
+}
+
+public class ChangeDetectionHttpClient
+{
+    private readonly JsonSerializerOptions jsonOptions;
+
+    public ChangeDetectionHttpClient(HttpClient client)
+    {
+        this.HttpClient = client;
+
+        this.jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+        };
+    }
+
+    public HttpClient HttpClient { get; }
+
+    public void SetAuthenticationToken(string authentication)
+    {
+        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", authentication);
+    }
+
+    public void SetBaseAddress(Uri baseAddress)
+    {
+        HttpClient.BaseAddress = baseAddress;
+    }
+
+    public async Task<T> QueryAsync<T>(OrientDbCommand command)
+    {
+        var url = $"/query";
+
+        var json = JsonSerializer.Serialize(command);
+        using var httpContent = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent(json),
+        };
+
+        var response = await HttpClient.SendAsync(httpContent);
+
+        response.EnsureSuccessStatusCode();
+
+        using var stream = await response.Content.ReadAsStreamAsync();
+
+        var orientDbResult = await JsonSerializer.DeserializeAsync<T>(stream, jsonOptions)
+            ?? throw new Exception("Unable to parse query result to JsonElement");
+
+        return orientDbResult;
     }
 }

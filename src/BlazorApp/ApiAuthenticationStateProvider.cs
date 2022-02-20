@@ -1,8 +1,7 @@
 ﻿using Blazored.LocalStorage;
-using System.ComponentModel.DataAnnotations;
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
+using Testar.ChangeDetection.Core.Graph;
 
 namespace BlazorApp;
 
@@ -23,25 +22,27 @@ public class User
 
 public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILocalStorageService _localStorage;
+    private readonly ChangeDetectionHttpClient httpClient;
+    private readonly ILocalStorageService localStorage;
 
-    public ApiAuthenticationStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
+    public ApiAuthenticationStateProvider(ChangeDetectionHttpClient httpClient, ILocalStorageService localStorage)
     {
-        _httpClient = httpClient;
-        _localStorage = localStorage;
+        this.httpClient = httpClient;
+        this.localStorage = localStorage;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var savedToken = await _localStorage.GetItemAsync<string>("authToken");
+        var savedToken = await localStorage.GetItemAsync<string>("authToken");
+        var location = await localStorage.GetItemAsync<Uri>("serverLocation");
 
-        if (string.IsNullOrWhiteSpace(savedToken))
+        if (string.IsNullOrWhiteSpace(savedToken) || location is null)
         {
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", savedToken);
+        httpClient.SetAuthenticationToken(savedToken);
+        httpClient.SetBaseAddress(location);
 
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(savedToken), "jwt")));
     }

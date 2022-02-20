@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Graph;
 
 namespace BlazorApp;
 
@@ -15,11 +16,11 @@ public interface IAuthService
 
 public class AuthService : IAuthService
 {
-    private readonly HttpClient httpClient;
+    private readonly ChangeDetectionHttpClient httpClient;
     private readonly AuthenticationStateProvider authenticationStateProvider;
     private readonly ILocalStorageService localStorage;
 
-    public AuthService(HttpClient httpClient,
+    public AuthService(ChangeDetectionHttpClient httpClient,
         AuthenticationStateProvider authenticationStateProvider,
         ILocalStorageService localStorage)
     {
@@ -30,7 +31,7 @@ public class AuthService : IAuthService
 
     public async Task<bool> LoginAsync(User user)
     {
-        if (user.UserName is not null && user.Password is not null)
+        if (user.UserName is not null && user.Password is not null && user.ServerUrl is not null)
         {
             var loginAsJson = JsonSerializer.Serialize(new LoginModel
             {
@@ -48,6 +49,8 @@ public class AuthService : IAuthService
             var token = await response.Content.ReadAsStringAsync();
 
             await localStorage.SetItemAsync("authToken", token);
+            await localStorage.SetItemAsync<Uri>("serverLocation", new Uri(user.ServerUrl));
+
             ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsAuthenticated(user.UserName);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
 
@@ -61,6 +64,7 @@ public class AuthService : IAuthService
     {
         await localStorage.RemoveItemAsync("authToken");
         ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsLoggedOut();
-        httpClient.DefaultRequestHeaders.Authorization = null;
+
+        httpClient.SetAuthenticationToken(null);
     }
 }
