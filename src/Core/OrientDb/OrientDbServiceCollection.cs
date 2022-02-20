@@ -8,7 +8,7 @@ public static class OrientDbServiceCollection
     public static IServiceCollection AddOrientDb(this IServiceCollection services)
     {
         services
-            .AddScoped<IOrientDbCommand, OrientDbCommand>()
+            .AddScoped<IOrientDbCommandExecuter, OrientDbCommandExecuter>()
             .AddScoped<IOrientDbLoginService, OrientDbLoginService>()
             ;
 

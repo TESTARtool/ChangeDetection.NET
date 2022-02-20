@@ -11,11 +11,11 @@ public interface IHtmlOutputter
 
 public class HtmlOutputter : IHtmlOutputter
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IOrientDbCommandExecuter orientDbCommand;
     private readonly ICompareImages compareImages;
     private readonly IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget;
 
-    public HtmlOutputter(IOrientDbCommand orientDbCommand, ICompareImages compareImages, IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget)
+    public HtmlOutputter(IOrientDbCommandExecuter orientDbCommand, ICompareImages compareImages, IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget)
     {
         this.orientDbCommand = orientDbCommand;
         this.compareImages = compareImages;

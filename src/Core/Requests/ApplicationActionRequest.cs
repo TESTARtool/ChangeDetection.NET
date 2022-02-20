@@ -9,9 +9,9 @@ public class ApplicationActionRequest : IRequest<AbstractAction[]>
 
 public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, AbstractAction[]>
 {
-    private readonly IOrientDbCommand dbCommand;
+    private readonly IOrientDbCommandExecuter dbCommand;
 
-    public ActionRequestHandler(IOrientDbCommand dbCommand)
+    public ActionRequestHandler(IOrientDbCommandExecuter dbCommand)
     {
         this.dbCommand = dbCommand;
     }
@@ -42,10 +42,10 @@ public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, Ab
 
     public async Task<ActionJson> AbstractAction(ApplicationActionRequest request)
     {
-        var actions = await dbCommand.ExecuteQueryAsync<ActionJson>($"SELECT FROM AbstractAction WHERE @rid = '{request.AbstractActionId.Value.Replace("#", "").Trim()}'");
+        var actions = await dbCommand.ExecuteQueryAsync<ActionJson>($"SELECT FROM AbstractAction WHERE @rid = '{request.AbstractActionId.Id.Replace("#", "").Trim()}'");
 
         return actions.SingleOrDefault()
-            ?? throw new Exception($"Unable to find actions with Id '{request.AbstractActionId.Value}'");
+            ?? throw new Exception($"Unable to find actions with Id '{request.AbstractActionId.Id}'");
     }
 
     public class ActionJson

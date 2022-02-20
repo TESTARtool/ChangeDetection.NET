@@ -106,9 +106,9 @@ public class Element
 
 public class GraphService : IGraphService
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IOrientDbCommandExecuter orientDbCommand;
 
-    public GraphService(IOrientDbCommand orientDbCommand)
+    public GraphService(IOrientDbCommandExecuter orientDbCommand)
     {
         this.orientDbCommand = orientDbCommand;
     }
@@ -281,8 +281,8 @@ public class GraphService : IGraphService
     // this helper method formats the @RID property into something that can be used in a web frontend
     private string FormatId(OrientDbId id)
     {
-        if (id.Value.IndexOf("#") != 0) return id.Value; // not an orientdb id
-        return id.Value
+        if (id.Id.IndexOf("#") != 0) return id.Id; // not an orientdb id
+        return id.Id
             .Replace("#", "")
             .Replace(":", "_");
     }

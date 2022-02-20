@@ -1,8 +1,12 @@
-﻿namespace Testar.ChangeDetection.Core;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Testar.ChangeDetection.Core;
 
 public class LoginModel
 {
-    public string Username { get; set; }
+    [Required]
+    public string Username { get; init; }
 
-    public string Password { get; set; }
+    [Required]
+    public string Password { get; init; }
 }

@@ -65,7 +65,7 @@ await Host.CreateDefaultBuilder(args)
             configActions.CreateMap<string, AbstractStateId>().ConvertUsing(x => new AbstractStateId(x));
             configActions.CreateMap<string, WidgetId>().ConvertUsing(x => new WidgetId(x));
         });
-        services.AddMediatR(typeof(OrientDbCommand).Assembly);
+        services.AddMediatR(typeof(OrientDbCommandExecuter).Assembly);
     })
 
     .ConfigureAppConfiguration((hostContext, config) =>

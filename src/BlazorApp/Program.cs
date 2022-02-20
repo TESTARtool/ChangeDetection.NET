@@ -44,7 +44,7 @@ builder.Services
 builder.Services.AddScoped<IStrategyBuilder, AllStrats>();
 //builder.Services.AddScoped<IChangeDetectionStrategy, WidgetTreeInitialStateStrategy>();
 
-builder.Services.AddMediatR(typeof(OrientDbCommand).Assembly);
+builder.Services.AddMediatR(typeof(OrientDbCommandExecuter).Assembly);
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddBlazoredModal();
 

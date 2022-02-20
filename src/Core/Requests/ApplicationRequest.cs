@@ -10,9 +10,9 @@ public class ApplicationRequest : IRequest<Application>
 
 public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, Application>
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IOrientDbCommandExecuter orientDbCommand;
 
-    public ApplicationRequestHandler(IOrientDbCommand orientDbCommand)
+    public ApplicationRequestHandler(IOrientDbCommandExecuter orientDbCommand)
     {
         this.orientDbCommand = orientDbCommand;
     }

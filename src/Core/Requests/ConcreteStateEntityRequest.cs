@@ -9,9 +9,9 @@ public class ConcreteStateEntityRequest : IRequest<ConcreteState>
 
 public class ConcreteStateEntityRequestHandler : IRequestHandler<ConcreteStateEntityRequest, ConcreteState?>
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IOrientDbCommandExecuter orientDbCommand;
 
-    public ConcreteStateEntityRequestHandler(IOrientDbCommand orientDbCommand)
+    public ConcreteStateEntityRequestHandler(IOrientDbCommandExecuter orientDbCommand)
     {
         this.orientDbCommand = orientDbCommand;
     }

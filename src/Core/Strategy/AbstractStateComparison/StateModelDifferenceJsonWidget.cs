@@ -12,9 +12,9 @@ public interface IStateModelDifferenceJsonWidget
 
 public class StateModelDifferenceJsonWidget : IStateModelDifferenceJsonWidget
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IOrientDbCommandExecuter orientDbCommand;
 
-    public StateModelDifferenceJsonWidget(IOrientDbCommand orientDbCommand)
+    public StateModelDifferenceJsonWidget(IOrientDbCommandExecuter orientDbCommand)
     {
         this.orientDbCommand = orientDbCommand;
     }

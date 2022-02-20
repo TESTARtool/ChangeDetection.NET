@@ -8,9 +8,9 @@ public class AllApplicationRequest : IRequest<Application[]>
 
 public class AllApplicationRequestHandler : IRequestHandler<AllApplicationRequest, Application[]>
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IOrientDbCommandExecuter orientDbCommand;
 
-    public AllApplicationRequestHandler(IOrientDbCommand orientDbCommand)
+    public AllApplicationRequestHandler(IOrientDbCommandExecuter orientDbCommand)
     {
         this.orientDbCommand = orientDbCommand;
     }

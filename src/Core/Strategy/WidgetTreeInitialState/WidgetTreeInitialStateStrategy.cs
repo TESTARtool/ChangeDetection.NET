@@ -8,10 +8,10 @@ namespace Testar.ChangeDetection.Core.Strategy.WidgetTreeInitialState;
 
 public class WidgetTreeInitialStateStrategy : IChangeDetectionStrategy
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IOrientDbCommandExecuter orientDbCommand;
     //private readonly IMapper mapper;
 
-    public WidgetTreeInitialStateStrategy(IOrientDbCommand orientDbCommand)//, IMapper mapper)
+    public WidgetTreeInitialStateStrategy(IOrientDbCommandExecuter orientDbCommand)//, IMapper mapper)
     {
         this.orientDbCommand = orientDbCommand;
         //  this.mapper = mapper;

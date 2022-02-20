@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Analyser.cs" Link="Analyser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)src\Analyser.cs" Link="Analyser.cs" />
     <PackageReference Include="SmartAnalyzers.CSharpExtensions.Annotations" Version="4.2.1" />
   </ItemGroup>
 </Project>
