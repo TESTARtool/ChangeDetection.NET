@@ -7,6 +7,7 @@ using Blazored.Modal;
 using MediatR;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Strategy;
@@ -21,7 +22,7 @@ builder.Services
     .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
     .AddHttpClient();
 
-builder.Services.AddHttpClient<ChangeDetectionHttpClient>();
+builder.Services.AddScoped<IChangeDetectionHttpClient, ChangeDetectionHttpClient>();
 
 builder.Services
     .AddScoped<IOrientDbSignInProvider, BlazorOrientDbSignInProvider>()

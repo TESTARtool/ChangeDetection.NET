@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Server.OrientDb;
 
 namespace Testar.ChangeDetection.Server.Controllers;
@@ -10,30 +9,31 @@ namespace Testar.ChangeDetection.Server.Controllers;
 [Authorize]
 public class QueryController : Controller
 {
+    private readonly ILogger<QueryController> logger;
     private readonly OrientDbHttpClient orientDbHttpClient;
 
-    public QueryController(OrientDbHttpClient orientDbHttpClient)
+    public QueryController(ILogger<QueryController> logger, OrientDbHttpClient orientDbHttpClient)
     {
+        this.logger = logger;
         this.orientDbHttpClient = orientDbHttpClient;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Query([FromBody] OrientDbCommand command)
+    public async Task<IActionResult> Get([FromBody] OrientDbCommand command)
     {
-        var result = await orientDbHttpClient
-            .WithSession(User.Claims)
-            .QueryAsync(command, Database.StateDatabase);
+        try
+        {
+            var result = await orientDbHttpClient
+                .WithSession(User.Claims)
+                .QueryAsync(command, Database.StateDatabase);
 
-        return Ok(result.Result);
-    }
+            return Ok(result.Result);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Get failed");
 
-    [HttpGet]
-    public async Task<IActionResult> Document([FromBody] OrientDbId orientDbId)
-    {
-        var result = await orientDbHttpClient
-            .WithSession(User.Claims)
-            .DocumentAsync(orientDbId, Database.CompareDatabase);
-
-        return Ok(result.Value);
+            return BadRequest(ex.Message);
+        }
     }
 }

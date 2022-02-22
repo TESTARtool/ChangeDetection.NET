@@ -1,7 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using System.Security.Claims;
 using System.Text.Json;
-using Testar.ChangeDetection.Core.Graph;
 
 namespace BlazorApp;
 
@@ -22,27 +21,22 @@ public class User
 
 public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 {
-    private readonly ChangeDetectionHttpClient httpClient;
     private readonly ILocalStorageService localStorage;
 
-    public ApiAuthenticationStateProvider(ChangeDetectionHttpClient httpClient, ILocalStorageService localStorage)
+    public ApiAuthenticationStateProvider(ILocalStorageService localStorage)
     {
-        this.httpClient = httpClient;
         this.localStorage = localStorage;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var savedToken = await localStorage.GetItemAsync<string>("authToken");
+        var savedToken = await localStorage.GetItemAsStringAsync("authToken");
         var location = await localStorage.GetItemAsync<Uri>("serverLocation");
 
         if (string.IsNullOrWhiteSpace(savedToken) || location is null)
         {
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
-
-        httpClient.SetAuthenticationToken(savedToken);
-        httpClient.SetBaseAddress(location);
 
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(savedToken), "jwt")));
     }
@@ -68,7 +62,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         var payload = jwt.Split('.')[1];
         var jsonBytes = ParseBase64WithoutPadding(payload);
         var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-
+        // TODO we moeten hier de exp nog testen...
         keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
 
         if (roles != null)

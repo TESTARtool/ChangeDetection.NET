@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Testar.ChangeDetection.Core.Graph;
 
@@ -18,99 +17,13 @@ public interface IGraphService
     string GenerateJsonString(Element[] elements);
 }
 
-public class Edge : Document
-{
-    public Edge(string id, string sourceId, string targetId) : base(id, sourceId, targetId)
-    {
-    }
-}
-
-public class Vertex : Document
-{
-    public Vertex(string id) : base(id)
-    {
-    }
-}
-
-public abstract class Document
-{
-    public Document(string id)
-    {
-        this.Id = id;
-    }
-
-    public Document(string id, string sourceId, string targetId)
-    {
-        this.Id = id;
-        this.SourceId = sourceId;
-        this.TargetId = targetId;
-    }
-
-    [JsonInclude]
-    [JsonPropertyName("id")]
-    public string Id { get; }
-
-    [JsonInclude]
-    [JsonPropertyName("source")]
-    public string? SourceId { get; set; }
-
-    [JsonInclude]
-    [JsonPropertyName("target")]
-    public string? TargetId { get; set; }
-
-    [JsonExtensionData]
-    public IDictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
-
-    public void AddProperty(string key, string value)
-    {
-        Properties.Add(key, value);
-    }
-}
-
-public class Element
-{
-    public const string GroupNodes = "nodes";
-
-    public const string GroupEdges = "edges";
-
-    public Element(string group, Document document)
-    {
-        this.Group = group;
-        this.Document = document;
-    }
-
-    public Element(string group, Document document, string className)
-    {
-        this.Group = group;
-        this.Document = document;
-        Classes.Add(className);
-    }
-
-    [JsonInclude]
-    [JsonPropertyName("group")]
-    public string Group { get; set; }
-
-    [JsonInclude]
-    [JsonPropertyName("data")]
-    public Document Document { get; set; }
-
-    [JsonInclude]
-    [JsonPropertyName("classes")]
-    public List<string> Classes { get; set; } = new();
-
-    public void AddClass(String className)
-    {
-        Classes.Add(className);
-    }
-}
-
 public class GraphService : IGraphService
 {
-    private readonly IOrientDbCommandExecuter orientDbCommand;
+    private readonly IChangeDetectionHttpClient httpClient;
 
-    public GraphService(IOrientDbCommandExecuter orientDbCommand)
+    public GraphService(IChangeDetectionHttpClient httpClient)
     {
-        this.orientDbCommand = orientDbCommand;
+        this.httpClient = httpClient;
     }
 
     public string GenerateJsonString(Element[] elements)
@@ -126,13 +39,15 @@ public class GraphService : IGraphService
 
     public Task<byte[]> DownloadScreenshotAsync(string id)
     {
-        return orientDbCommand.ExecuteDocumentAsync(new OrientDbId(id.Replace('_', ':')));
+        return httpClient.DocumentAsync(new OrientDbId(id.Replace('_', ':')));
     }
 
     public async Task<Element[]> FetchAbstractConcreteConnectors(ModelIdentifier modelIdentifier)
     {
-        var sql = $"SELECT FROM (TRAVERSE inE() FROM (SELECT FROM AbstractState WHERE modelIdentifier = '{modelIdentifier.Value}')) WHERE @class = 'isAbstractedBy'";
-        var edges = FetchEdges(sql, "isAbstractedBy");
+        var command = new OrientDbCommand("SELECT FROM (TRAVERSE inE() FROM (SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier)) WHERE @class = 'isAbstractedBy'")
+            .AddParameter("modelIdentifier", modelIdentifier.Value);
+
+        var edges = FetchEdges(command, "isAbstractedBy");
 
         return await edges.ToArrayAsync();
     }
@@ -146,15 +61,14 @@ public class GraphService : IGraphService
             elements.Add(new Element(Element.GroupNodes, new Vertex("ConcreteLayer"), "Parent"));
         }
 
-        var concreteSql = $"SELECT FROM (TRAVERSE in() FROM (SELECT FROM AbstractState WHERE modelIdentifier = '{modelIdentifier.Value}')) WHERE @class = 'ConcreteState'";
-        var concreteNodes = await FetchNodes(concreteSql, "ConcreteState", showCompoundGraph ? "ConcreteLayer" : null, modelIdentifier)
-            .ToArrayAsync();
-
+        var command = new OrientDbCommand("SELECT FROM (TRAVERSE in() FROM (SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier)) WHERE @class = 'ConcreteState'")
+            .AddParameter("modelIdentifier", modelIdentifier.Value);
+        var concreteNodes = await FetchNodes(command, "ConcreteState", showCompoundGraph ? "ConcreteLayer" : null, modelIdentifier).ToArrayAsync();
         elements.AddRange(concreteNodes);
 
-        var concreteActionSql = $"SELECT FROM (TRAVERSE in('isAbstractedBy').outE('ConcreteAction') FROM (SELECT FROM AbstractState WHERE modelIdentifier = '{modelIdentifier.Value}')) WHERE @class = 'ConcreteAction'";
-        var concreteActionEdges = await FetchEdges(concreteActionSql, "ConcreteAction")
-            .ToArrayAsync();
+        command = new OrientDbCommand("SELECT FROM (TRAVERSE in('isAbstractedBy').outE('ConcreteAction') FROM (SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier)) WHERE @class = 'ConcreteAction'")
+            .AddParameter("modelIdentifier", modelIdentifier.Value);
+        var concreteActionEdges = await FetchEdges(command, "ConcreteAction").ToArrayAsync();
 
         elements.AddRange(concreteActionEdges);
 
@@ -170,31 +84,24 @@ public class GraphService : IGraphService
             elements.Add(new Element(Element.GroupNodes, new Vertex("AbstractLayer"), "Parent"));
         }
 
-        var nodesCommand = new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
+        var command = new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier.Value);
-
-        var nodesSql = $"SELECT FROM AbstractState WHERE modelIdentifier = '{modelIdentifier.Value}'";
-        var nodes = await FetchNodes(nodesSql, "AbstractState", showCompoundGraph ? "AbstractLayer" : null, modelIdentifier)
-            .ToArrayAsync();
-
+        var nodes = await FetchNodes(command, "AbstractState", showCompoundGraph ? "AbstractLayer" : null, modelIdentifier).ToArrayAsync();
         elements.AddRange(nodes);
 
-        var actionSql = $"SELECT FROM AbstractAction WHERE modelIdentifier = '{modelIdentifier.Value}'";
-        var actionNodes = await FetchEdges(actionSql, "AbstractAction")
-            .ToArrayAsync();
-
+        command = new OrientDbCommand("SELECT FROM AbstractAction WHERE modelIdentifier = :modelIdentifier")
+            .AddParameter("modelIdentifier", modelIdentifier.Value);
+        var actionNodes = await FetchEdges(command, "AbstractAction").ToArrayAsync();
         elements.AddRange(actionNodes);
 
-        var blackholeSql = $"SELECT FROM (TRAVERSE out() FROM  (SELECT FROM AbstractState WHERE modelIdentifier = '{modelIdentifier.Value}')) WHERE @class = 'BlackHole'";
-        var blackholeNodes = await FetchNodes(blackholeSql, "BlackHole", showCompoundGraph ? "AbstractLayer" : null, modelIdentifier)
-            .ToArrayAsync();
-
+        command = new OrientDbCommand("SELECT FROM (TRAVERSE out() FROM  (SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier)) WHERE @class = 'BlackHole'")
+            .AddParameter("modelIdentifier", modelIdentifier.Value);
+        var blackholeNodes = await FetchNodes(command, "BlackHole", showCompoundGraph ? "AbstractLayer" : null, modelIdentifier).ToArrayAsync();
         elements.AddRange(blackholeNodes);
 
-        var unvisitedSql = $"SELECT FROM UnvisitedAbstractAction WHERE modelIdentifier = '{modelIdentifier.Value}'";
-        var unvisitedEdges = await FetchEdges(unvisitedSql, "UnvisitedAbstractAction")
-            .ToArrayAsync();
-
+        command = new OrientDbCommand("SELECT FROM UnvisitedAbstractAction WHERE modelIdentifier = :modelIdentifier")
+            .AddParameter("modelIdentifier", modelIdentifier.Value);
+        var unvisitedEdges = await FetchEdges(command, "UnvisitedAbstractAction").ToArrayAsync();
         elements.AddRange(unvisitedEdges);
 
         return elements.ToArray();
@@ -214,9 +121,10 @@ public class GraphService : IGraphService
         return elements.ToArray();
     }
 
-    private async IAsyncEnumerable<Element> FetchEdges(string sql, string className)
+    private async IAsyncEnumerable<Element> FetchEdges(OrientDbCommand command, string className)
     {
-        var result = await orientDbCommand.ExecuteQueryAsync<JsonElement>(sql);
+        var result = await httpClient.QueryAsync<JsonElement>(command);
+
         foreach (var item in result)
         {
             var id = new OrientDbId(item.GetProperty("@rid").ToString());
@@ -236,9 +144,10 @@ public class GraphService : IGraphService
         }
     }
 
-    private async IAsyncEnumerable<Element> FetchNodes(string sql, string className, string? parent, ModelIdentifier modelIdentifier)
+    private async IAsyncEnumerable<Element> FetchNodes(OrientDbCommand command, string className, string? parent, ModelIdentifier modelIdentifier)
     {
-        var result = await orientDbCommand.ExecuteQueryAsync<JsonElement>(sql);
+        var result = await httpClient.QueryAsync<JsonElement>(command);
+
         foreach (var item in result)
         {
             var id = new OrientDbId(item.GetProperty("@rid").ToString());
@@ -288,54 +197,5 @@ public class GraphService : IGraphService
         return id.Id
             .Replace("#", "")
             .Replace(":", "_");
-    }
-}
-
-public class ChangeDetectionHttpClient
-{
-    private readonly JsonSerializerOptions jsonOptions;
-
-    public ChangeDetectionHttpClient(HttpClient client)
-    {
-        this.HttpClient = client;
-
-        this.jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-        };
-    }
-
-    public HttpClient HttpClient { get; }
-
-    public void SetAuthenticationToken(string authentication)
-    {
-        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", authentication);
-    }
-
-    public void SetBaseAddress(Uri baseAddress)
-    {
-        HttpClient.BaseAddress = baseAddress;
-    }
-
-    public async Task<T> QueryAsync<T>(OrientDbCommand command)
-    {
-        var url = $"/query";
-
-        var json = JsonSerializer.Serialize(command);
-        using var httpContent = new HttpRequestMessage(HttpMethod.Post, url)
-        {
-            Content = new StringContent(json),
-        };
-
-        var response = await HttpClient.SendAsync(httpContent);
-
-        response.EnsureSuccessStatusCode();
-
-        using var stream = await response.Content.ReadAsStreamAsync();
-
-        var orientDbResult = await JsonSerializer.DeserializeAsync<T>(stream, jsonOptions)
-            ?? throw new Exception("Unable to parse query result to JsonElement");
-
-        return orientDbResult;
     }
 }

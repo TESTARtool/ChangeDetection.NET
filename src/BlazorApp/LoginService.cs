@@ -1,9 +1,5 @@
 ﻿using Blazored.LocalStorage;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
 using Testar.ChangeDetection.Core;
-using Testar.ChangeDetection.Core.Graph;
 
 namespace BlazorApp;
 
@@ -16,15 +12,15 @@ public interface IAuthService
 
 public class AuthService : IAuthService
 {
-    private readonly ChangeDetectionHttpClient httpClient;
+    private readonly IChangeDetectionHttpClient changeDetectionHttpClient;
     private readonly AuthenticationStateProvider authenticationStateProvider;
     private readonly ILocalStorageService localStorage;
 
-    public AuthService(ChangeDetectionHttpClient httpClient,
+    public AuthService(IChangeDetectionHttpClient changeDetectionHttpClient,
         AuthenticationStateProvider authenticationStateProvider,
         ILocalStorageService localStorage)
     {
-        this.httpClient = httpClient;
+        this.changeDetectionHttpClient = changeDetectionHttpClient;
         this.authenticationStateProvider = authenticationStateProvider;
         this.localStorage = localStorage;
     }
@@ -33,26 +29,25 @@ public class AuthService : IAuthService
     {
         if (user.UserName is not null && user.Password is not null && user.ServerUrl is not null)
         {
-            var loginAsJson = JsonSerializer.Serialize(new LoginModel
+            var url = user.ServerUrl.EndsWith('/')
+                ? new Uri(user.ServerUrl.Substring(0, user.ServerUrl.Length - 1))
+                : new Uri(user.ServerUrl);
+
+            var token = await changeDetectionHttpClient.LoginAsync(url, new LoginModel
             {
                 Username = user.UserName,
                 Password = user.Password
             });
 
-            var response = await httpClient.PostAsync($"{user.ServerUrl}/api/Login", new StringContent(loginAsJson, Encoding.UTF8, "application/json"));
-
-            if (!response.IsSuccessStatusCode)
+            if (token is null)
             {
                 return false;
             }
 
-            var token = await response.Content.ReadAsStringAsync();
-
-            await localStorage.SetItemAsync("authToken", token);
+            await localStorage.SetItemAsStringAsync("authToken", token);
             await localStorage.SetItemAsync<Uri>("serverLocation", new Uri(user.ServerUrl));
 
             ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsAuthenticated(user.UserName);
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
 
             return true;
         }
@@ -64,7 +59,5 @@ public class AuthService : IAuthService
     {
         await localStorage.RemoveItemAsync("authToken");
         ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsLoggedOut();
-
-        httpClient.SetAuthenticationToken(null);
     }
 }
