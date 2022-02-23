@@ -25,10 +25,6 @@ builder.Services
 builder.Services.AddScoped<IChangeDetectionHttpClient, ChangeDetectionHttpClient>();
 
 builder.Services
-    .AddScoped<IOrientDbSignInProvider, BlazorOrientDbSignInProvider>()
-    .AddOrientDb();
-
-builder.Services
     .AddScoped<IAuthService, AuthService>()
     .AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>()
     .AddAuthorizationCore()
@@ -47,7 +43,7 @@ builder.Services
 builder.Services.AddScoped<IStrategyBuilder, AllStrats>();
 //builder.Services.AddScoped<IChangeDetectionStrategy, WidgetTreeInitialStateStrategy>();
 
-builder.Services.AddMediatR(typeof(OrientDbCommandExecuter).Assembly);
+builder.Services.AddMediatR(typeof(AbstractState).Assembly);
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddBlazoredModal();
 

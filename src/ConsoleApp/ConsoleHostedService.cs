@@ -14,7 +14,6 @@ internal sealed partial class ConsoleHostedService : IHostedService
     private readonly IChangeDetectionStrategy strategy;
     private readonly IMediator mediator;
     private readonly IOrientDbLoginService loginService;
-    private readonly IOrientDbCommandExecuter orientDbCommand;
     private readonly IGraphService graphService;
     private readonly CompareOptions compareOptions;
     private Task? applicationTask;
@@ -27,7 +26,6 @@ internal sealed partial class ConsoleHostedService : IHostedService
         IMediator mediator,
         IOptions<CompareOptions> compareOptions,
         IOrientDbLoginService loginService,
-        IOrientDbCommandExecuter orientDbCommand,
         IGraphService graphService
         )
     {
@@ -36,7 +34,6 @@ internal sealed partial class ConsoleHostedService : IHostedService
         this.strategy = strategy;
         this.mediator = mediator;
         this.loginService = loginService;
-        this.orientDbCommand = orientDbCommand;
         this.graphService = graphService;
         this.compareOptions = compareOptions.Value;
     }

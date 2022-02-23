@@ -11,13 +11,13 @@ public interface IHtmlOutputter
 
 public class HtmlOutputter : IHtmlOutputter
 {
-    private readonly IOrientDbCommandExecuter orientDbCommand;
+    private readonly IChangeDetectionHttpClient client;
     private readonly ICompareImages compareImages;
     private readonly IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget;
 
-    public HtmlOutputter(IOrientDbCommandExecuter orientDbCommand, ICompareImages compareImages, IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget)
+    public HtmlOutputter(IChangeDetectionHttpClient client, ICompareImages compareImages, IStateModelDifferenceJsonWidget stateModelDifferenceJsonWidget)
     {
-        this.orientDbCommand = orientDbCommand;
+        this.client = client;
         this.compareImages = compareImages;
         this.stateModelDifferenceJsonWidget = stateModelDifferenceJsonWidget;
     }
@@ -190,7 +190,7 @@ public class HtmlOutputter : IHtmlOutputter
         var concreteState = state.ConcreteStates.First();
         var fileName = concreteState.ConcreteIDCustom.Value.ToString() + ".png";
         var filePath = fileOutputHandler.GetFilePath(fileName);
-        var screenshotBytes = await orientDbCommand.ExecuteDocumentAsync(concreteState.Screenshot);
+        var screenshotBytes = await client.DocumentAsync(concreteState.Screenshot);
         await File.WriteAllBytesAsync(filePath, screenshotBytes);
 
         return fileName;

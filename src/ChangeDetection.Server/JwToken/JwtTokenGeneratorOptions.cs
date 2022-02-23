@@ -1,8 +1,8 @@
-﻿namespace Testar.ChangeDetection.Server;
+﻿namespace Testar.ChangeDetection.Server.JwToken;
 
-public class JwtTokenGeneratorOptions
+public class GeneratorOptions
 {
-    public const string ConfigName = "JwtTokenGenerator";
+    public const string ConfigName = "JwTokenGenerator";
 
     public string JwtSecurityKey { get; set; }
     public string JwtIssuer { get; set; }

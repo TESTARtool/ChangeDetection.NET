@@ -11,12 +11,8 @@ using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
-Console.WriteLine(@" _____ _____ ____ _____  _    ____  _  ");
-Console.WriteLine(@"|_   _| ____/ ___|_   _|/ \  |  _ \| | ");
-Console.WriteLine(@"  | | |  _| \___ \ | | / _ \ | |_) | | ");
-Console.WriteLine(@"  | | | |___ ___) || |/ ___ \|  _ <|_| ");
-Console.WriteLine(@"  |_| |_____|____/ |_/_/   \_\_| \_(_) ");
-Console.WriteLine();
+TestarLogo.Display();
+
 Console.WriteLine($"ChangeDetection.NET");
 
 await Host.CreateDefaultBuilder(args)
@@ -43,8 +39,6 @@ await Host.CreateDefaultBuilder(args)
         }
 
         services
-            .AddScoped<IOrientDbSignInProvider, ConsoleAppOrientDbSignInProvider>()
-            .AddOrientDb()
             .Configure<OrientDbOptions>(hostContext.Configuration.GetSection(OrientDbOptions.ConfigName));
 
         services
@@ -65,7 +59,7 @@ await Host.CreateDefaultBuilder(args)
             configActions.CreateMap<string, AbstractStateId>().ConvertUsing(x => new AbstractStateId(x));
             configActions.CreateMap<string, WidgetId>().ConvertUsing(x => new WidgetId(x));
         });
-        services.AddMediatR(typeof(OrientDbCommandExecuter).Assembly);
+        services.AddMediatR(typeof(AbstractState).Assembly);
     })
 
     .ConfigureAppConfiguration((hostContext, config) =>

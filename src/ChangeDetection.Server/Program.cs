@@ -1,20 +1,29 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Testar.ChangeDetection.Server;
+using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Server.JwToken;
 using Testar.ChangeDetection.Server.OrientDb;
+
+TestarLogo.Display();
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Configure<JwtTokenGeneratorOptions>(
-    builder.Configuration.GetSection(JwtTokenGeneratorOptions.ConfigName));
+builder.Services.AddHealthChecks();
+
+builder.Configuration.AddEnvironmentVariables(prefix: "Testar");
+
+builder.Services.Configure<GeneratorOptions>(
+    builder.Configuration.GetSection(GeneratorOptions.ConfigName));
 
 builder.Services.Configure<OrientDbOptions>(
     builder.Configuration.GetSection(OrientDbOptions.ConfigName));
 
+var corsPolicyName = "myCors";
+
 builder.Services.AddCors(setup =>
 {
-    setup.AddPolicy(name: "myCors", builder =>
+    setup.AddPolicy(name: corsPolicyName, builder =>
     {
         builder
             .WithOrigins("https://localhost:7206")
@@ -40,25 +49,25 @@ builder.Services
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["JwtTokenGenerator:JwtIssuer"],
-            ValidAudience = builder.Configuration["JwtTokenGenerator:JwtAudience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtTokenGenerator:JwtSecurityKey"])),
+            ValidIssuer = builder.Configuration["JwTokenGenerator:JwtIssuer"],
+            ValidAudience = builder.Configuration["JwTokenGenerator:JwtAudience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwTokenGenerator:JwtSecurityKey"])),
         };
     });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.MapHealthChecks("/healthz");
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-app.UseCors("myCors");
+app.UseCors(corsPolicyName);
 
 app.UseAuthentication();
 app.UseAuthorization();
