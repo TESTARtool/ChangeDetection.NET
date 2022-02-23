@@ -9,11 +9,11 @@ public class ApplicationActionRequest : IRequest<AbstractAction[]>
 
 public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, AbstractAction[]>
 {
-    private readonly IOrientDbCommand dbCommand;
+    private readonly IChangeDetectionHttpClient client;
 
-    public ActionRequestHandler(IOrientDbCommand dbCommand)
+    public ActionRequestHandler(IChangeDetectionHttpClient client)
     {
-        this.dbCommand = dbCommand;
+        this.client = client;
     }
 
     public async Task<AbstractAction[]> Handle(ApplicationActionRequest request, CancellationToken cancellationToken)
@@ -24,8 +24,10 @@ public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, Ab
 
         foreach (var concreteActionId in action.ConcreteActionIds)
         {
-            var sql = $"SELECT `Desc` FROM ConcreteAction WHERE actionId = '{concreteActionId}'";
-            var concreteActions = (await dbCommand.ExecuteQueryAsync<ConcreteActionJson>(sql))
+            var command = new OrientDbCommand("SELECT `Desc` FROM ConcreteAction WHERE actionId = :actionId")
+                .AddParameter("actionId", concreteActionId);
+
+            var concreteActions = (await client.QueryAsync<ConcreteActionJson>(command))
                 .Select(x => new AbstractAction
                 {
                     AbstractActionId = new AbstractActionId(action.ActionId),
@@ -42,10 +44,13 @@ public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, Ab
 
     public async Task<ActionJson> AbstractAction(ApplicationActionRequest request)
     {
-        var actions = await dbCommand.ExecuteQueryAsync<ActionJson>($"SELECT FROM AbstractAction WHERE @rid = '{request.AbstractActionId.Value.Replace("#", "").Trim()}'");
+        var command = new OrientDbCommand("SELECT FROM AbstractAction WHERE @rid = :rid")
+            .AddParameter("rid", request.AbstractActionId.Id.Replace("#", "").Trim());
+
+        var actions = await client.QueryAsync<ActionJson>(command);
 
         return actions.SingleOrDefault()
-            ?? throw new Exception($"Unable to find actions with Id '{request.AbstractActionId.Value}'");
+            ?? throw new Exception($"Unable to find actions with Id '{request.AbstractActionId.Id}'");
     }
 
     public class ActionJson

@@ -9,18 +9,19 @@ public class ConcreteStateEntityRequest : IRequest<ConcreteState>
 
 public class ConcreteStateEntityRequestHandler : IRequestHandler<ConcreteStateEntityRequest, ConcreteState?>
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IChangeDetectionHttpClient client;
 
-    public ConcreteStateEntityRequestHandler(IOrientDbCommand orientDbCommand)
+    public ConcreteStateEntityRequestHandler(IChangeDetectionHttpClient client)
     {
-        this.orientDbCommand = orientDbCommand;
+        this.client = client;
     }
 
     public async Task<ConcreteState?> Handle(ConcreteStateEntityRequest request, CancellationToken cancellationToken)
     {
-        var sql = $"SELECT FROM ConcreteState WHERE ConcreteIDCustom = '{request.ConcreteStateId.Value}' LIMIT 1";
+        var command = new OrientDbCommand("SELECT FROM ConcreteState WHERE ConcreteIDCustom :concreteIDCustom LIMIT 1")
+            .AddParameter("concreteIDCustom", request.ConcreteStateId.Value);
 
-        var concreteStates = await orientDbCommand.ExecuteQueryAsync<ConcreteStateJson>(sql);
+        var concreteStates = await client.QueryAsync<ConcreteStateJson>(command);
 
         return concreteStates.Select(x => new ConcreteState
         {

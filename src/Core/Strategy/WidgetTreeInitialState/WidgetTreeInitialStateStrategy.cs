@@ -8,13 +8,11 @@ namespace Testar.ChangeDetection.Core.Strategy.WidgetTreeInitialState;
 
 public class WidgetTreeInitialStateStrategy : IChangeDetectionStrategy
 {
-    private readonly IOrientDbCommand orientDbCommand;
-    //private readonly IMapper mapper;
+    private readonly IChangeDetectionHttpClient client;
 
-    public WidgetTreeInitialStateStrategy(IOrientDbCommand orientDbCommand)//, IMapper mapper)
+    public WidgetTreeInitialStateStrategy(IChangeDetectionHttpClient client)
     {
-        this.orientDbCommand = orientDbCommand;
-        //  this.mapper = mapper;
+        this.client = client;
     }
 
     public string Name => "Widget Tree Initial State";
@@ -150,9 +148,10 @@ public class WidgetTreeInitialStateStrategy : IChangeDetectionStrategy
 
     private async Task<Widget> GetWidgetTreeFromConcreteStateIdAsync(ConcreteStateId concreteIDCustom)
     {
-        var sql = $"SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteIDCustom = '{concreteIDCustom.Value}'))";
+        var command = new OrientDbCommand("SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteIDCustom = :concreteIDCustom))")
+            .AddParameter("concreteIDCustom", concreteIDCustom.Value);
 
-        var widgetsjson = await orientDbCommand.ExecuteQueryAsync<JsonElement>(sql);
+        var widgetsjson = await client.QueryAsync<JsonElement>(command);
 
         var widgets = new List<Widget>();
 

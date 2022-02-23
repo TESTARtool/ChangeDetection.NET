@@ -10,19 +10,20 @@ public class ApplicationRequest : IRequest<Application>
 
 public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, Application>
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IChangeDetectionHttpClient client;
 
-    public ApplicationRequestHandler(IOrientDbCommand orientDbCommand)
+    public ApplicationRequestHandler(IChangeDetectionHttpClient client)
     {
-        this.orientDbCommand = orientDbCommand;
+        this.client = client;
     }
 
     public async Task<Application> Handle(ApplicationRequest request, CancellationToken cancellationToken)
     {
         var application = await GetApplicationAsync(request);
-        var sql = $"SELECT FROM AbstractState WHERE modelIdentifier = '{application.ModelIdentifier}'";
+        var command = new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
+            .AddParameter("modelIdentifier", application.ModelIdentifier);
 
-        var states = await orientDbCommand.ExecuteQueryAsync<AbstractStateJson>(sql);
+        var states = await client.QueryAsync<AbstractStateJson>(command);
 
         return new Application
         {
@@ -45,11 +46,11 @@ public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, App
 
     private async Task<ApplicationJson> GetApplicationAsync(ApplicationRequest request)
     {
-        var sql = "SELECT FROM AbstractStateModel WHERE " +
-        $"applicationName = '{request.ApplicationName}' AND " +
-        $"applicationVersion = '{request.ApplicationVersion}'";
+        var command = new OrientDbCommand("SELECT FROM AbstractStateModel WHERE applicationName = :applicationName AND applicationVersion = :applicationVersion")
+            .AddParameter("applicationName", request.ApplicationName)
+            .AddParameter("applicationVersion", request.ApplicationVersion);
 
-        var entities = await orientDbCommand.ExecuteQueryAsync<ApplicationJson>(sql);
+        var entities = await client.QueryAsync<ApplicationJson>(command);
 
         return entities.SingleOrDefault()
             ?? throw new Exception($"Cannot find application '{request.ApplicationName}' with version '{request.ApplicationVersion}'");

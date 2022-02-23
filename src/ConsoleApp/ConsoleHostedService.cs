@@ -1,7 +1,8 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Testar.ChangeDetection.Core.Requests;
+using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.Strategy;
 
 namespace Testar.ChangeDetection.ConsoleApp;
@@ -13,6 +14,7 @@ internal sealed partial class ConsoleHostedService : IHostedService
     private readonly IChangeDetectionStrategy strategy;
     private readonly IMediator mediator;
     private readonly IOrientDbLoginService loginService;
+    private readonly IGraphService graphService;
     private readonly CompareOptions compareOptions;
     private Task? applicationTask;
     private int? exitCode;
@@ -23,7 +25,8 @@ internal sealed partial class ConsoleHostedService : IHostedService
         IChangeDetectionStrategy strategy,
         IMediator mediator,
         IOptions<CompareOptions> compareOptions,
-        IOrientDbLoginService loginService
+        IOrientDbLoginService loginService,
+        IGraphService graphService
         )
     {
         this.logger = logger;
@@ -31,23 +34,43 @@ internal sealed partial class ConsoleHostedService : IHostedService
         this.strategy = strategy;
         this.mediator = mediator;
         this.loginService = loginService;
+        this.graphService = graphService;
         this.compareOptions = compareOptions.Value;
     }
 
     public async Task RunAsync()
     {
+        var modelId = new ModelIdentifier("ppsh1a2e1033379108");
+        var elements = await graphService.FetchGraph(modelId, false);
+
+        var json = graphService.GenerateJsonString(elements);
+
+        File.WriteAllText("my-json.json", json);
+
         // var session = loginService.LoginAsync()
+        //var control = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.ControlName, ApplicationVersion = compareOptions.ControlVersion });
 
-        var control = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.ControlName, ApplicationVersion = compareOptions.ControlVersion });
-        var test = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.TestName, ApplicationVersion = compareOptions.TestVersion });
-        var fileHandler = new FileHandler(control, test);
+        //var sql = $"SELECT FROM AbstractState WHERE modelIdentifier = 'ppsh1a2e1033379108'";
 
-        await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
+        //var items = await orientDbCommand.ExecuteQueryAsync<JsonElement>(sql);
 
-        Console.WriteLine();
-        Console.WriteLine();
-        Console.WriteLine("Change detection completed");
-        Console.WriteLine($"Results can be viewed at location: {fileHandler.RootFolder}");
+        //foreach (var item in items)
+        //{
+        //    foreach (var prop in item.EnumerateObject())
+        //    {
+        //        Console.WriteLine($"{prop.Name}:{prop.Value}");
+        //    }
+        //}
+
+        //var test = await mediator.Send(new ApplicationRequest { ApplicationName = compareOptions.TestName, ApplicationVersion = compareOptions.TestVersion });
+        //var fileHandler = new FileHandler(control, test);
+
+        //await strategy.ExecuteChangeDetectionAsync(control, test, fileHandler);
+
+        //Console.WriteLine();
+        //Console.WriteLine();
+        //Console.WriteLine("Change detection completed");
+        //Console.WriteLine($"Results can be viewed at location: {fileHandler.RootFolder}");
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

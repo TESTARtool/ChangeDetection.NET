@@ -8,18 +8,17 @@ public class AllApplicationRequest : IRequest<Application[]>
 
 public class AllApplicationRequestHandler : IRequestHandler<AllApplicationRequest, Application[]>
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IChangeDetectionHttpClient client;
 
-    public AllApplicationRequestHandler(IOrientDbCommand orientDbCommand)
+    public AllApplicationRequestHandler(IChangeDetectionHttpClient client)
     {
-        this.orientDbCommand = orientDbCommand;
+        this.client = client;
     }
 
     public async Task<Application[]> Handle(AllApplicationRequest request, CancellationToken cancellationToken)
     {
-        var sql = "SELECT FROM AbstractStateModel";
-
-        var applications = await orientDbCommand.ExecuteQueryAsync<ApplicationJson>(sql);
+        var command = new OrientDbCommand("SELECT FROM AbstractStateModel");
+        var applications = await client.QueryAsync<ApplicationJson>(command);
 
         return applications
             .Select(x => new Application

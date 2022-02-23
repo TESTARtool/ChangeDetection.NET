@@ -1,6 +1,8 @@
 ﻿@inject IMediator mediator;
 @inject IStrategyBuilder strategies;
-@inject IJSRuntime JS
+@inject IJSRuntime JS;
+@inject NavigationManager NavigationManager;
+
 
 <h3>Available Models</h3>
 @*<EditForm Model="@applicationListViewModel" OnValidSubmit="ExecuteChangeDetection" >
@@ -22,7 +24,7 @@
                         <div class="btn-group">
                             <button type="submit" class="btn btn-primary btn-sm" @onclick="(e) => SetAsControl(e, application)">Add as control</button>
                             <button type="submit" class="btn btn-primary btn-sm" @onclick="(e) => SetAsTest(e, application)" >Add as test</button>
-                            <button type="submit" class="btn btn-secondary btn-sm">Open model</button>
+                            <button type="submit" class="btn btn-secondary btn-sm" @onclick="(e) => OpenModel(e, application)" >Open model</button>
                         </div>
                       </div>
                   </div>
@@ -78,6 +80,14 @@
     private ApplicationViewModel? testApplication { get; set; } = null;
     private bool disableExecution { get; set; } = true;
     private string? strategyName { get; set; } = "Proof Of concept - Abstract State Comparison";
+
+
+    private EventCallback OpenModel(MouseEventArgs s, ApplicationViewModel application)
+    {
+        NavigationManager.NavigateTo($"Graph/{application.ModelIdentifier.Value}");
+
+        return EventCallback.Empty;
+    }
 
     private EventCallback SetAsStrategy(EventArgs s, string name)
     {

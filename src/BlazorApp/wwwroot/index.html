@@ -4,11 +4,24 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>BlazorApp</title>
+    <title>Testar Change Detection</title>
     <base href="/" />
+    <script src="js/babel.min.js"></script>
+    <script src="js/cytoscape.min.js"></script>
+    <script src="js/cola.min.js"></script>
+    <script src="js/cytoscape-cose-bilkent.js"></script>
+    <script src="js/cytoscape-cola.js"></script>
+    <script src="js/cytoscape-euler.js"></script>
+    <script src="js/dagre.js"></script>
+    <script src="js/cytoscape-dagre.js"></script>
+    <script src="js/klay.js"></script>
+    <script src="js/cytoscape-klay.js"></script>
+    <script src="js/jquery-3.2.1.slim.min.js"></script>
+    <script src="js/jquery.magnific-popup.min.js"></script>
+
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="_content/Blazored.Modal/blazored-modal.css" rel="stylesheet" />
-    <link href="css/app.css" rel="stylesheet" />
+    <link href="css/app.css?version=1" rel="stylesheet" />
     <link href="BlazorApp.styles.css" rel="stylesheet" />
     <link href="manifest.json" rel="manifest" />
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
@@ -16,7 +29,14 @@
 </head>
 
 <body>
-    <div id="app">Loading...</div>
+    <div id="app">
+        <div class="text-center">
+            <div>Loading application...</div>
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -28,5 +48,6 @@
 
     <script>navigator.serviceWorker.register('service-worker.js');</script>
     <script src="files.js"></script>
+    <script src="graph.js"></script>
 </body>
 </html>

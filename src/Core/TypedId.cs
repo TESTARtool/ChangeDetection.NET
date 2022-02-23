@@ -1,10 +1,14 @@
 ﻿namespace Testar.ChangeDetection.Core;
 
-public record AbstractActionId(string Value);
-public record ModelIdentifier(string Value);
-public record ConcreteStateId(string Value);
-public record ConcreteActionId(string Value);
-public record ConcreteIDCustom(string Value);
-public record OrientDbId(string Value);
-public record AbstractStateId(string Value);
-public record WidgetId(string Value);
+public record struct AbstractActionId(string Value);
+public record struct ModelIdentifier(string Value);
+public record struct ConcreteStateId(string Value);
+public record struct ConcreteActionId(string Value);
+public record struct ConcreteIDCustom(string Value);
+public record struct OrientDbId(string Id)
+{
+    public string FormatId() => Id.Replace("#", "").Trim();
+}
+
+public record struct AbstractStateId(string Value);
+public record struct WidgetId(string Value);

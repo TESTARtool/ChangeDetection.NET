@@ -6,8 +6,18 @@
     </div>
 
     <main>
+        
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <AuthorizeView>
+                <Authorized>
+                    <a href="Logout">Logout</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="Login">Login</a>
+                </NotAuthorized>
+            </AuthorizeView>
+
+            <a href="https://testar.org/" target="_blank">About Testar</a>
         </div>
 
         <article class="content px-4">

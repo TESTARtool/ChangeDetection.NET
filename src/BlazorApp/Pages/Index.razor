@@ -5,13 +5,11 @@
 
 <AuthorizeView>
     <NotAuthorized>
-        <h1>Hello, world!!</h1>
-        Please sign in.
+        <h1>Welcome to TESTAR Change Detection Tool</h1>
+        Please sign in to view your available models.
     </NotAuthorized>
     <Authorized>
-        <h1>Welcome back, @LocalStorageService.GetItemAsString("username")!!</h1>
-        
-        <ApplicationList />
+       <ApplicationList />
     </Authorized>
 </AuthorizeView>
 

@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Text.Json.Serialization;
 
 namespace Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
@@ -12,11 +11,11 @@ public interface IStateModelDifferenceJsonWidget
 
 public class StateModelDifferenceJsonWidget : IStateModelDifferenceJsonWidget
 {
-    private readonly IOrientDbCommand orientDbCommand;
+    private readonly IChangeDetectionHttpClient client;
 
-    public StateModelDifferenceJsonWidget(IOrientDbCommand orientDbCommand)
+    public StateModelDifferenceJsonWidget(IChangeDetectionHttpClient client)
     {
-        this.orientDbCommand = orientDbCommand;
+        this.client = client;
     }
 
     public async IAsyncEnumerable<WidgetJson> GetNewWidgets(DeltaState removedState, DeltaState addedState, IFileOutputHandler fileOutputHandler)
@@ -52,9 +51,11 @@ public class StateModelDifferenceJsonWidget : IStateModelDifferenceJsonWidget
 
     public async Task<WidgetJson[]> FetchWidgetTreeInfo(ConcreteIDCustom concreteIDCustom)
     {
-        var sql = $"SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteIDCustom = '{concreteIDCustom.Value}'))";
+        var sql = $"";
+        var command = new OrientDbCommand("SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteIDCustom = :concreteIDCustom))")
+            .AddParameter("concreteIDCustom", concreteIDCustom.Value);
 
-        var widgets = await orientDbCommand.ExecuteQueryAsync<WidgetJson>(sql);
+        var widgets = await client.QueryAsync<WidgetJson>(command);
 
         return widgets.ToArray();
     }

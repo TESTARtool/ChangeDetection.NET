@@ -7,6 +7,8 @@ using Blazored.Modal;
 using MediatR;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
@@ -20,12 +22,16 @@ builder.Services
     .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
     .AddHttpClient();
 
-builder.Services
-    .AddScoped<IOrientDbSignInProvider, BlazorOrientDbSignInProvider>()
-    .AddOrientDb();
+builder.Services.AddScoped<IChangeDetectionHttpClient, ChangeDetectionHttpClient>();
 
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-builder.Services.AddAuthorizationCore();
+builder.Services
+    .AddScoped<IAuthService, AuthService>()
+    .AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>()
+    .AddAuthorizationCore()
+    ;
+
+builder.Services
+    .AddScoped<IGraphService, GraphService>();
 
 builder.Services
     .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
@@ -37,7 +43,7 @@ builder.Services
 builder.Services.AddScoped<IStrategyBuilder, AllStrats>();
 //builder.Services.AddScoped<IChangeDetectionStrategy, WidgetTreeInitialStateStrategy>();
 
-builder.Services.AddMediatR(typeof(OrientDbCommand).Assembly);
+builder.Services.AddMediatR(typeof(AbstractState).Assembly);
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddBlazoredModal();
 
