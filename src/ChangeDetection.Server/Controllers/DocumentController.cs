@@ -22,6 +22,12 @@ public class DocumentController : Controller
     /// </summary>
     /// <param name="orientDbId">Orient DB Id of the document</param>
     /// <returns>Base64 representation of the document</returns>
+    /// <remarks>
+    /// Sample request
+    ///
+    ///     GET /api/Document/4:1
+    ///
+    /// </remarks>
     [HttpGet("{Id}")]
     public async Task<IActionResult> Get(string id)
     {

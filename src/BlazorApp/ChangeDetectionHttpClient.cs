@@ -30,14 +30,9 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
     public async Task<byte[]> DocumentAsync(OrientDbId id)
     {
         var httpClient = await CreateHttpClientAsync();
-        var url = "/api/Document";
-        var json = JsonSerializer.Serialize(id);
-        using var httpContent = new HttpRequestMessage(HttpMethod.Post, url)
-        {
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
+        var url = $"/api/Document/id/{id.FormatId()}";
 
-        var response = await httpClient.SendAsync(httpContent);
+        var response = await httpClient.GetAsync(url);
 
         await EnsureSuccessStatusCodeAsync(response);
 
