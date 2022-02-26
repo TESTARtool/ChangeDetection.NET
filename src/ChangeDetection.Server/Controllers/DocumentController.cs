@@ -17,12 +17,17 @@ public class DocumentController : Controller
         this.orientDbHttpClient = orientDbHttpClient;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Get([FromBody] OrientDbId orientDbId)
+    /// <summary>
+    /// Gets a document from OrientDB
+    /// </summary>
+    /// <param name="orientDbId">Orient DB Id of the document</param>
+    /// <returns>Base64 representation of the document</returns>
+    [HttpGet("{Id}")]
+    public async Task<IActionResult> Get(string id)
     {
         var result = await orientDbHttpClient
             .WithSession(User.Claims)
-            .DocumentAsync(orientDbId, Database.StateDatabase);
+            .DocumentAsync(new OrientDbId(id), Database.StateDatabase);
 
         return Ok(result.Value);
     }

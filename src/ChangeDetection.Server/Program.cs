@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Server;
@@ -39,7 +40,23 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo()
+    {
+        Title = "Testar .NET Server",
+        Version = "v1",
+        Description = "Proxy request and handle authorisation to the Orient DB server",
+        License = new OpenApiLicense()
+        {
+            Name = "BSD 3-Clause License",
+            Url = new Uri("https://github.com/TESTARtool/ChangeDetection.NET/blob/main/LICENSE")
+        },
+    });
+
+    var xmlFilename = $"Testar.ChangeDetection.Server.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

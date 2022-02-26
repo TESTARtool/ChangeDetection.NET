@@ -18,6 +18,26 @@ public class QueryController : Controller
         this.orientDbHttpClient = orientDbHttpClient;
     }
 
+    /// <summary>
+    /// Queries the database
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns>JSON result</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/Query
+    ///     {
+    ///         "command": "SELECT FROM class where Id = :id",
+    ///         {
+    ///             "parameters" : {
+    ///                 "id": "123"
+    ///             }
+    ///         }
+    ///     }
+    ///
+    /// For every parameter and item in the parameters list must be added
+    /// </remarks>
     [HttpPost]
     public async Task<IActionResult> Get([FromBody] OrientDbCommand command)
     {
