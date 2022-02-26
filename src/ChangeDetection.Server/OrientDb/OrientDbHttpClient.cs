@@ -71,6 +71,7 @@ public class OrientDbHttpClient
         };
 
         var response = await client.SendAsync(httpContent);
+        response.EnsureSuccessStatusCode();
 
         using var stream = await response.Content.ReadAsStreamAsync();
 
@@ -98,7 +99,7 @@ public class OrientDbHttpClient
     private string DatabaseToName(Database database) => database switch
     {
         Database.StateDatabase => orientDbOptions.StateDatabaseName,
-        Database.CompareDatabase => orientDbOptions.CompareDatabaseName,
+        //Database.CompareDatabase => orientDbOptions.CompareDatabaseName,
         _ => throw new ArgumentException("Value not found"),
     };
 }

@@ -1,4 +1,6 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -10,8 +12,11 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
     private readonly JsonSerializerOptions jsonOptions;
     private readonly IHttpClientFactory httpClientFactory;
     private readonly ILocalStorageService localStorageService;
+    private readonly NavigationManager navigationManager;
 
-    public ChangeDetectionHttpClient(IHttpClientFactory httpClientFactory, ILocalStorageService localStorageService)
+    public ChangeDetectionHttpClient(IHttpClientFactory httpClientFactory,
+        ILocalStorageService localStorageService,
+        NavigationManager navigationManager)
     {
         this.jsonOptions = new JsonSerializerOptions
         {
@@ -19,6 +24,7 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         };
         this.httpClientFactory = httpClientFactory;
         this.localStorageService = localStorageService;
+        this.navigationManager = navigationManager;
     }
 
     public async Task<byte[]> DocumentAsync(OrientDbId id)
@@ -32,7 +38,8 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         };
 
         var response = await httpClient.SendAsync(httpContent);
-        response.EnsureSuccessStatusCode();
+
+        await EnsureSuccessStatusCodeAsync(response);
 
         var value = await response.Content.ReadAsStringAsync();
 
@@ -74,7 +81,7 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
 
             var response = await httpClient.SendAsync(httpContent);
 
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessStatusCodeAsync(response);
 
             using var stream = await response.Content.ReadAsStreamAsync();
 
@@ -88,6 +95,19 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
             Console.WriteLine("Something went wrong here: " + command.Command);
 
             throw;
+        }
+    }
+
+    private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response)
+    {
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            await localStorageService.RemoveItemAsync("authToken");
+            navigationManager.NavigateTo("/login", forceLoad: true, replace: true);
         }
     }
 

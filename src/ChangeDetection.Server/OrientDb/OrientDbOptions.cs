@@ -6,6 +6,4 @@ public class OrientDbOptions
 
     public Uri OrientDbServerUrl { get; set; }
     public string StateDatabaseName { get; set; }
-
-    public string CompareDatabaseName { get; set; }
 }

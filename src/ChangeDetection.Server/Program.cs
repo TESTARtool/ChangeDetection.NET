@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Server;
 using Testar.ChangeDetection.Server.JwToken;
 using Testar.ChangeDetection.Server.OrientDb;
 
@@ -9,9 +10,9 @@ TestarLogo.Display();
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHealthChecks();
-
-builder.Configuration.AddEnvironmentVariables(prefix: "Testar");
+builder.Services.AddHealthChecks()
+    .AddCheck<OptionsHealthCheck>(nameof(OptionsHealthCheck))
+    .AddOrientDbHealthCheck();
 
 builder.Services.Configure<GeneratorOptions>(
     builder.Configuration.GetSection(GeneratorOptions.ConfigName));
@@ -26,9 +27,10 @@ builder.Services.AddCors(setup =>
     setup.AddPolicy(name: corsPolicyName, builder =>
     {
         builder
-            .WithOrigins("https://localhost:7206")
+            .WithOrigins("*")
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            ;
     });
 });
 
