@@ -30,7 +30,7 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
     public async Task<byte[]> DocumentAsync(OrientDbId id)
     {
         var httpClient = await CreateHttpClientAsync();
-        var url = $"/api/Document/id/{id.FormatId()}";
+        var url = $"/api/Document/{id.FormatId()}";
 
         var response = await httpClient.GetAsync(url);
 
