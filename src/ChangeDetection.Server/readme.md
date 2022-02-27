@@ -8,7 +8,7 @@ The restful web service are explained in an OpenAPI.json file (previously known 
 The server is provided with a health endpoint, reachable at /healthz. It will return either `healty` or `unhealthy`. The service is unhealthy when something is wrong with the environment variables or orientDB is not reachable. 
 
 ## Docker
-A docker image can be run with the following settings
+A docker image can be run with the following example settings
 ```
-docker run -i -dp 5000:80 --name="Testar-Server" 5cabdc97a914 -e JwTokenGenerator__JwtSecurityKey="hfjdhfdifngyuernguinfdfs4235tfmguh" -e JwTokenGenerator__JwtIssuer="http://localhost" -e JwTokenGenerator__JwtAudience="http://localhost" -e JwTokenGenerator__JwtExpiryInSeconds=3600 -e OrientDb__OrientDbServerUrl="http://192.168.188.28:2480" -e OrientDb__StateDatabaseName="testar" 
+docker run -i -dp 5000:80 --name="Testar-Server" -e JwTokenGenerator__JwtSecurityKey="hfjdhfdifngyuernguinfdfs4235tfmguh" -e JwTokenGenerator__JwtIssuer="http://localhost" -e JwTokenGenerator__JwtAudience="http://localhost" -e JwTokenGenerator__JwtExpiryInSeconds=3600 -e OrientDb__OrientDbServerUrl="http://192.168.188.28:2480" -e OrientDb__StateDatabaseName="testar" <image-name>
 ```
