@@ -12,6 +12,8 @@ public interface IGraphService
 
     Task<Element[]> FetchAbstractConcreteConnectors(ModelIdentifier modelIdentifier);
 
+    Task<Element[]> FetchSequenceLayerAsync(ModelIdentifier modelIdentifier, bool showCompoundGraph);
+
     Task<byte[]> DownloadScreenshotAsync(string id);
 
     string GenerateJsonString(Element[] elements);
@@ -86,23 +88,19 @@ public class GraphService : IGraphService
 
         var command = new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier.Value);
-        var nodes = await FetchNodes(command, "AbstractState", showCompoundGraph ? "AbstractLayer" : null, modelIdentifier).ToArrayAsync();
-        elements.AddRange(nodes);
+        elements.AddRange(await FetchNodes(command, "AbstractState", showCompoundGraph ? "AbstractLayer" : null, modelIdentifier).ToArrayAsync());
 
         command = new OrientDbCommand("SELECT FROM AbstractAction WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier.Value);
-        var actionNodes = await FetchEdges(command, "AbstractAction").ToArrayAsync();
-        elements.AddRange(actionNodes);
+        elements.AddRange(await FetchEdges(command, "AbstractAction").ToArrayAsync());
 
         command = new OrientDbCommand("SELECT FROM (TRAVERSE out() FROM  (SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier)) WHERE @class = 'BlackHole'")
             .AddParameter("modelIdentifier", modelIdentifier.Value);
-        var blackholeNodes = await FetchNodes(command, "BlackHole", showCompoundGraph ? "AbstractLayer" : null, modelIdentifier).ToArrayAsync();
-        elements.AddRange(blackholeNodes);
+        elements.AddRange(await FetchNodes(command, "BlackHole", showCompoundGraph ? "AbstractLayer" : null, modelIdentifier).ToArrayAsync());
 
         command = new OrientDbCommand("SELECT FROM UnvisitedAbstractAction WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier.Value);
-        var unvisitedEdges = await FetchEdges(command, "UnvisitedAbstractAction").ToArrayAsync();
-        elements.AddRange(unvisitedEdges);
+        elements.AddRange(await FetchEdges(command, "UnvisitedAbstractAction").ToArrayAsync());
 
         return elements.ToArray();
     }
@@ -111,14 +109,58 @@ public class GraphService : IGraphService
     {
         var abstractLayer = await FetchAbstractLayerAsync(modelIdentifier, showCompoundGraph);
         var concreteLayer = await FetchConcreteLayerAsync(modelIdentifier, showCompoundGraph);
+        var sequenceLayer = await FetchSequenceLayerAsync(modelIdentifier, showCompoundGraph);
         var connections = await FetchAbstractConcreteConnectors(modelIdentifier);
+        var sequenceConnections = await FetchConcreteSequenceConnectors(modelIdentifier);
 
         var elements = new List<Element>();
         elements.AddRange(abstractLayer);
         elements.AddRange(concreteLayer);
+        elements.AddRange(sequenceLayer);
         elements.AddRange(connections);
+        elements.AddRange(sequenceConnections);
 
         return elements.ToArray();
+    }
+
+    public async Task<Element[]> FetchSequenceLayerAsync(ModelIdentifier modelIdentifier, bool showCompoundGraph)
+    {
+        var elements = new ElementRetriever();
+
+        if (showCompoundGraph)
+        {
+            elements.AddCompoundGraphElement(new Element(Element.GroupNodes, new Vertex("SequenceLayer"), "Parent"));
+        }
+
+        var command = new OrientDbCommand("SELECT FROM TestSequence WHERE modelIdentifier = :identifier")
+            .AddParameter("identifier", modelIdentifier.Value);
+        elements.Add(FetchNodes(command, "TestSequence", showCompoundGraph ? "SequenceLayer" : null, modelIdentifier));
+
+        command = new OrientDbCommand("SELECT FROM (TRAVERSE in('isAbstractedBy').in('Accessed') FROM (SELECT FROM AbstractState WHERE modelIdentifier = :identifier)) WHERE @class = 'SequenceNode'")
+            .AddParameter("identifier", modelIdentifier.Value);
+        elements.Add(FetchNodes(command, "SequenceNode", showCompoundGraph ? "SequenceLayer" : null, modelIdentifier));
+
+        command = new OrientDbCommand("SELECT FROM (TRAVERSE in('isAbstractedBy').in('Accessed').outE('SequenceStep') FROM (SELECT FROM AbstractState WHERE modelIdentifier = :identifier)) WHERE @class = 'SequenceStep'")
+            .AddParameter("identifier", modelIdentifier.Value);
+        elements.Add(FetchEdges(command, "SequenceStep"));
+
+        command = new OrientDbCommand("SELECT FROM (TRAVERSE outE('FirstNode') FROM (SELECT FROM TestSequence WHERE modelIdentifier = :identifier)) WHERE @class = 'FirstNode'")
+            .AddParameter("identifier", modelIdentifier.Value);
+        elements.Add(FetchEdges(command, "FirstNode"));
+
+        return await elements.ToArrayAscync();
+    }
+
+    private async Task<Element[]> FetchConcreteSequenceConnectors(ModelIdentifier modelIdentifier)
+    {
+        var elements = new ElementRetriever();
+
+        var command = new OrientDbCommand("SELECT FROM (TRAVERSE in('isAbstractedBy').inE('Accessed') FROM (SELECT FROM AbstractState WHERE modelIdentifier = :identifier)) WHERE @class = 'Accessed'")
+            .AddParameter("identifier", modelIdentifier.Value);
+
+        elements.Add(FetchEdges(command, "Accessed"));
+
+        return await elements.ToArrayAscync();
     }
 
     private async IAsyncEnumerable<Element> FetchEdges(OrientDbCommand command, string className)
@@ -197,5 +239,39 @@ public class GraphService : IGraphService
         return id.Id
             .Replace("#", "")
             .Replace(":", "_");
+    }
+
+    private class ElementRetriever
+    {
+        private Element? compoundGraph = null;
+
+        private List<IAsyncEnumerable<Element>> elementCollections = new();
+
+        public void Add(IAsyncEnumerable<Element> elements)
+        {
+            elementCollections.Add(elements);
+        }
+
+        public void AddCompoundGraphElement(Element element)
+        {
+            compoundGraph = element;
+        }
+
+        public async Task<Element[]> ToArrayAscync()
+        {
+            var elements = new List<Element>();
+
+            if (compoundGraph is not null)
+            {
+                elements.Add(compoundGraph);
+            }
+
+            foreach (var item in elementCollections)
+            {
+                elements.AddRange(await item.ToArrayAsync());
+            }
+
+            return elements.ToArray();
+        }
     }
 }
