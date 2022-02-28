@@ -12,3 +12,12 @@ A docker image can be run with the following example settings
 ```
 docker run -i -dp 5000:80 --name="Testar-Server" -e JwTokenGenerator__JwtSecurityKey="hfjdhfdifngyuernguinfdfs4235tfmguh" -e JwTokenGenerator__JwtIssuer="http://localhost" -e JwTokenGenerator__JwtAudience="http://localhost" -e JwTokenGenerator__JwtExpiryInSeconds=3600 -e OrientDb__OrientDbServerUrl="http://192.168.188.28:2480" -e OrientDb__StateDatabaseName="testar" <image-name>
 ```
+
+| Setting | Explanation |
+| --- | --- 
+JwTokenGenerator__JwtSecurityKey | Security Key to sign the JWT. Make this very long and unique |
+JwTokenGenerator__JwtIssuer | Jwt issuer |
+JwTokenGenerator__JwtAudience | JWT Audience |
+JwTokenGenerator__JwtExpiryInSeconds | Set the expiry seconds of the JWT |
+OrientDb__OrientDbServerUrl | Specify the OrientDB server URL. In Docker this is not local host |
+OrientDb__StateDatabaseName | Specify the name of the state database for TESTAR |

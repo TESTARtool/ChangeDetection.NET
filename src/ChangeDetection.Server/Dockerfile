@@ -18,5 +18,3 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Testar.ChangeDetection.Server.dll"]
-
-HEALTHCHECK CMD curl --fail http://localhost:5000/healthz || exit
