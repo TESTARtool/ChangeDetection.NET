@@ -15,43 +15,53 @@ public class AuthService : IAuthService
     private readonly IChangeDetectionHttpClient changeDetectionHttpClient;
     private readonly AuthenticationStateProvider authenticationStateProvider;
     private readonly ILocalStorageService localStorage;
+    private readonly ILogger<AuthService> logger;
 
     public AuthService(IChangeDetectionHttpClient changeDetectionHttpClient,
         AuthenticationStateProvider authenticationStateProvider,
-        ILocalStorageService localStorage)
+        ILocalStorageService localStorage,
+        ILogger<AuthService> logger
+        )
     {
         this.changeDetectionHttpClient = changeDetectionHttpClient;
         this.authenticationStateProvider = authenticationStateProvider;
         this.localStorage = localStorage;
+        this.logger = logger;
     }
 
     public async Task<bool> LoginAsync(User user)
     {
-        if (user.UserName is not null && user.Password is not null && user.ServerUrl is not null)
+        try
         {
-            var url = user.ServerUrl.EndsWith('/')
-                ? new Uri(user.ServerUrl.Substring(0, user.ServerUrl.Length - 1))
-                : new Uri(user.ServerUrl);
-
-            var token = await changeDetectionHttpClient.LoginAsync(url, new LoginModel
+            if (user.UserName is not null && user.Password is not null && user.ServerUrl is not null)
             {
-                Username = user.UserName,
-                Password = user.Password
-            });
+                var url = user.ServerUrl.EndsWith('/')
+                    ? new Uri(user.ServerUrl.Substring(0, user.ServerUrl.Length - 1))
+                    : new Uri(user.ServerUrl);
 
-            if (token is null)
-            {
-                return false;
+                var token = await changeDetectionHttpClient.LoginAsync(url, new LoginModel
+                {
+                    Username = user.UserName,
+                    Password = user.Password
+                });
+
+                if (token is null)
+                {
+                    return false;
+                }
+
+                await localStorage.SetItemAsStringAsync("authToken", token);
+                await localStorage.SetItemAsync<Uri>("serverLocation", new Uri(user.ServerUrl));
+
+                ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsAuthenticated(user.UserName);
+
+                return true;
             }
-
-            await localStorage.SetItemAsStringAsync("authToken", token);
-            await localStorage.SetItemAsync<Uri>("serverLocation", new Uri(user.ServerUrl));
-
-            ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsAuthenticated(user.UserName);
-
-            return true;
         }
-
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Login failed");
+        }
         return false;
     }
 

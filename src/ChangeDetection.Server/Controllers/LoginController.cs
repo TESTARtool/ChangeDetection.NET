@@ -23,6 +23,21 @@ public class LoginController : Controller
         this.orientDbHttpClient = orientDbHttpClient;
     }
 
+    /// <summary>
+    /// Logins the user to the OrientDB database, returning a java web token (JTW)
+    /// </summary>
+    /// <param name="login"></param>
+    /// <returns>JWT</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/Login
+    ///     {
+    ///         "username" : "orientDb user",
+    ///         "password" : "orientDb password"
+    ///     }
+    ///
+    /// </remarks>
     [HttpPost]
     public async Task<IActionResult> Login([FromBody] LoginModel login)
     {
