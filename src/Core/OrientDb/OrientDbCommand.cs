@@ -35,4 +35,14 @@ public sealed class OrientDbCommand
         Parameters.Add(name, value);
         return this;
     }
+
+    public async IAsyncEnumerable<TElement> ExecuteOn<TElement>(IChangeDetectionHttpClient client)
+    {
+        var elements = await client.QueryAsync<TElement>(this);
+
+        foreach (var element in elements)
+        {
+            yield return element;
+        }
+    }
 }

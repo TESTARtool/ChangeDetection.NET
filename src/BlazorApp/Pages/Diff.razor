@@ -1,0 +1,37 @@
+﻿@page "/Graph/{App1ModelIdentifier}/{App2ModelIdentifier}"
+
+@inject IJSRuntime JS
+@inject IGraphService graphService;
+
+<h3>Diff</h3>
+@if (IsGraphAvailable)
+{
+    <div class="viewpane" id="cy">
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <h1>@ProgressStatus</h1>
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">loading</span>
+        </div>
+    </div>
+} 
+@code {
+    public bool IsGraphAvailable { get; set; } = false;
+    public string ProgressStatus { get; set; } = "Loading graph data...";
+    [Parameter] public string App1ModelIdentifier { get; set; }
+    [Parameter] public string App2ModelIdentifier { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var app1abstractLayer = await graphService.FetchAbstractLayerAsync(new ModelIdentifier(App1ModelIdentifier), false);
+        var app2abstractLayer = await graphService.FetchAbstractLayerAsync(new ModelIdentifier(App2ModelIdentifier), false);
+
+        var combine = new List<GraphElement>();
+        combine.AddRange(app1abstractLayer);
+        combine.AddRange(app2abstractLayer);
+
+    }
+}

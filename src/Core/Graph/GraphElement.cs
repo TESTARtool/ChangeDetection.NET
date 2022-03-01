@@ -1,18 +1,18 @@
 ﻿namespace Testar.ChangeDetection.Core.Graph;
 
-public class Element
+public class GraphElement
 {
     public const string GroupNodes = "nodes";
 
     public const string GroupEdges = "edges";
 
-    public Element(string group, Document document)
+    public GraphElement(string group, Document document)
     {
         this.Group = group;
         this.Document = document;
     }
 
-    public Element(string group, Document document, string className)
+    public GraphElement(string group, Document document, string className)
     {
         this.Group = group;
         this.Document = document;
@@ -31,8 +31,14 @@ public class Element
     [JsonPropertyName("classes")]
     public List<string> Classes { get; set; } = new();
 
-    public void AddClass(String className)
+    [JsonIgnore]
+    public bool IsInitial => Classes.Any(x => x == "isInitial")
+
+
+public void AddClass(string className)
     {
         Classes.Add(className);
     }
+
+    );
 }
