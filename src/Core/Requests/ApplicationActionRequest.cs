@@ -24,19 +24,18 @@ public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, Ab
 
         foreach (var concreteActionId in action.ConcreteActionIds)
         {
-            var command = new OrientDbCommand("SELECT `Desc` FROM ConcreteAction WHERE actionId = :actionId")
-                .AddParameter("actionId", concreteActionId);
-
-            var concreteActions = (await client.QueryAsync<ConcreteActionJson>(command))
+            var concreteActions = new OrientDbCommand("SELECT `Desc` FROM ConcreteAction WHERE actionId = :actionId")
+                .AddParameter("actionId", concreteActionId)
+                .ExecuteOn<ConcreteActionJson>(client)
                 .Select(x => new AbstractAction
                 {
                     AbstractActionId = new AbstractActionId(action.ActionId),
                     ConcreteActionId = new ConcreteActionId(concreteActionId),
                     Description = x.Desc,
                 })
-                .ToList();
+                .ToListAsync();
 
-            actions.AddRange(concreteActions);
+            actions.AddRange(await concreteActions);
         }
 
         return actions.ToArray();
@@ -44,13 +43,12 @@ public class ActionRequestHandler : IRequestHandler<ApplicationActionRequest, Ab
 
     public async Task<ActionJson> AbstractAction(ApplicationActionRequest request)
     {
-        var command = new OrientDbCommand("SELECT FROM AbstractAction WHERE @rid = :rid")
-            .AddParameter("rid", request.AbstractActionId.Id.Replace("#", "").Trim());
+        var action = await new OrientDbCommand("SELECT FROM AbstractAction WHERE @rid = :rid")
+            .AddParameter("rid", request.AbstractActionId.Id.Replace("#", "").Trim())
+            .ExecuteOn<ActionJson>(client)
+            .SingleOrDefaultAsync();
 
-        var actions = await client.QueryAsync<ActionJson>(command);
-
-        return actions.SingleOrDefault()
-            ?? throw new Exception($"Unable to find actions with Id '{request.AbstractActionId.Id}'");
+        return action ?? throw new Exception($"Unable to find actions with Id '{request.AbstractActionId.Id}'");
     }
 
     public class ActionJson

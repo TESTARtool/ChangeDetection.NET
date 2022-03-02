@@ -32,13 +32,10 @@ public class GraphElement
     public List<string> Classes { get; set; } = new();
 
     [JsonIgnore]
-    public bool IsInitial => Classes.Any(x => x == "isInitial")
+    public bool IsInitial => Classes.Any(x => x == "isInitial");
 
-
-public void AddClass(string className)
+    public void AddClass(string className)
     {
         Classes.Add(className);
     }
-
-    );
 }

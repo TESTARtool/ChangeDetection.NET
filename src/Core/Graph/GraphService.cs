@@ -14,6 +14,8 @@ public interface IGraphService
 
     Task<GraphElement[]> FetchSequenceLayerAsync(ModelIdentifier modelIdentifier, bool showCompoundGraph);
 
+    Task<GraphElement[]> FetchDiffGraph(ModelIdentifier modelIdentifier1, ModelIdentifier modelIdentifier2);
+
     Task<byte[]> DownloadScreenshotAsync(string id);
 
     string GenerateJsonString(GraphElement[] elements);
@@ -112,9 +114,24 @@ public class GraphService : IGraphService
             }
         }
 
+
+        var result3 = new OrientDbCommand("SELECT FROM AbstractAction WHERE modelIdentifier = :modelIdentifier")
+            .AddParameter("modelIdentifier", modelIdentifier1.Value)
+            .ExecuteOn<JsonElement>(httpClient)
+            .Select(x => AsEdge(x, "AbstractAction"))
+            .ToArrayAsync();
+        
+        var result4 = new OrientDbCommand("SELECT FROM AbstractAction WHERE modelIdentifier = :modelIdentifier")
+            .AddParameter("modelIdentifier", modelIdentifier2.Value)
+            .ExecuteOn<JsonElement>(httpClient)
+            .Select(x => AsEdge(x, "AbstractAction"))
+            .ToArrayAsync();
+
         var elements = new List<GraphElement>();
         elements.AddRange(result1);
         elements.AddRange(result2);
+        elements.AddRange(await result3);
+        elements.AddRange(await result4);
 
         return elements.ToArray();
 
