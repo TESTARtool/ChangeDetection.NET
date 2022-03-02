@@ -87,13 +87,13 @@ public class GraphService : IGraphService
         var result1 = await new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier1.Value)
             .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsNode(x, "AbstractState", null, modelIdentifier1.Value))
+            .Select(x => AsNode(x, "AbstractState", modelIdentifier1.Value, modelIdentifier1.Value))
             .ToArrayAsync();
 
         var result2 = await new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier2.Value)
             .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsNode(x, "AbstractState", null, modelIdentifier2.Value))
+            .Select(x => AsNode(x, "AbstractState", modelIdentifier2.Value, modelIdentifier2.Value))
             .ToArrayAsync();
 
         var result2Docs = result2.Select(x => x.Document);
@@ -114,20 +114,25 @@ public class GraphService : IGraphService
             }
         }
 
-
         var result3 = new OrientDbCommand("SELECT FROM AbstractAction WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier1.Value)
             .ExecuteOn<JsonElement>(httpClient)
             .Select(x => AsEdge(x, "AbstractAction"))
             .ToArrayAsync();
-        
+
         var result4 = new OrientDbCommand("SELECT FROM AbstractAction WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier2.Value)
             .ExecuteOn<JsonElement>(httpClient)
             .Select(x => AsEdge(x, "AbstractAction"))
             .ToArrayAsync();
 
-        var elements = new List<GraphElement>();
+        var elements = new List<GraphElement>
+        {
+            new GraphElement(GraphElement.GroupNodes, new Vertex(modelIdentifier1.Value), "Parent"),
+            new GraphElement(GraphElement.GroupNodes, new Vertex(modelIdentifier2.Value), "Parent")
+        };
+
+
         elements.AddRange(result1);
         elements.AddRange(result2);
         elements.AddRange(await result3);
