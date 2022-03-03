@@ -107,6 +107,8 @@ else
         </div>
     </div>
 } 
+
+
 @code {
     public bool IsGraphAvailable { get; set; } = false;
     public string ProgressStatus { get; set; } = "Loading graph data...";
@@ -127,7 +129,7 @@ else
     {
         if (IsGraphAvailable)
         {
-            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson);
+            await JS.InvokeVoidAsync("loadDiffGraph", GraphInJson);
         }
     }
 }

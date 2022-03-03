@@ -1,4 +1,5 @@
 ﻿@page "/Graph/{ModelIdentifier}"
+@layout GraphLayout
 @inject IJSRuntime JS
 @inject IGraphService graphService;
 
@@ -7,6 +8,39 @@
     <div class="graph-canvas">
 
         <div class="topbar">
+@*             <div class="btn-group">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
+                Manual close
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickable">
+                <li><h6 class="dropdown-header">Dropdown header</h6></li>
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+              </ul>
+            </div>*@
+
+
+@*            <div class="btn-group">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
+    Manual close
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickable">
+    <li><a class="dropdown-item" href="#">Menu item</a></li>
+    <li><a class="dropdown-item" href="#">Menu item</a></li>
+    <li><a class="dropdown-item" href="#">Menu item</a></li>
+  </ul>
+</div>*@
+
+<div class="dropdown">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+    Dropdown button
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+    <li><a class="dropdown-item" href="#">Action</a></li>
+    <li><a class="dropdown-item" href="#">Another action</a></li>
+    <li><a class="dropdown-item" href="#">Something else here</a></li>
+  </ul>
+</div>
             <div class="layout">
                 <div class="column">
                     <div><label for="layout-control">Layout: <select name="layout-control" id="layout-control">

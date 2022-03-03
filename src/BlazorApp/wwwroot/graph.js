@@ -185,6 +185,20 @@
             },
 
             {
+                selector: '.Added',
+                style: {
+                    'background-image': "img/plus.png"
+                }
+            },
+
+            {
+                selector: '.Removed',
+                style: {
+                    'background-image': "img/min.png"
+                }
+            },
+
+            {
                 selector: '.UnvisitedAbstractAction',
                 style: {
                     'line-color': "#1c9099",

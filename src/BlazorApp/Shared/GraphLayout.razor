@@ -1,0 +1,45 @@
+﻿@inherits LayoutComponentBase
+
+<main>
+    <nav class="navbar navbar-light bg-dark text-white">
+        <div class="container-fluid">
+            <a class="navbar-brand text-warning" href="#">TESTAR.NET</a>
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-left mb-md-0">
+                <li><a href="" class="nav-link px-2 text-white">Home</a></li>
+                <li><a href="https://testar.org/" target="_blank" class="nav-link px-2 text-white">About Testar</a></li>
+            </ul>
+            <div class="text-end">
+                <AuthorizeView>
+                    <Authorized>
+                        <a href="Logout" class="btn btn-outline-light me-2">Logout</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="Login" class="btn btn-warning">Login</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </nav>
+
+    <article class="content px-4">
+        @Body
+    </article>
+</main>
+
+<footer class="footer mt-auto py-3 bg-light">
+    <div class="container">
+        <div class="text-end">
+            <div class="btn-group dropup">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
+                Manual close
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickable">
+                <li><h6 class="dropdown-header">Dropdown header</h6></li>
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+              </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
