@@ -26,19 +26,48 @@
     </article>
 </main>
 
-<footer class="footer mt-auto py-3 bg-light">
-    <div class="container">
+<footer class="footer mt-auto py-3">
+    <div class="container-fluid">
         <div class="text-end">
             <div class="btn-group dropup">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
-                Manual close
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickable">
-                <li><h6 class="dropdown-header">Dropdown header</h6></li>
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
+              Open legend
+            </button>
+            <div class="dropdown-menu pt-0 mx-0 rounded-3 shadow overflow-hidden" style="width: 280px;">
+              <ul class="list-unstyled mb-0">
+                <li>
+                  <div class="dropdown-item d-flex align-items-center gap-2 py-2" id="legend-abstract-state">
+                    <span class="border border-dark px-4 py-3" style="background-color: #1C909A;"></span>Abstract state
+                  </div>
+                </li>
+                <li>
+                  <div class="dropdown-item d-flex align-items-center gap-2 py-2" id="legend-concrete-state">
+                    <span class="border border-dark px-4 py-3" style="background-color: #67A9CF;"></span>Concrete State
+                  </div>
+                </li>
+                <li>
+                  <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
+                    <span class="border border-dark px-4 py-3" style="background-color: #016450;"></span>Sequence Node
+                  </div>
+                </li>
+                <li>
+                  <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
+                    <span class="border border-dark px-4 py-3" style="background-color: #014636;"></span>First Sequence Node
+                  </div>
+                </li>
+                <li>
+                  <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
+                    <span class="border border-dark px-4 py-3" style="background-color: #e7298a;"></span>Widget
+                  </div>
+                </li>
+                <li>
+                  <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
+                    <span class="border border-dark px-4 py-3" style="background-image: url('../img/blackhole-bg.jpg'); background-size:contain"></span>Black hole
+                  </div>
+                </li>
               </ul>
             </div>
+          </div>
         </div>
     </div>
 </footer>

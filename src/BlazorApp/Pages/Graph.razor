@@ -6,128 +6,64 @@
 @if (IsGraphAvailable)
 {
     <div class="graph-canvas">
-
-        <div class="topbar">
-@*             <div class="btn-group">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
-                Manual close
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickable">
-                <li><h6 class="dropdown-header">Dropdown header</h6></li>
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-              </ul>
-            </div>*@
-
-
-@*            <div class="btn-group">
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
-    Manual close
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickable">
-    <li><a class="dropdown-item" href="#">Menu item</a></li>
-    <li><a class="dropdown-item" href="#">Menu item</a></li>
-    <li><a class="dropdown-item" href="#">Menu item</a></li>
-  </ul>
-</div>*@
-
-<div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-    Dropdown button
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-    <li><a class="dropdown-item" href="#">Action</a></li>
-    <li><a class="dropdown-item" href="#">Another action</a></li>
-    <li><a class="dropdown-item" href="#">Something else here</a></li>
-  </ul>
-</div>
-            <div class="layout">
-                <div class="column">
-                    <div><label for="layout-control">Layout: <select name="layout-control" id="layout-control">
-                        <option selected disabled></option>
-                        <option value="random">Random</option>
-                        <option value="grid">Grid</option>
-                        <option value="circle">Circle</option>
-                        <option value="concentric">Concentric</option>
-                        <option value="breadthfirst">Breadthfirst</option>
-                        <option value="cose">Cose</option>
-                        <option value="cose-bilkent">Cose-bilkent</option>
-                        <option value="cola">Cola</option>
-                        <option value="euler">Euler</option>
-                        <option value="dagre">Dagre</option>
-                        <option value="klay">Klay</option>
-                    </select></label></div>
-                    <div>
-                        <label for="show-labels" class="custom-checkbox">Show labels<input type="checkbox" id="show-labels" checked><span class="checkmark"></span></label>
-                    </div>
-                    <div>
-                        <button id="show-all" type="button" class="button_custom">Show all nodes</button>
-                    </div>
+        <div class="layout">
+            <div class="column">
+                <div><label for="layout-control">Layout: <select name="layout-control" id="layout-control">
+                    <option selected disabled></option>
+                    <option value="random">Random</option>
+                    <option value="grid">Grid</option>
+                    <option value="circle">Circle</option>
+                    <option value="concentric">Concentric</option>
+                    <option value="breadthfirst">Breadthfirst</option>
+                    <option value="cose">Cose</option>
+                    <option value="cose-bilkent">Cose-bilkent</option>
+                    <option value="cola">Cola</option>
+                    <option value="euler">Euler</option>
+                    <option value="dagre">Dagre</option>
+                    <option value="klay">Klay</option>
+                </select></label></div>
+                <div>
+                    <label for="show-labels" class="custom-checkbox">Show labels<input type="checkbox" id="show-labels" checked><span class="checkmark"></span></label>
                 </div>
-
-                <div class="column">
-                    <div class="extra-margin-left">
-                        <label for="toggle-abstract-layer" class="custom-checkbox">Show abstract layer
-                            <input type="checkbox" id="toggle-abstract-layer" checked>
-                            <span class="checkmark"></span>
-                        </label>
-                    </div>
-                    <div class="extra-margin-left"><label for="toggle-concrete-layer" class="custom-checkbox">Show concrete layer<input type="checkbox" id="toggle-concrete-layer" checked><span class="checkmark"></span></label></div>
-                    <div class="extra-margin-left"><label for="toggle-sequence-layer" class="custom-checkbox">Show sequence layer<input type="checkbox" id="toggle-sequence-layer" checked><span class="checkmark"></span></label></div>
-                    <div class="extra-margin-left"><label for="toggle-layer-transitions" class="custom-checkbox">Show inter-layer edges<input type="checkbox" id="toggle-layer-transitions" checked><span class="checkmark"></span></label></div>
+                <div>
+                    <button id="show-all" type="button" class="button_custom">Show all nodes</button>
                 </div>
+            </div>
 
-                <div class="column">
-                    <div class="extra-margin-left"><span class="legend">Legend:</span></div>
+            <div class="column">
+                <div class="extra-margin-left">
+                    <label for="toggle-abstract-layer" class="custom-checkbox">Show abstract layer
+                        <input type="checkbox" id="toggle-abstract-layer" checked>
+                        <span class="checkmark"></span>
+                    </label>
                 </div>
+                <div class="extra-margin-left"><label for="toggle-concrete-layer" class="custom-checkbox">Show concrete layer<input type="checkbox" id="toggle-concrete-layer" checked><span class="checkmark"></span></label></div>
+                <div class="extra-margin-left"><label for="toggle-sequence-layer" class="custom-checkbox">Show sequence layer<input type="checkbox" id="toggle-sequence-layer" checked><span class="checkmark"></span></label></div>
+                <div class="extra-margin-left"><label for="toggle-layer-transitions" class="custom-checkbox">Show inter-layer edges<input type="checkbox" id="toggle-layer-transitions" checked><span class="checkmark"></span></label></div>
+            </div>
 
-                <div class="column">
-                    <div class="legend-box abstract-state" id="legend-abstract-state"></div>
-                    <div class="legend-box concrete-state" id="legend-concrete-state"></div>
-                    <div class="legend-box sequence-node"></div>
-                </div>
-
-                <div class="column">
-                    <div class="legend-text">Abstract state</div>
-                    <div class="legend-text">Concrete State</div>
-                    <div class="legend-text">Sequence Node</div>
-                </div>
-
-                <div class="column">
-                    <div class="legend-box first-node"></div>
-                    <div class="legend-box widget"></div>
-                    <div class="legend-box blackhole"></div>
-                </div>
-
-                <div class="column">
-                    <div class="legend-text">First Sequence Node</div>
-                    <div class="legend-text">Widget</div>
-                    <div class="legend-text">Black hole</div>
-                </div>
-
-                <div class="column">
-                    <div class="extra-margin-left">
-                        <div class="stats-text" id="stats-abstract-states"></div>
-                        <div class="stats-text" id="stats-abstract-actions"></div>
-                        <div class="stats-text" id="stats-concrete-states"></div>
-                        <div class="stats-text" id="stats-concrete-actions"></div>
-                    </div>
+            <div class="column">
+                <div class="extra-margin-left">
+                    <div class="stats-text" id="stats-abstract-states"></div>
+                    <div class="stats-text" id="stats-abstract-actions"></div>
+                    <div class="stats-text" id="stats-concrete-states"></div>
+                    <div class="stats-text" id="stats-concrete-actions"></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="viewpane" id="cy">
-        </div>
+    <div class="viewpane" id="cy">
+    </div>
 
-        <div class="cd-panel cd-panel--from-right js-cd-panel-main">
-            <div class="cd-panel__container">
-                <div class="panel-header" id="content-panel-header">
-                </div>
-                <div class="cd-panel__content" id="cd-content-panel">
+    <div class="cd-panel cd-panel--from-right js-cd-panel-main">
+        <div class="cd-panel__container">
+            <div class="panel-header" id="content-panel-header">
+            </div>
+            <div class="cd-panel__content" id="cd-content-panel">
 
-                </div> <!-- cd-panel__content -->
-            </div> <!-- cd-panel__container -->
-        </div>
+            </div> <!-- cd-panel__content -->
+        </div> <!-- cd-panel__container -->
     </div>
 }
 else
