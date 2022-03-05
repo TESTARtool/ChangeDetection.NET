@@ -96,29 +96,69 @@ public class GraphService : IGraphService
             .Select(x => AsNode(x, "AbstractState", modelIdentifier2.Value, modelIdentifier2.Value))
             .ToArrayAsync();
 
-        var result2Docs = result2.Select(x => x.Document);
+        var result2Docs = result2.Select(x => (Vertex)x.Document);
         foreach (var item in result1)
         {
-            if (!result2Docs.Any(x => x.Id == item.Document.Id))
+            if (!result2Docs.Any(x => x.StateId == ((Vertex)item.Document).StateId))
             {
                 item.AddClass("Removed");
             }
         }
 
-        var result1Docs = result1.Select(x => x.Document);
+        var result1Docs = result1.Select(x => (Vertex)x.Document);
         foreach (var item in result2)
         {
-            if (!result1Docs.Any(x => x.Id == item.Document.Id))
+            if (!result1Docs.Any(x => x.StateId == ((Vertex)item.Document).StateId))
             {
                 item.AddClass("Added");
             }
         }
 
+        var elements = new List<GraphElement>();
+        elements.AddRange(result1);
+        elements.AddRange(result2);
+
+        var stateId_Ids = new Dictionary<string, string>();
+        var switchIdsFromLeftToRight = new Dictionary<string, string>();
+        var unchangedStateIds = new List<string>();
+        var unchangedIds = new List<string>();
+
+        foreach (var item in elements)
+        {
+            if (!item.Classes.Any(x => x == "Added" || x == "Removed"))
+            {
+                item.AddClass("Unchanged");
+                var stateId = ((Vertex)item.Document).StateId;
+                if (stateId is not null)
+                {
+                    unchangedIds.Add(item.Document.Id);
+
+                    if (unchangedStateIds.Contains(stateId))
+                    {
+                        // stateId already exist, switch ids
+                        // lookup new Id for state
+                        var newId = stateId_Ids[stateId];
+                        switchIdsFromLeftToRight.Add(item.Document.Id, newId);
+
+                        // since this item should not have any edges now, remove from graph
+                        item.AddClass("Remove");
+                    }
+                    else
+                    {
+                        unchangedStateIds.Add(stateId);
+                        stateId_Ids.Add(stateId, item.Document.Id);
+                    }
+                }
+            }
+        }
+
+        elements.RemoveAll(x => x.Classes.Contains("Remove"));
+
         var result3 = new OrientDbCommand("SELECT FROM AbstractAction WHERE modelIdentifier = :modelIdentifier")
-            .AddParameter("modelIdentifier", modelIdentifier1.Value)
-            .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsEdge(x, "AbstractAction"))
-            .ToArrayAsync();
+        .AddParameter("modelIdentifier", modelIdentifier1.Value)
+        .ExecuteOn<JsonElement>(httpClient)
+        .Select(x => AsEdge(x, "AbstractAction"))
+        .ToArrayAsync();
 
         var result4 = new OrientDbCommand("SELECT FROM AbstractAction WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier2.Value)
@@ -126,23 +166,33 @@ public class GraphService : IGraphService
             .Select(x => AsEdge(x, "AbstractAction"))
             .ToArrayAsync();
 
-        var elements = new List<GraphElement>
+        var edges = new List<GraphElement>();
+        edges.AddRange(await result3);
+        edges.AddRange(await result4);
+
+        foreach (var item in edges)
         {
-            new GraphElement(GraphElement.GroupNodes, new Vertex(modelIdentifier1.Value), "Parent"),
-            new GraphElement(GraphElement.GroupNodes, new Vertex(modelIdentifier2.Value), "Parent")
-        };
+            var edge = (Edge)item.Document;
+            if (edge.SourceId is not null && edge.TargetId is not null)
+            {
+                if (unchangedIds.Contains(edge.SourceId) && switchIdsFromLeftToRight.ContainsKey(edge.SourceId))
+                {
+                    // part of the unchange state, Replace ids
+                    edge.SourceId = switchIdsFromLeftToRight[edge.SourceId];
+                }
+                if (unchangedIds.Contains(edge.TargetId) && switchIdsFromLeftToRight.ContainsKey(edge.TargetId))
+                {
+                    // part of the unchange state, Replace ids
+                    edge.TargetId = switchIdsFromLeftToRight[edge.TargetId];
+                }
+            }
+        }
 
-
-        elements.AddRange(result1);
-        elements.AddRange(result2);
-        elements.AddRange(await result3);
-        elements.AddRange(await result4);
+        elements.AddRange(edges);
+        //elements.Add(new GraphElement(GraphElement.GroupNodes, new Vertex(modelIdentifier1.Value), "Parent"));
+        //elements.Add(new GraphElement(GraphElement.GroupNodes, new Vertex(modelIdentifier2.Value), "Parent"));
 
         return elements.ToArray();
-
-        // exist in result1 but missing in result2 -> removed
-        // missing in result1 but exist in result1 -> added
-        // only for initial state -> if Id is different -> changed
     }
 
     public async Task<GraphElement[]> FetchAbstractLayerAsync(ModelIdentifier modelIdentifier, bool showCompoundGraph)
@@ -254,7 +304,7 @@ public class GraphService : IGraphService
 
         foreach (var property in jsonElement.EnumerateObject())
         {
-            if (!property.Name.Contains("in") && !property.Name.Contains("out") && !property.Name.StartsWith("@"))
+            if (!property.Name.StartsWith("in_") && !property.Name.StartsWith("out_") && !property.Name.StartsWith("@"))
             {
                 jsonEdge.AddProperty(property.Name, property.Value.ToString().Replace("\"", ""));
             }
@@ -278,7 +328,7 @@ public class GraphService : IGraphService
 
         foreach (var property in jsonElement.EnumerateObject())
         {
-            if (property.Name.Contains("in_") || property.Name.Contains("out_") || property.Name.StartsWith("@"))
+            if (property.Name.StartsWith("in_") || property.Name.StartsWith("out_") || property.Name.StartsWith("@"))
             {
             }
             else if (property.Name == "screenshot")
