@@ -27,7 +27,7 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         this.navigationManager = navigationManager;
     }
 
-    public async Task<byte[]> DocumentAsync(OrientDbId id)
+    public async Task<string?> DocumentAsBase64Async(OrientDbId id)
     {
         var httpClient = await CreateHttpClientAsync();
         var url = $"/api/Document/{id.FormatId()}";
@@ -38,9 +38,16 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
 
         var value = await response.Content.ReadAsStringAsync();
 
+        return value;
+    }
+
+    public async Task<byte[]> DocumentAsync(OrientDbId id)
+    {
+        var value = await DocumentAsBase64Async(id);
+
         return string.IsNullOrWhiteSpace(value)
-            ? Array.Empty<byte>()
-            : Convert.FromBase64String(value);
+           ? Array.Empty<byte>()
+           : Convert.FromBase64String(value);
     }
 
     public async Task<string?> LoginAsync(Uri serverUrl, LoginModel loginModel)

@@ -2,6 +2,8 @@
 
 public interface IChangeDetectionHttpClient
 {
+    Task<string?> DocumentAsBase64Async(OrientDbId id);
+
     Task<byte[]> DocumentAsync(OrientDbId id);
 
     Task<T[]> QueryAsync<T>(OrientDbCommand command);

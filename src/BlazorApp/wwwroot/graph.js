@@ -88,7 +88,7 @@
                 style: {
                     'background-color': '#67A9CF',
                     'background-image': function (ele) {
-                        return "${contentFolder}/" + ele.data('id') + ".png"
+                        return "data:image/png;base64," + ele.data('screenshot')
                     },
                     'background-fit': 'contain',
                     'label': 'data(customLabel)'
@@ -566,7 +566,7 @@
             // add the screenshot full image
             let nodeImage = document.createElement("img");
             nodeImage.alt = "Image for node " + targetNode.id();
-            nodeImage.src = "${contentFolder}/" + targetNode.id() + ".png";
+            nodeImage.src = "data:image/png;base64," + targetNode.data('screenshot');
             nodeImage.classList.add("node-img-full");
             popupAnchor.appendChild(nodeImage);
             contentPanel.appendChild(popupAnchor);
@@ -589,7 +589,7 @@
                         // add the screenshot full image
                         let nodeImage = document.createElement("img");
                         nodeImage.alt = "Image for node " + element.id();
-                        nodeImage.src = "${contentFolder}/" + element.id() + ".png";
+                        nodeImage.src = "data:image/png;base64," + element.data('screenshot');
                         nodeImage.classList.add("node-img-thumb");
                         popupAnchor.appendChild(nodeImage);
                         div.appendChild(popupAnchor);
@@ -738,13 +738,13 @@
             // create divs for the source and target screenshots
             let sourceDiv = document.createElement("div");
             let sourceImg = document.createElement("img");
-            sourceImg.src = "${contentFolder}/" + targetEdge.source().id() + ".png";
+            sourceImg.src = "data:image/png;base64," + targetEdge.source().data('screenshot');
             sourceDiv.classList.add('screenshot');
             sourceDiv.appendChild(sourceImg);
 
             let targetDiv = document.createElement("div");
             let targetImg = document.createElement("img");
-            targetImg.src = "${contentFolder}/" + targetEdge.target().id() + ".png";
+            targetImg.src = "data:image/png;base64," + targetEdge.target().data('screenshot');
             targetDiv.classList.add('screenshot');
             targetDiv.appendChild(targetImg);
 
