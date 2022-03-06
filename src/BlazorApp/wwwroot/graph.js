@@ -558,7 +558,7 @@
         if (targetNode.hasClass("ConcreteState")) {
             // create a popup anchor
             let popupAnchor = document.createElement("a");
-            popupAnchor.href = "${contentFolder}/" + targetNode.id() + ".png";
+            popupAnchor.href = "data:image/png;base64," + targetNode.data('screenshot');
             $(popupAnchor).magnificPopup(
                 { type: "image" }
             );
@@ -583,7 +583,7 @@
                     (element) => {
                         // create an anchor element for each screenshot
                         let popupAnchor = document.createElement("a");
-                        popupAnchor.href = "${contentFolder}/" + element.id() + ".png";
+                        popupAnchor.href = "data:image/png;base64," + element.data('screenshot');
 
                         // add the image thumbnail
                         // add the screenshot full image
@@ -600,18 +600,11 @@
                 $(div).magnificPopup({
                     delegate: 'a',
                     type: 'image',
-                    tLoading: 'Loading image #%curr%...',
                     mainClass: 'mfp-img-mobile',
                     gallery: {
                         enabled: true,
                         navigateByImgClick: true,
                         preload: [0, 1] // Will preload 0 - before current, and 1 after the current image
-                    },
-                    image: {
-                        tError: 'The image could not be loaded.',
-                        titleSrc: function (item) {
-                            return item.el.attr('title');
-                        }
                     }
                 });
 
