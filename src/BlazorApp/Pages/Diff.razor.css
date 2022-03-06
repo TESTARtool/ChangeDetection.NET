@@ -1,4 +1,11 @@
-﻿/*.graph-canvas {
+﻿img.logo {
+    width: 249px;
+    height: 202px;
+    display: inline-block;
+    float: left;
+}
+
+/*.graph-canvas {
     margin-top: -1.1rem;
     margin-left: -2.0rem;
     margin-right: -1.5rem;

@@ -51,13 +51,11 @@ public class StateModelDifferenceJsonWidget : IStateModelDifferenceJsonWidget
 
     public async Task<WidgetJson[]> FetchWidgetTreeInfo(ConcreteIDCustom concreteIDCustom)
     {
-        var sql = $"";
-        var command = new OrientDbCommand("SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteIDCustom = :concreteIDCustom))")
-            .AddParameter("concreteIDCustom", concreteIDCustom.Value);
+        var widgets = new OrientDbCommand("SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteIDCustom = :concreteIDCustom))")
+            .AddParameter("concreteIDCustom", concreteIDCustom.Value)
+            .ExecuteOn<WidgetJson>(client);
 
-        var widgets = await client.QueryAsync<WidgetJson>(command);
-
-        return widgets.ToArray();
+        return await widgets.ToArrayAsync();
     }
 }
 

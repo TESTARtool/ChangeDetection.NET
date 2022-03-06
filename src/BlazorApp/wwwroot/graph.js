@@ -185,6 +185,20 @@
             },
 
             {
+                selector: '.Added',
+                style: {
+                    'background-image': "img/plus.png"
+                }
+            },
+
+            {
+                selector: '.Removed',
+                style: {
+                    'background-image': "img/min.png"
+                }
+            },
+
+            {
                 selector: '.UnvisitedAbstractAction',
                 style: {
                     'line-color': "#1c9099",
@@ -920,19 +934,19 @@
 
     function initStats() {
         let div = document.getElementById('stats-abstract-states');
-        let text = document.createTextNode("Nr of abstract states: " + appStatus.nrOfAbstractStates);
+        let text = document.createTextNode(appStatus.nrOfAbstractStates);
         div.append(text);
 
         div = document.getElementById('stats-abstract-actions');
-        text = document.createTextNode("Nr of abstract actions: " + appStatus.nrOfAbstractActions);
+        text = document.createTextNode(appStatus.nrOfAbstractActions);
         div.append(text);
 
         div = document.getElementById('stats-concrete-states');
-        text = document.createTextNode('Nr of concrete states:  ' + appStatus.nrOfConcreteStates);
+        text = document.createTextNode(appStatus.nrOfConcreteStates);
         div.append(text);
 
         div = document.getElementById('stats-concrete-actions');
-        text = document.createTextNode('Nr of concrete actions: ' + appStatus.nrOfConcreteActions);
+        text = document.createTextNode(appStatus.nrOfConcreteActions);
         div.append(text);
     }
 

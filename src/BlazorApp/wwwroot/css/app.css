@@ -38,6 +38,15 @@ a, .btn-link {
     color: red;
 }
 
+footer {
+    bottom: 0;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

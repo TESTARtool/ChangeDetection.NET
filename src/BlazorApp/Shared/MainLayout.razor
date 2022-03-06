@@ -1,27 +1,30 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
     <main>
-        
-        <div class="top-row px-4">
-            <AuthorizeView>
-                <Authorized>
-                    <a href="Logout">Logout</a>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="Login">Login</a>
-                </NotAuthorized>
-            </AuthorizeView>
-
-            <a href="https://testar.org/" target="_blank">About Testar</a>
-        </div>
+        <nav class="navbar navbar-light bg-dark text-white">
+            <div class="container-fluid">
+                <a class="navbar-brand text-warning" href="#">TESTAR.NET</a>
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-left mb-md-0">
+                    <li><a href="" class="nav-link px-2 text-white">Home</a></li>
+                    <li><a href="https://testar.org/" target="_blank" class="nav-link px-2 text-white">About Testar</a></li>
+                </ul>
+                <div class="text-end">
+                    <AuthorizeView>
+                        <Authorized>
+                            <a href="Logout" class="btn btn-outline-light me-2">Logout</a>
+                        </Authorized>
+                        <NotAuthorized>
+                            <a href="Login" class="btn btn-warning">Login</a>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </nav>
 
         <article class="content px-4">
             @Body
         </article>
     </main>
+
 </div>

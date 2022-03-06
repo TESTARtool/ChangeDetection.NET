@@ -49,6 +49,10 @@ public class QueryController : Controller
 
             return Ok(result.Result);
         }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            return Unauthorized();
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Get failed");

@@ -25,6 +25,7 @@ await Host.CreateDefaultBuilder(args)
             hostContext.Configuration.GetSection(CompareOptions.ConfigName));
 
         services.AddScoped<IGraphService, GraphService>();
+        services.AddSingleton<IChangeDetectionHttpClient, ConsoleToClient>();
 
         services.AddHttpClient();
 
@@ -39,7 +40,7 @@ await Host.CreateDefaultBuilder(args)
         }
 
         services
-            .Configure<OrientDbOptions>(hostContext.Configuration.GetSection(OrientDbOptions.ConfigName));
+            .Configure<TestarServerOptions>(hostContext.Configuration.GetSection(TestarServerOptions.ConfigName));
 
         services
             .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
@@ -59,7 +60,7 @@ await Host.CreateDefaultBuilder(args)
             configActions.CreateMap<string, AbstractStateId>().ConvertUsing(x => new AbstractStateId(x));
             configActions.CreateMap<string, WidgetId>().ConvertUsing(x => new WidgetId(x));
         });
-        services.AddMediatR(typeof(AbstractState).Assembly);
+        services.AddMediatR(typeof(TestarLogo).Assembly);
     })
 
     .ConfigureAppConfiguration((hostContext, config) =>

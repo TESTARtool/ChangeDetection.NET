@@ -40,7 +40,8 @@ builder.Services
     .AddScoped<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
     .AddScoped<IHtmlOutputter, HtmlOutputter>();
 
-builder.Services.AddScoped<IStrategyBuilder, AllStrats>();
+builder.Services.AddScoped<IStrategyBuilder, AllStrats>()
+    .AddScoped<IChangeDetectionStrategy, DiffPageStrategy>();
 //builder.Services.AddScoped<IChangeDetectionStrategy, WidgetTreeInitialStateStrategy>();
 
 builder.Services.AddMediatR(typeof(AbstractState).Assembly);
