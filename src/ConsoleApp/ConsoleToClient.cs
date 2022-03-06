@@ -9,16 +9,18 @@ namespace Testar.ChangeDetection.ConsoleApp;
 public class ConsoleToClient : IChangeDetectionHttpClient
 {
     private readonly JsonSerializerOptions jsonOptions;
+    private readonly ILogger<ConsoleToClient> logger;
     private readonly IHttpClientFactory httpClientFactory;
     private readonly IOptions<TestarServerOptions> orientDbOptions;
     private string? authToken = null;
 
-    public ConsoleToClient(IHttpClientFactory httpClientFactory, IOptions<TestarServerOptions> orientDbOptions)
+    public ConsoleToClient(ILogger<ConsoleToClient> logger, IHttpClientFactory httpClientFactory, IOptions<TestarServerOptions> orientDbOptions)
     {
         this.jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
         };
+        this.logger = logger;
         this.httpClientFactory = httpClientFactory;
         this.orientDbOptions = orientDbOptions;
     }
@@ -67,25 +69,33 @@ public class ConsoleToClient : IChangeDetectionHttpClient
 
     public async Task<T[]> QueryAsync<T>(OrientDbCommand command)
     {
-        var httpClient = CreateHttpClient();
-        var url = $"/api/query";
-
-        var json = JsonSerializer.Serialize(command);
-        using var httpContent = new HttpRequestMessage(HttpMethod.Post, url)
+        try
         {
-            Content = new StringContent(json, Encoding.UTF8, "application/json"),
-        };
+            var httpClient = CreateHttpClient();
+            var url = $"/api/query";
 
-        var response = await httpClient.SendAsync(httpContent);
+            var json = JsonSerializer.Serialize(command);
+            using var httpContent = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            };
 
-        response.EnsureSuccessStatusCode();
+            var response = await httpClient.SendAsync(httpContent);
 
-        using var stream = await response.Content.ReadAsStreamAsync();
+            response.EnsureSuccessStatusCode();
 
-        var orientDbResult = await JsonSerializer.DeserializeAsync<T[]>(stream, jsonOptions)
-            ?? throw new Exception("Unable to parse query result to JsonElement");
+            using var stream = await response.Content.ReadAsStreamAsync();
 
-        return orientDbResult;
+            var orientDbResult = await JsonSerializer.DeserializeAsync<T[]>(stream, jsonOptions)
+                ?? throw new Exception("Unable to parse query result to JsonElement");
+
+            return orientDbResult;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Someting wrong with command {command}", command.Command);
+            throw;
+        }
     }
 
     private HttpClient CreateHttpClient()

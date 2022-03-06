@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using MediatR;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Graph;
+using Testar.ChangeDetection.Core.Requests;
 
 namespace Testar.ChangeDetection.ConsoleApp;
 
@@ -12,6 +14,7 @@ internal sealed partial class ConsoleHostedService : IHostedService
     private readonly IOptions<TestarServerOptions> orientDbOptions;
     private readonly IChangeDetectionHttpClient changeDetectionHttpClient;
     private readonly IGraphService graphService;
+    private readonly IMediator mediator;
     private readonly CompareOptions compareOptions;
     private Task? applicationTask;
     private int? exitCode;
@@ -22,7 +25,8 @@ internal sealed partial class ConsoleHostedService : IHostedService
         IOptions<CompareOptions> compareOptions,
         IOptions<TestarServerOptions> orientDbOptions,
         IChangeDetectionHttpClient changeDetectionHttpClient,
-        IGraphService graphService
+        IGraphService graphService,
+        IMediator mediator
         )
     {
         this.logger = logger;
@@ -30,6 +34,7 @@ internal sealed partial class ConsoleHostedService : IHostedService
         this.orientDbOptions = orientDbOptions;
         this.changeDetectionHttpClient = changeDetectionHttpClient;
         this.graphService = graphService;
+        this.mediator = mediator;
         this.compareOptions = compareOptions.Value;
     }
 
@@ -41,14 +46,16 @@ internal sealed partial class ConsoleHostedService : IHostedService
             Password = "testar"
         });
 
-        var modelId1 = new ModelIdentifier("1chdi5230521708089");
-        var modelId2 = new ModelIdentifier("1chxaqf301488509161");
+        var result = await mediator.Send(new AllApplicationRequest());
 
-        var elements = await graphService.FetchDiffGraph(modelId1, modelId2);
+        //var modelId1 = new ModelIdentifier("1chdi5230521708089");
+        //var modelId2 = new ModelIdentifier("1chxaqf301488509161");
 
-        var json = graphService.GenerateJsonString(elements);
+        //var elements = await graphService.FetchDiffGraph(modelId1, modelId2);
 
-        File.WriteAllText("my-json.json", json);
+        //var json = graphService.GenerateJsonString(elements);
+
+        //File.WriteAllText("my-json.json", json);
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
