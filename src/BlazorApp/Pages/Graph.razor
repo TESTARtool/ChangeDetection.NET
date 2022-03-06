@@ -5,53 +5,60 @@
 
 @if (IsGraphAvailable)
 {
-    <div class="graph-canvas">
-        <div class="layout">
-            <div class="column">
-                <div><label for="layout-control">Layout: <select name="layout-control" id="layout-control">
-                    <option selected disabled></option>
-                    <option value="random">Random</option>
-                    <option value="grid">Grid</option>
-                    <option value="circle">Circle</option>
-                    <option value="concentric">Concentric</option>
-                    <option value="breadthfirst">Breadthfirst</option>
-                    <option value="cose">Cose</option>
-                    <option value="cose-bilkent">Cose-bilkent</option>
-                    <option value="cola">Cola</option>
-                    <option value="euler">Euler</option>
-                    <option value="dagre">Dagre</option>
-                    <option value="klay">Klay</option>
-                </select></label></div>
-                <div>
-                    <label for="show-labels" class="custom-checkbox">Show labels<input type="checkbox" id="show-labels" checked><span class="checkmark"></span></label>
-                </div>
-                <div>
-                    <button id="show-all" type="button" class="button_custom">Show all nodes</button>
-                </div>
-            </div>
+    <div class="container-fluid" style="padding-left: 0px">
+    <div class="text-start">
+            
+        <select id="layout-control" class="custom-select text-secondary" aria-label="Default select example"
+            style="padding-top: .4rem; padding-bottom: .6rem; padding-left: 1rem; border-radius: .3rem; width:150px;">
+            <option value="grid" selected>Grid</option>
+            <option value="random">Random</option>
+            <option value="circle">Circle</option>
+            <option value="concentric">Concentric</option>
+            <option value="breadthfirst">Breadthfirst</option>
+            <option value="cose">Cose</option>
+            <option value="cose-bilkent">Cose-bilkent</option>
+            <option value="cola">Cola</option>
+            <option value="euler">Euler</option>
+            <option value="dagre">Dagre</option>
+            <option value="klay">Klay</option>
+        </select>
 
-            <div class="column">
-                <div class="extra-margin-left">
-                    <label for="toggle-abstract-layer" class="custom-checkbox">Show abstract layer
-                        <input type="checkbox" id="toggle-abstract-layer" checked>
-                        <span class="checkmark"></span>
-                    </label>
-                </div>
-                <div class="extra-margin-left"><label for="toggle-concrete-layer" class="custom-checkbox">Show concrete layer<input type="checkbox" id="toggle-concrete-layer" checked><span class="checkmark"></span></label></div>
-                <div class="extra-margin-left"><label for="toggle-sequence-layer" class="custom-checkbox">Show sequence layer<input type="checkbox" id="toggle-sequence-layer" checked><span class="checkmark"></span></label></div>
-                <div class="extra-margin-left"><label for="toggle-layer-transitions" class="custom-checkbox">Show inter-layer edges<input type="checkbox" id="toggle-layer-transitions" checked><span class="checkmark"></span></label></div>
-            </div>
+        <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off">
+        <label class="btn btn-outline-secondary" for="show-labels">Show Labels</label>
 
-            <div class="column">
-                <div class="extra-margin-left">
-                    <div class="stats-text" id="stats-abstract-states"></div>
-                    <div class="stats-text" id="stats-abstract-actions"></div>
-                    <div class="stats-text" id="stats-concrete-states"></div>
-                    <div class="stats-text" id="stats-concrete-actions"></div>
-                </div>
-            </div>
+        <div class="btn-group" role="group" aria-label="Show layers for the graph group">
+            <button id="show-all" class="btn btn-warning" type="submit">Show all nodes</button>
+
+            <input type="checkbox" class="btn-check" id="toggle-abstract-layer" checked autocomplete="off">
+            <label class="btn btn-outline-secondary" for="toggle-abstract-layer">Abstract layer</label>
+
+            <input type="checkbox" class="btn-check" id="toggle-concrete-layer" checked autocomplete="off">
+            <label class="btn btn-outline-secondary" for="toggle-concrete-layer">Concrete layer</label>
+
+            <input type="checkbox" class="btn-check" id="toggle-sequence-layer" checked autocomplete="off">
+            <label class="btn btn-outline-secondary" for="toggle-sequence-layer">Sequence layer</label>
+
+            <input type="checkbox" class="btn-check" id="toggle-layer-transitions" checked autocomplete="off">
+            <label class="btn btn-outline-secondary" for="toggle-layer-transitions">Inter-layer edges</label>
+        </div>
+
+        <div class="btn-group" role="group" aria-label="Show amount of nodes">
+            <button type="button" class="btn btn-secondary" disabled>
+              Abstract States <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-states"></span>
+            </button>
+            <button type="button" class="btn btn-secondary" disabled>
+              Abstract Actions <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-actions"></span>
+            </button>
+            <button type="button" class="btn btn-secondary" disabled>
+              Concrete States <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-states"></span>
+            </button>
+            <button type="button" class="btn btn-secondary" disabled>
+              Concrete Actions <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-actions"></span>
+            </button>
         </div>
     </div>
+</div>
+
 
     <div class="viewpane" id="cy">
     </div>
@@ -61,7 +68,6 @@
             <div class="panel-header" id="content-panel-header">
             </div>
             <div class="cd-panel__content" id="cd-content-panel">
-
             </div> <!-- cd-panel__content -->
         </div> <!-- cd-panel__container -->
     </div>
