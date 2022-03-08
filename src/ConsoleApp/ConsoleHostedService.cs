@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Graph;
-using Testar.ChangeDetection.Core.Requests;
 
 namespace Testar.ChangeDetection.ConsoleApp;
 
@@ -45,8 +44,6 @@ internal sealed partial class ConsoleHostedService : IHostedService
             Username = orientDbOptions.Value.Username,
             Password = "testar"
         });
-
-        var result = await mediator.Send(new AllApplicationRequest());
 
         //var modelId1 = new ModelIdentifier("1chdi5230521708089");
         //var modelId2 = new ModelIdentifier("1chxaqf301488509161");

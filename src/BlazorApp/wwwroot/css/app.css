@@ -1,7 +1,34 @@
-﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+﻿@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css");
 
-html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+body {
+    font-family: 'Roboto',system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    height: 100vh;
+    height: -webkit-fill-available;
+}
+
+html {
+    height: 100vh;
+    height: -webkit-fill-available;
+}
+
+main {
+    height: 100vh;
+    height: -webkit-fill-available;
+}
+
+.page {
+    height: 100vh;
+    height: -webkit-fill-available;
+}
+
+#app {
+    height: 100vh;
+    height: -webkit-fill-available;
+}
+
+.content {
+    height: 100vh;
+    height: -webkit-fill-available;
 }
 
 h1:focus {

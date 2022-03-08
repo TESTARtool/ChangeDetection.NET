@@ -7,6 +7,11 @@
                 <a class="navbar-brand text-warning" href="#">TESTAR.NET</a>
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-left mb-md-0">
                     <li><a href="" class="nav-link px-2 text-white">Home</a></li>
+                    <AuthorizeView>
+                        <Authorized>
+                            <li><a href="/Models" class="nav-link px-2 text-white">Models</a></li>
+                        </Authorized>
+                    </AuthorizeView>
                     <li><a href="https://testar.org/" target="_blank" class="nav-link px-2 text-white">About Testar</a></li>
                 </ul>
                 <div class="text-end">
@@ -22,7 +27,7 @@
             </div>
         </nav>
 
-        <article class="content px-4">
+        <article class="content p-0 m-0">
             @Body
         </article>
     </main>

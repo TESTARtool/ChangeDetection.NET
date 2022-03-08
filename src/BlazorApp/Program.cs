@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
+using Testar.ChangeDetection.Core.Services;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
@@ -25,6 +26,7 @@ builder.Services
 builder.Services.AddScoped<IChangeDetectionHttpClient, ChangeDetectionHttpClient>();
 
 builder.Services
+    .AddScoped<IModelService, ModelService>()
     .AddScoped<IAuthService, AuthService>()
     .AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>()
     .AddAuthorizationCore()

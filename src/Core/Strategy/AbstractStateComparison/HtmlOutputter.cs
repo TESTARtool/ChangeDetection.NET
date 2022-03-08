@@ -6,7 +6,7 @@ namespace Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
 public interface IHtmlOutputter
 {
-    Task SaveOutToHtmlAsync(Application application, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler);
+    Task SaveOutToHtmlAsync(Model application, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler);
 }
 
 public class HtmlOutputter : IHtmlOutputter
@@ -22,7 +22,7 @@ public class HtmlOutputter : IHtmlOutputter
         this.stateModelDifferenceJsonWidget = stateModelDifferenceJsonWidget;
     }
 
-    public async Task SaveOutToHtmlAsync(Application application, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
+    public async Task SaveOutToHtmlAsync(Model application, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
     {
         var template = ResourceFiles.Get("Template.html")
             .InNamespace(typeof(HtmlOutputter).Namespace ?? "")
@@ -47,7 +47,7 @@ public class HtmlOutputter : IHtmlOutputter
         await File.WriteAllTextAsync(path, html);
     }
 
-    private async Task<string> AddImageOrWidgetTreeComparisonAsync(Application application, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
+    private async Task<string> AddImageOrWidgetTreeComparisonAsync(Model application, DeltaState[] addedStates, DeltaState[] removedStates, IFileOutputHandler fileOutputHandler)
     {
         var tags = AbstractAttributesTags(application);
 
@@ -134,7 +134,7 @@ public class HtmlOutputter : IHtmlOutputter
         return capitalizeWord.ToString().Trim();
     }
 
-    private HashSet<ITag> AbstractAttributesTags(Application control)
+    private HashSet<ITag> AbstractAttributesTags(Model control)
     {
         // Update Set object "abstractAttributesTags" with the Tags
         // we need to check for Widget Tree difference

@@ -1,0 +1,138 @@
+﻿@page "/Models/{ModelIdentifier}"
+@page "/Models"
+@inject IModelService modelService;
+
+<div class="sidebar ">
+  <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-light px-3 py-3" style="width: 450px;">
+    <a href="/Models" class="d-flex align-items-center flex-shrink-0 link-dark text-decoration-none">
+      <span class="fs-5 fw-semibold">Available Models</span>
+    </a>
+    @foreach(var model in models)
+    {
+        <div class="group-list mt-2">
+            <a href="/Models/@model.ModelIdentifier.Value" class="list-group-item list-group-item-action rounded-3">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@model.Name</h5>
+                    <small class="text-muted">@model.ModelIdentifier.Value</small>
+                </div>
+                <p class="mb-1">@model.Version</p>
+                <small class="text-muted">@string.Join(", ", model.AbstractionAttributes)</small>
+            </a>
+        </div>
+    }
+  </div>
+  @if (SelectedModel is not null)
+  {
+      <div class="p-2 flex-fill px-3 py-3">
+          <div class="row">
+              <div class="col-8">
+                <div class="fs-5 fw-semibold">@SelectedModel.Name</div>
+                <div class="fs-7 text-muted">@SelectedModel.Version</div>
+              </div>
+              <div class="col-4 text-end align-self-center">
+                  <a href="/Graph/@SelectedModel.ModelIdentifier.Value" class="btn btn-secondary">Open Graph</a>
+                  <a href="Diff" class="btn btn-secondary disabled">Compare with</a>
+              </div>
+          </div>
+          <div class="row mt-3">
+              <div class="col-12">
+              <div class="card">
+                  <div class="card-header">
+                      Test Sequences
+                  </div>
+                  <table class="table table-borderless mt-1">
+                      <thead class="table-white">
+                        <tr>
+                            <th scope="col"></th> <!-- Icon -->
+                            <th scope="col">Start data/time</th>
+                            <th scope="col">Number of steps</th>
+                            <th scope="col">Quirks</th>
+                            <th scope="col">Deterministic run</th>
+                            <th scope="col"></th> <!-- button -->
+                        </tr>
+                      </thead>
+                      <tbody>
+                      @foreach(var sequence in SelectedModel.TestSequences)
+                      {
+                          <tr>
+                              <td>
+                                  @if (sequence.Verdict == Verdict.Success) 
+                                  {
+                                    <i class="bi bi-hand-thumbs-up-fill text-success"></i>
+                                  }
+                                  @if (sequence.Verdict == Verdict.InterruptBySystem) 
+                                  {
+                                    <i class="bi bi-exclamation text-error"></i>
+                                  }
+                                  @if (sequence.Verdict == Verdict.InterruptByUser) 
+                                  {
+                                    <i class="bi bi-hand-index text-primary"></i>
+                                  }
+                                  @if (sequence.Verdict == Verdict.Unknown) 
+                                  {
+                                    <i class="bi bi-question text-primary"></i>
+                                  }
+                              </td>
+                              <td>@sequence.StartDateTime.ToString("MMM dd, yyyy h:mm:ss tt")</td>
+                              <td>@sequence.NumberOfSteps</td>
+                              <td>@sequence.NumberOfErrors</td>
+                              <td>
+                                  @if (@sequence.IsSequenceDeterministic)
+                                  {
+                                    <i class="fs-6 bi bi-check text-success"></i>
+                                  }
+                                  @if (!@sequence.IsSequenceDeterministic)
+                                  {
+                                    <i class="fs-6 bi bi-x text-error"></i>  
+                                  }
+                              </td>
+                              <td><a href="#" class="btn btn-secondary">Show</a></td>
+                          </tr>
+                      }
+                      </tbody>
+                    </table>
+                </div>
+                </div>
+          </div>
+      </div>
+  }
+</div>
+
+@code {
+    [Parameter] public string? ModelIdentifier { get; set; }
+    public Model? SelectedModel { get; set; }
+    public List<Model> models = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (!models.Any())
+        {
+            models = await modelService.AllModels().ToListAsync();
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (ModelIdentifier is not null)
+        {
+            var modelId = new ModelIdentifier(ModelIdentifier);
+            SelectedModel = models.SingleOrDefault(x => x.ModelIdentifier == modelId);
+        }
+
+        if (ModelIdentifier is not null && SelectedModel is null)
+        {
+            // something odd here TODO handle this case
+            SelectedModel = new Model
+            {
+                Name = $"Model with {ModelIdentifier} not found.",
+                Version = "",
+                AbstractionAttributes = Array.Empty<string>(),
+                AbstractStates = Array.Empty<AbstractState>(),
+                ModelIdentifier = new ModelIdentifier(""),
+                TestSequences = Array.Empty<TestSequence>()
+             };
+        }
+    }
+}

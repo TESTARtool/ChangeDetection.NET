@@ -6,9 +6,9 @@ namespace Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
 public interface IFindStateDifferences
 {
-    IAsyncEnumerable<DeltaState> FindAddedState(Application control, Application test);
+    IAsyncEnumerable<DeltaState> FindAddedState(Model control, Model test);
 
-    IAsyncEnumerable<DeltaState> FindRemovedState(Application control, Application test);
+    IAsyncEnumerable<DeltaState> FindRemovedState(Model control, Model test);
 }
 
 public class FindStateDifferences : IFindStateDifferences
@@ -20,7 +20,7 @@ public class FindStateDifferences : IFindStateDifferences
         this.mediator = mediator;
     }
 
-    public async IAsyncEnumerable<DeltaState> FindAddedState(Application control, Application test)
+    public async IAsyncEnumerable<DeltaState> FindAddedState(Model control, Model test)
     {
         var addedStates = test.AbstractStates
            .Where(x => !control.AbstractStates.Select(y => y.StateId).Contains(x.StateId))
@@ -42,7 +42,7 @@ public class FindStateDifferences : IFindStateDifferences
         }
     }
 
-    public async IAsyncEnumerable<DeltaState> FindRemovedState(Application control, Application test)
+    public async IAsyncEnumerable<DeltaState> FindRemovedState(Model control, Model test)
     {
         var removeStates = control.AbstractStates
           .Where(x => !test.AbstractStates.Select(y => y.StateId).Contains(x.StateId))

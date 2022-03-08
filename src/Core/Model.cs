@@ -1,10 +1,10 @@
 ﻿namespace Testar.ChangeDetection.Core;
 
-public class Application
+public class Model
 {
     public string[] AbstractionAttributes { get; init; }
-    public string ApplicationName { get; init; }
-    public string ApplicationVersion { get; init; }
+    public string Name { get; init; }
+    public string Version { get; init; }
     public ModelIdentifier ModelIdentifier { get; init; }
     public AbstractState[] AbstractStates { get; init; }
     public TestSequence[] TestSequences { get; init; }

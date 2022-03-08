@@ -15,7 +15,7 @@ public class DiffPageStrategy : IChangeDetectionStrategy
 
     public string Name => "Different page Viewer";
 
-    public Task ExecuteChangeDetectionAsync(Application control, Application test, IFileOutputHandler fileOutputHandler)
+    public Task ExecuteChangeDetectionAsync(Model control, Model test, IFileOutputHandler fileOutputHandler)
     {
         navigationManager.NavigateTo($"/Diff/{control.ModelIdentifier.Value}/{test.ModelIdentifier.Value}");
 

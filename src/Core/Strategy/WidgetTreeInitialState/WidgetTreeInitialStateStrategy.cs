@@ -17,7 +17,7 @@ public class WidgetTreeInitialStateStrategy : IChangeDetectionStrategy
 
     public string Name => "Widget Tree Initial State";
 
-    public async Task ExecuteChangeDetectionAsync(Application control, Application test, IFileOutputHandler fileOutputHandler)
+    public async Task ExecuteChangeDetectionAsync(Model control, Model test, IFileOutputHandler fileOutputHandler)
     {
         var controlConcreteId = control.AbstractStates
             .SingleOrDefault(x => x.IsInitial)

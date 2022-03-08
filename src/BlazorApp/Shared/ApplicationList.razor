@@ -2,12 +2,13 @@
 @inject IStrategyBuilder strategies;
 @inject IJSRuntime JS;
 @inject NavigationManager NavigationManager;
+@inject IModelService modelService;
 
 
 <h3>Available Models</h3>
-*@
 
-    <div class="row">
+
+    <div class="row p-3">
         <div class="col-8">
             <div class="list-group">
                 @foreach(var application in applicationListViewModel.Applications)
@@ -173,13 +174,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var models = await mediator.Send(new AllApplicationRequest());
+        var models = await modelService.AllModels().ToListAsync();
 
         applicationListViewModel.Applications = models
             .Select(x => new ApplicationViewModel(applicationListViewModel)
             {
-                ApplicationName = x.ApplicationName,
-                ApplicationVersion = x.ApplicationVersion,
+                ApplicationName = x.Name,
+                ApplicationVersion = x.Version,
                 ModelIdentifier = x.ModelIdentifier,
                 IsSelected = false,
                 AbstractionAttributes = x.AbstractionAttributes

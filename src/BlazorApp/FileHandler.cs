@@ -6,9 +6,9 @@ namespace Testar.ChangeDetection.BlazarApp;
 
 public class FileHandler : IFileOutputHandler
 {
-    public FileHandler(Application control, Application test)
+    public FileHandler(Model control, Model test)
     {
-        var folderName = $"{control.ApplicationName}_{control.ApplicationVersion}_Diff_{test.ApplicationName}_{test.ApplicationVersion}";
+        var folderName = $"{control.Name}_{control.Version}_Diff_{test.Name}_{test.Version}";
 
         RootFolder = Path.Combine("out", folderName);
 

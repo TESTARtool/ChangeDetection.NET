@@ -1,25 +1,39 @@
-﻿using MediatR;
-using System.Text.Json;
+﻿using System.Text.Json;
 
-namespace Testar.ChangeDetection.Core.Requests;
+namespace Testar.ChangeDetection.Core.Services;
 
-public class AllApplicationRequest : IRequest<Application[]>
+public interface IModelService
 {
+    IAsyncEnumerable<Model> AllModels();
 }
 
-public class AllApplicationRequestHandler : IRequestHandler<AllApplicationRequest, Application[]>
+public class ModelService : IModelService
 {
     private readonly IChangeDetectionHttpClient client;
 
-    public AllApplicationRequestHandler(IChangeDetectionHttpClient client)
+    public ModelService(IChangeDetectionHttpClient client)
     {
         this.client = client;
     }
 
-    public async Task<Application[]> Handle(AllApplicationRequest request, CancellationToken cancellationToken)
+    public async IAsyncEnumerable<Model> AllModels()
     {
-        return await GetAllApplication(request)
-            .ToArrayAsync();
+        var applications = await new OrientDbCommand("SELECT FROM AbstractStateModel")
+          .ExecuteOn<ModelJson>(client)
+          .ToArrayAsync();
+
+        foreach (var application in applications)
+        {
+            yield return new Model
+            {
+                AbstractionAttributes = application.AbstractionAttributes,
+                AbstractStates = Array.Empty<AbstractState>(),
+                Name = application.ApplicationName,
+                Version = application.ApplicationVersion,
+                ModelIdentifier = new ModelIdentifier(application.ModelIdentifier),
+                TestSequences = await FetchTestSequences(application.ModelIdentifier).ToArrayAsync()
+            };
+        }
     }
 
     private static Verdict StringToVerdict(string value) => value switch
@@ -29,26 +43,6 @@ public class AllApplicationRequestHandler : IRequestHandler<AllApplicationReques
         "INTERRUPTED_BY_ERROR" => Verdict.InterruptBySystem,
         _ => Verdict.Unknown,
     };
-
-    private async IAsyncEnumerable<Application> GetAllApplication(AllApplicationRequest request)
-    {
-        var applications = await new OrientDbCommand("SELECT FROM AbstractStateModel")
-          .ExecuteOn<ApplicationJson>(client)
-          .ToArrayAsync();
-
-        foreach (var application in applications)
-        {
-            yield return new Application
-            {
-                AbstractionAttributes = application.AbstractionAttributes,
-                AbstractStates = Array.Empty<AbstractState>(),
-                ApplicationName = application.ApplicationName,
-                ApplicationVersion = application.ApplicationVersion,
-                ModelIdentifier = new ModelIdentifier(application.ModelIdentifier),
-                TestSequences = await FetchTestSequences(application.ModelIdentifier).ToArrayAsync()
-            };
-        }
-    }
 
     private async IAsyncEnumerable<TestSequence> FetchTestSequences(string modelIdentifier)
     {
@@ -104,7 +98,7 @@ public class AllApplicationRequestHandler : IRequestHandler<AllApplicationReques
         public string Verdict { get; set; }
     }
 
-    private class ApplicationJson
+    private class ModelJson
     {
         public string ModelIdentifier { get; init; }
         public string ApplicationVersion { get; init; }

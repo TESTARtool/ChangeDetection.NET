@@ -4,5 +4,5 @@ public interface IChangeDetectionStrategy
 {
     string Name { get; }
 
-    Task ExecuteChangeDetectionAsync(Application control, Application test, IFileOutputHandler fileOutputHandler);
+    Task ExecuteChangeDetectionAsync(Model control, Model test, IFileOutputHandler fileOutputHandler);
 }
