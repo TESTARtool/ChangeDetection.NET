@@ -5,6 +5,8 @@ namespace Testar.ChangeDetection.Core.Services;
 public interface IModelService
 {
     IAsyncEnumerable<Model> AllModels();
+
+    //IAsyncEnumerable<TestSequenceAction> GetTestSequenceActions(SequenceId testSequenceId);
 }
 
 public class ModelService : IModelService
@@ -31,10 +33,29 @@ public class ModelService : IModelService
                 Name = application.ApplicationName,
                 Version = application.ApplicationVersion,
                 ModelIdentifier = new ModelIdentifier(application.ModelIdentifier),
+                // TODO: not get everything... just get it when needed....
                 TestSequences = await FetchTestSequences(application.ModelIdentifier).ToArrayAsync()
             };
         }
     }
+
+    //public async IAsyncEnumerable<TestSequenceAction> GetTestSequenceActions(SequenceId testSequenceId)
+    //{
+    //    var actions = await new OrientDbCommand("SELECT FROM(TRAVERSE out('FirstNode') FROM ( SELECT FROM TestSequence WHERE sequenceId = :sequenceId)) WHERE @class = 'SequenceNode'")
+    //        .AddParameter("sequenceId", testSequenceId.Value)
+    //        .ExecuteOn<ActionJson>(client)
+    //        .ToArrayAsync();
+
+    //    var counterSource = 1;
+    //    var counterTarget = 2;
+
+    //    while (true)
+    //    {
+    //        // out_SequenceStep -> for the description
+    //    }
+
+    //    yield return;
+    //}
 
     private static Verdict StringToVerdict(string value) => value switch
     {
@@ -91,6 +112,10 @@ public class ModelService : IModelService
             .AnyAsync();
     }
 
+    public class ActionJson
+    {
+    }
+
     private class SequenceJson
     {
         public string SequenceId { get; set; }
@@ -105,4 +130,8 @@ public class ModelService : IModelService
         public string ApplicationName { get; set; }
         public string[] AbstractionAttributes { get; set; }
     }
+}
+
+public class TestSequenceAction
+{
 }

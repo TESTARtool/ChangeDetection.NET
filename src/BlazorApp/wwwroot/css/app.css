@@ -1,34 +1,24 @@
 ﻿@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css");
 
+html {
+    height: 100vh;
+}
+
 body {
     font-family: 'Roboto',system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
     height: 100vh;
-    height: -webkit-fill-available;
-}
-
-html {
-    height: 100vh;
-    height: -webkit-fill-available;
-}
-
-main {
-    height: 100vh;
-    height: -webkit-fill-available;
-}
-
-.page {
-    height: 100vh;
-    height: -webkit-fill-available;
 }
 
 #app {
     height: 100vh;
-    height: -webkit-fill-available;
+}
+
+.page {
+    height: 100vh;
 }
 
 .content {
-    height: 100vh;
-    height: -webkit-fill-available;
+    height: calc(100% - 56px);
 }
 
 h1:focus {
@@ -102,3 +92,30 @@ footer {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+pre {
+    font-size: 11px;
+    overflow: scroll;
+}
+
+.string {
+    color: #1D52A7;
+}
+
+.number {
+    color: #2A8656;
+}
+
+.boolean {
+    color: #1D52A7;
+    font-weight: bold;
+}
+
+.null {
+    color: #1D52A7;
+    font-weight: bold;
+}
+
+.key {
+    color: #9C110E;
+}

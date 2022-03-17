@@ -3,24 +3,31 @@
 @inject IModelService modelService;
 
 <div class="sidebar ">
-  <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-light px-3 py-3" style="width: 450px;">
-    <a href="/Models" class="d-flex align-items-center flex-shrink-0 link-dark text-decoration-none">
-      <span class="fs-5 fw-semibold">Available Models</span>
-    </a>
-    @foreach(var model in models)
-    {
-        <div class="group-list mt-2">
-            <a href="/Models/@model.ModelIdentifier.Value" class="list-group-item list-group-item-action rounded-3">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">@model.Name</h5>
-                    <small class="text-muted">@model.ModelIdentifier.Value</small>
-                </div>
-                <p class="mb-1">@model.Version</p>
-                <small class="text-muted">@string.Join(", ", model.AbstractionAttributes)</small>
-            </a>
+  <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-light" style="width: 450px;">
+      <div style="overflow-y:auto">
+    <div class="d-flex align-items-center flex-shrink-0 link-dark text-decoration-none pb-1">
+        <div class="px-3 py-3">
+            <span class="fs-5 fw-semibold">Models</span>
+
         </div>
-    }
+    </div>
+
+        @foreach(var model in models)
+        {
+            <div class="group-list px-3 mb-2">
+                <a href="/Models/@model.ModelIdentifier.Value" class="list-group-item list-group-item-action rounded-3">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">@model.Name</h5>
+                        <small class="text-muted">@model.ModelIdentifier.Value</small>
+                    </div>
+                    <p class="mb-1">@model.Version</p>
+                    <small class="text-muted">@string.Join(", ", model.AbstractionAttributes)</small>
+                </a>
+            </div>
+        }
   </div>
+</div>
+
   @if (SelectedModel is not null)
   {
       <div class="p-2 flex-fill px-3 py-3">
@@ -118,7 +125,7 @@
         if (ModelIdentifier is not null)
         {
             var modelId = new ModelIdentifier(ModelIdentifier);
-            SelectedModel = models.SingleOrDefault(x => x.ModelIdentifier == modelId);
+            SelectedModel = models.FirstOrDefault(x => x.ModelIdentifier == modelId);
         }
 
         if (ModelIdentifier is not null && SelectedModel is null)

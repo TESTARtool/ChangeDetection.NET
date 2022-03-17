@@ -100,6 +100,31 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         }
     }
 
+    public async Task<string> QueryRaw(OrientDbCommand command)
+    {
+        try
+        {
+            var httpClient = await CreateHttpClientAsync();
+            var url = $"/api/query";
+
+            var json = JsonSerializer.Serialize(command);
+            using var httpContent = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            };
+
+            var response = await httpClient.SendAsync(httpContent);
+
+            await EnsureSuccessStatusCodeAsync(response);
+
+            return await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
+        }
+    }
+
     private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response)
     {
         try
