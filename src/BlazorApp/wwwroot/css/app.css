@@ -119,3 +119,7 @@ pre {
 .key {
     color: #9C110E;
 }
+
+.carousel-item {
+    transition: transform 0.2s ease-in-out;
+}

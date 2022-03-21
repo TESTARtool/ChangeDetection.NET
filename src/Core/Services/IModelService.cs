@@ -2,11 +2,20 @@
 
 namespace Testar.ChangeDetection.Core.Services;
 
+public class TestSequenceVisualisation
+{
+    public int Order { get; set; }
+    public string BeforeImage { get; set; }
+    public string AfterImage { get; set; }
+    public string ActionDescription { get; set; }
+    public bool IsDeterministic { get; set; }
+}
+
 public interface IModelService
 {
     IAsyncEnumerable<Model> AllModels();
 
-    //IAsyncEnumerable<TestSequenceAction> GetTestSequenceActions(SequenceId testSequenceId);
+    IAsyncEnumerable<TestSequenceVisualisation> GetTestSequenceActions(SequenceId testSequenceId);
 }
 
 public class ModelService : IModelService
@@ -39,23 +48,54 @@ public class ModelService : IModelService
         }
     }
 
-    //public async IAsyncEnumerable<TestSequenceAction> GetTestSequenceActions(SequenceId testSequenceId)
-    //{
-    //    var actions = await new OrientDbCommand("SELECT FROM(TRAVERSE out('FirstNode') FROM ( SELECT FROM TestSequence WHERE sequenceId = :sequenceId)) WHERE @class = 'SequenceNode'")
-    //        .AddParameter("sequenceId", testSequenceId.Value)
-    //        .ExecuteOn<ActionJson>(client)
-    //        .ToArrayAsync();
+    public async IAsyncEnumerable<TestSequenceVisualisation> GetTestSequenceActions(SequenceId testSequenceId)
+    {
+        var sequenceNodes = await new OrientDbCommand("SELECT FROM sequenceNode WHERE sequenceId = :sequenceId")
+            .AddParameter("sequenceId", testSequenceId.Value)
+            .ExecuteOn<SequenceNodeJson>(client)
+            .ToArrayAsync();
 
-    //    var counterSource = 1;
-    //    var counterTarget = 2;
+        var sequenceSteps = await GetSequenceSteps(sequenceNodes)
+            .ToArrayAsync();
 
-    //    while (true)
-    //    {
-    //        // out_SequenceStep -> for the description
-    //    }
+        // transform the sequence node into a test visualisation
+        // a test visualisation consist of 2 images (from the concrete states)
+        // and a label containing the desciption concrete action.
+        // the concrete action description is included in the sequence step
 
-    //    yield return;
-    //}
+        // we will start with the firstNode and work our way from there
+        // until we find a step without a next step (== out_sequenceStep empty or null)
+        var firstNode = sequenceNodes.FirstOrDefault(x => x.In_FirstNode.Any());
+        if (firstNode is null)
+        {
+            // if first node is not found no need to continue
+            // technical out_sequenceStep could be null or empty but lets handle that later on
+            yield break;
+        }
+
+        var order = 0;
+        var selectedNode = firstNode;
+        var beforeImage = await GetImageFromSequenceNode(selectedNode);
+        do
+        {
+            var step = sequenceSteps.FirstOrDefault(x => x.Id == selectedNode.Out_SequenceStep.FirstOrDefault());
+            selectedNode = sequenceNodes.FirstOrDefault(x => x.SequenceId == step?.In);
+            var afterImage = await GetImageFromSequenceNode(selectedNode);
+
+            yield return new TestSequenceVisualisation
+            {
+                Order = order++,
+                BeforeImage = beforeImage,
+                ActionDescription = step?.ActionDescription ?? string.Empty,
+                AfterImage = afterImage,
+                IsDeterministic = !(step?.NonDeterministic ?? false)
+            };
+
+            // the after image is the before image for a next test sequence visualisation
+            // lets re-use it to prevent extra database calls
+            beforeImage = afterImage;
+        } while (selectedNode is not null && selectedNode.Out_SequenceStep.Any());
+    }
 
     private static Verdict StringToVerdict(string value) => value switch
     {
@@ -64,6 +104,33 @@ public class ModelService : IModelService
         "INTERRUPTED_BY_ERROR" => Verdict.InterruptBySystem,
         _ => Verdict.Unknown,
     };
+
+    private async Task<string> GetImageFromSequenceNode(SequenceNodeJson? sequenceNode)
+    {
+        if (sequenceNode is null)
+        {
+            return string.Empty;
+        }
+
+        var state = await new OrientDbCommand("SELECT screenshot FROM concreteState WHERE ConcreteIDCustom = :concreteId")
+              .AddParameter("concreteId", sequenceNode.ConcreteStateId)
+              .ExecuteOn<ScreenshotJson>(client)
+              .FirstAsync();
+
+        return await client.DocumentAsBase64Async(new OrientDbId(state.Screenshot)) ?? string.Empty;
+    }
+
+    private async IAsyncEnumerable<SequenceStep> GetSequenceSteps(SequenceNodeJson[] actions)
+    {
+        var nodes = actions.Where(x => x.Out_SequenceStep.Any()).ToList();
+        foreach (var action in nodes)
+        {
+            yield return await new OrientDbCommand("SELECT FROM SequenceStep WHERE @rid = :id")
+                .AddParameter("id", action.Out_SequenceStep[0])
+                .ExecuteOn<SequenceStep>(client)
+                .SingleAsync();
+        }
+    }
 
     private async IAsyncEnumerable<TestSequence> FetchTestSequences(string modelIdentifier)
     {
@@ -112,8 +179,31 @@ public class ModelService : IModelService
             .AnyAsync();
     }
 
-    public class ActionJson
+    public class SequenceNodeJson
     {
+        [JsonPropertyName("@rid")]
+        public string SequenceId { get; set; }
+
+        public string[] Out_SequenceStep { get; set; } = Array.Empty<string>();
+        public string[] In_FirstNode { get; set; } = Array.Empty<string>();
+        public string ConcreteStateId { get; set; }
+    }
+
+    private class ScreenshotJson
+    {
+        public string Screenshot { get; set; }
+    }
+
+    private class SequenceStep
+    {
+        [JsonPropertyName("@rid")]
+        public string Id { get; set; }
+
+        public string ActionDescription { get; set; }
+        public string Out { get; set; }
+        public string In { get; set; }
+        public string concreteActionId { get; set; }
+        public bool NonDeterministic { get; set; }
     }
 
     private class SequenceJson
@@ -128,10 +218,6 @@ public class ModelService : IModelService
         public string ModelIdentifier { get; init; }
         public string ApplicationVersion { get; init; }
         public string ApplicationName { get; set; }
-        public string[] AbstractionAttributes { get; set; }
+        public string[] AbstractionAttributes { get; set; } = Array.Empty<string>();
     }
-}
-
-public class TestSequenceAction
-{
 }
