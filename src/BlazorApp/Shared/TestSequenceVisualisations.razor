@@ -1,0 +1,140 @@
+﻿@inject IModelService modelService;
+
+<style>
+.blazored-modal{
+    height:80%;
+    width:80%;
+}
+.blazored-modal-content{
+    height:100%;
+    overflow-y:auto;
+    overflow-x: hidden;
+}
+</style>
+
+<div class="h-100" >
+
+    <div class="row">
+        <div class="col">
+            <h6>Sequence verdict</h6>
+            @if (TestSequence.Verdict == Verdict.Success) 
+            {
+                <i class="bi bi-hand-thumbs-up-fill text-success"></i>
+                <span class="h6 text-success">Interrupted by system</span>
+            }
+            @if (TestSequence.Verdict == Verdict.InterruptBySystem) 
+            {
+                <i class="bi bi-exclamation text-error"></i>
+                <span class="h6 text-error">Interrupted by system</span>
+            }
+            @if (TestSequence.Verdict == Verdict.InterruptByUser) 
+            {
+                <i class="bi bi-hand-index text-primary"></i>
+                <span class="h6 text-primary">Interrupted by user</span>
+            }
+            @if (TestSequence.Verdict == Verdict.Unknown) 
+            {
+                <i class="bi bi-question text-primary"></i>
+                <span class="h6 text-primary">Unknown</span>
+            }
+        </div>
+        <div class="col">
+            <h6>Start data/time</h6>
+            @TestSequence.StartDateTime.ToString("MMM dd, yyyy h:mm:ss tt")
+        </div>
+        <div class="col">
+            <h6>Number of steps</h6>
+            @TestSequence.NumberOfSteps
+        </div>
+        <div class="col">
+            <h6>Quirks</h6>
+            @TestSequence.NumberOfErrors
+        </div>
+        <div class="col">
+            <h6>Deterministic run</h6>
+             @if (@TestSequence.IsSequenceDeterministic)
+             {
+                <i class="fs-6 bi bi-check text-success"></i>
+             }
+             @if (!@TestSequence.IsSequenceDeterministic)
+             {
+                <i class="fs-6 bi bi-x text-error"></i>  
+             }
+        </div>
+    </div>
+    <br/>
+
+    @if (IsLoading)
+    {
+        <div class="row align-items-center">
+          <div class="col text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+    }
+    else
+    {
+    
+        <div id="visualisationCarousel" class="carousel carousel-dark carousel-fade" data-bs-ride="carousel" data-bs-interval="false">
+            <div class="carousel-indicators">
+                @foreach(var visualisation in visulations)
+                {
+                    <button type="button" data-bs-target="#visualisationCarousel" data-bs-slide-to="@visualisation.Order" class="active" aria-current="true" aria-label="Slide @visualisation.Order"></button>
+                }
+            </div>
+            <div class="carousel-inner">
+                @foreach(var visualisation in visulations)
+                {
+                    <div class="carousel-item @((visualisation.Order == 0)? "active" : "")">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col">
+                                    <img src="data:image/png;base64,@visualisation.BeforeImage" class="d-block w-100">
+                                </div>
+                                <div class="col">
+                                    <img src="data:image/png;base64,@visualisation.AfterImage" class="d-block w-100">
+                                </div>
+                            </div>
+                            <div class="row text-center">
+                                <br/>
+                                <h5>@visualisation.ActionDescription</h5>
+                                <br/>
+                                <br/>
+                                <br/>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#visualisationCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#visualisationCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    }
+</div>
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public TestSequence TestSequence { get; set; }
+    public List<TestSequenceVisualisation> visulations { get; set; } = new();
+    public bool IsLoading { get; set; }
+
+    protected async override void OnInitialized()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        visulations = await modelService
+            .GetTestSequenceActions(TestSequence.Id)
+            .ToListAsync();
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+}
