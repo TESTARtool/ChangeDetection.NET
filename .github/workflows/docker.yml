@@ -1,0 +1,27 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [ features/docker-build ]
+
+jobs:
+  pubh_to_registry:
+    name: Push Testar-Net-UI image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: CheckOut Repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core 6.0.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install dependencies
+        run: dotnet restore "./ChangeDetection.sln"
+
+      - name: Build code
+        run: dotnet build "./ChangeDetection.sln" --configuration Release --no-restore
+      
+      - name: Testar-net-ui docker build
+        run: docker build -t rneeft/testar-net-ui:latest -f src/BlazorApp/Dockerfile .
