@@ -12,16 +12,19 @@ jobs:
       - name: CheckOut Repository
         uses: actions/checkout@v2
 
-      - name: Setup .NET Core 6.0.x
-        uses: actions/setup-dotnet@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
         with:
-          dotnet-version: 6.0.x
-
-      - name: Install dependencies
-        run: dotnet restore "./ChangeDetection.sln"
-
-      - name: Build code
-        run: dotnet build "./ChangeDetection.sln" --configuration Release --no-restore
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       
-      - name: Testar-net-ui docker build
-        run: docker build -t rneeft/testar-net-ui:latest -f src/BlazorApp/Dockerfile .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      
+      - name: Build and push testar-net-ui
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./src/BlazorApp/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:latest
