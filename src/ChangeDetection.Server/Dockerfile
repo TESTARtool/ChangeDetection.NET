@@ -4,16 +4,22 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /src
-COPY ["src/ChangeDetection.Server/ChangeDetection.Server.csproj", "src/ChangeDetection.Server/"]
-RUN dotnet restore "src/ChangeDetection.Server/ChangeDetection.Server.csproj"
+WORKDIR /source
+# copy csproj and restore as distinct layers
+COPY src/ChangeDetection.Server/*.csproj src/ChangeDetection.Server/
+COPY src/Core/*.csproj src/Core/
+COPY src/Analyser.cs src/
+COPY Directory.Build.props /
+RUN dotnet restore src/ChangeDetection.Server/ChangeDetection.Server.csproj
+
 COPY . .
-WORKDIR "/src/src/ChangeDetection.Server"
-RUN dotnet build "ChangeDetection.Server.csproj" -c Release -o /app/build
+WORKDIR /source/src/ChangeDetection.Server
+RUN dotnet build -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "ChangeDetection.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
+# final stage/image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
