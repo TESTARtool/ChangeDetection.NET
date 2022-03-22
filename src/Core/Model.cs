@@ -7,7 +7,6 @@ public class Model
     public string Version { get; init; }
     public ModelIdentifier ModelIdentifier { get; init; }
     public AbstractState[] AbstractStates { get; init; }
-    public TestSequence[] TestSequences { get; init; }
 }
 
 public class TestSequence

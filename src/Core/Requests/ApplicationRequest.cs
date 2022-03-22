@@ -42,7 +42,6 @@ public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, Mod
             ModelIdentifier = new ModelIdentifier(application.ModelIdentifier),
             AbstractionAttributes = application.AbstractionAttributes,
             AbstractStates = await states,
-            TestSequences = Array.Empty<TestSequence>()
         };
     }
 

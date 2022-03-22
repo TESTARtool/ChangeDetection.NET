@@ -15,6 +15,8 @@ public interface IModelService
 {
     IAsyncEnumerable<Model> AllModels();
 
+    IAsyncEnumerable<TestSequence> TestSequences(ModelIdentifier modelIdentifier);
+
     IAsyncEnumerable<TestSequenceVisualisation> GetTestSequenceActions(SequenceId testSequenceId);
 }
 
@@ -25,6 +27,27 @@ public class ModelService : IModelService
     public ModelService(IChangeDetectionHttpClient client)
     {
         this.client = client;
+    }
+
+    public async IAsyncEnumerable<TestSequence> TestSequences(ModelIdentifier modelIdentifier)
+    {
+        var sequences = await new OrientDbCommand("SELECT FROM TestSequence WHERE modelIdentifier = :identifier ORDER BY startDateTime ASC")
+           .AddParameter("identifier", modelIdentifier.Value)
+           .ExecuteOn<SequenceJson>(client)
+           .ToArrayAsync();
+
+        foreach (var sequence in sequences)
+        {
+            yield return new TestSequence
+            {
+                Id = new SequenceId(sequence.SequenceId),
+                StartDateTime = DateTime.ParseExact(sequence.StartDateTime, "yyyy-MM-dd HH:mm:ss", provider: null),
+                NumberOfSteps = await NumberOfStepsAsync(sequence.SequenceId),
+                NumberOfErrors = await NumberOfErrorsAsync(sequence.SequenceId),
+                IsSequenceDeterministic = !await IsSequenceNonDeterministicAsync(sequence.SequenceId),
+                Verdict = StringToVerdict(sequence.Verdict),
+            };
+        }
     }
 
     public async IAsyncEnumerable<Model> AllModels()
@@ -42,8 +65,6 @@ public class ModelService : IModelService
                 Name = application.ApplicationName,
                 Version = application.ApplicationVersion,
                 ModelIdentifier = new ModelIdentifier(application.ModelIdentifier),
-                // TODO: not get everything... just get it when needed....
-                TestSequences = await FetchTestSequences(application.ModelIdentifier).ToArrayAsync()
             };
         }
     }
@@ -129,27 +150,6 @@ public class ModelService : IModelService
                 .AddParameter("id", action.Out_SequenceStep[0])
                 .ExecuteOn<SequenceStep>(client)
                 .SingleAsync();
-        }
-    }
-
-    private async IAsyncEnumerable<TestSequence> FetchTestSequences(string modelIdentifier)
-    {
-        var sequences = await new OrientDbCommand("SELECT FROM TestSequence WHERE modelIdentifier = :identifier ORDER BY startDateTime ASC")
-            .AddParameter("identifier", modelIdentifier)
-            .ExecuteOn<SequenceJson>(client)
-            .ToArrayAsync();
-
-        foreach (var sequence in sequences)
-        {
-            yield return new TestSequence
-            {
-                Id = new SequenceId(sequence.SequenceId),
-                StartDateTime = DateTime.ParseExact(sequence.StartDateTime, "yyyy-MM-dd HH:mm:ss", provider: null),
-                NumberOfSteps = await NumberOfStepsAsync(sequence.SequenceId),
-                NumberOfErrors = await NumberOfErrorsAsync(sequence.SequenceId),
-                IsSequenceDeterministic = !await IsSequenceNonDeterministicAsync(sequence.SequenceId),
-                Verdict = StringToVerdict(sequence.Verdict),
-            };
         }
     }
 
