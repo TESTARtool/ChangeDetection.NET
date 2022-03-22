@@ -27,7 +27,7 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         this.navigationManager = navigationManager;
     }
 
-    public async Task<byte[]> DocumentAsync(OrientDbId id)
+    public async Task<string?> DocumentAsBase64Async(OrientDbId id)
     {
         var httpClient = await CreateHttpClientAsync();
         var url = $"/api/Document/{id.FormatId()}";
@@ -38,9 +38,16 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
 
         var value = await response.Content.ReadAsStringAsync();
 
+        return value;
+    }
+
+    public async Task<byte[]> DocumentAsync(OrientDbId id)
+    {
+        var value = await DocumentAsBase64Async(id);
+
         return string.IsNullOrWhiteSpace(value)
-            ? Array.Empty<byte>()
-            : Convert.FromBase64String(value);
+           ? Array.Empty<byte>()
+           : Convert.FromBase64String(value);
     }
 
     public async Task<string?> LoginAsync(Uri serverUrl, LoginModel loginModel)
@@ -90,6 +97,31 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
             Console.WriteLine("Something went wrong here: " + command.Command);
 
             throw;
+        }
+    }
+
+    public async Task<string> QueryRaw(OrientDbCommand command)
+    {
+        try
+        {
+            var httpClient = await CreateHttpClientAsync();
+            var url = $"/api/query";
+
+            var json = JsonSerializer.Serialize(command);
+            using var httpContent = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            };
+
+            var response = await httpClient.SendAsync(httpContent);
+
+            await EnsureSuccessStatusCodeAsync(response);
+
+            return await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
         }
     }
 

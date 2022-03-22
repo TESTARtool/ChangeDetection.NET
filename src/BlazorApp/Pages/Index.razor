@@ -1,7 +1,7 @@
-﻿@page "/"
-@inject ISyncLocalStorageService LocalStorageService
+﻿@page "/{ModelIdentifier}"
+@page "/"
+@inject IModelService modelService;
 
-<PageTitle>Index</PageTitle>
 
 <AuthorizeView>
     <NotAuthorized>
@@ -9,10 +9,200 @@
         Please sign in to view your available models.
     </NotAuthorized>
     <Authorized>
-       <ApplicationList />
+<div class="sidebar">
+    <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-light" style="width: 450px;">
+        <div style="overflow-y:auto">
+            <div class="d-flex align-items-center flex-shrink-0 link-dark text-decoration-none pb-1">
+                <div class="px-3 py-3">
+                    <span class="fs-5 fw-semibold">Models</span>
+                </div>
+            </div>
+            @if (IsLoadingModels)
+            {
+                <div class="d-flex align-items-center flex-shrink-0 link-dark text-decoration-none pb-1">
+                    <div class="px-3 py-3 mx-auto">
+                        <div class="spinner-border" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach(var model in models)
+                {
+                    <div class="group-list px-3 mb-2">
+                        <a href="/@model.ModelIdentifier.Value" class="list-group-item list-group-item-action rounded-3">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">@model.Name</h5>
+                                <small class="text-muted">@model.ModelIdentifier.Value</small>
+                            </div>
+                            <p class="mb-1">@model.Version</p>
+                            <small class="text-muted">@string.Join(", ", model.AbstractionAttributes)</small>
+                        </a>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+  @if (SelectedModel is not null)
+  {
+      <div class="p-2 flex-fill px-3 py-3">
+          <div class="row">
+              <div class="col-8">
+                <div class="fs-5 fw-semibold">@SelectedModel.Name</div>
+                <div class="fs-7 text-muted">@SelectedModel.Version</div>
+              </div>
+              <div class="col-4 text-end align-self-center">
+                  <a href="/Graph/@SelectedModel.ModelIdentifier.Value" class="btn btn-secondary">Open Graph</a>
+                  <a href="Diff" class="btn btn-secondary disabled">Compare with</a>
+              </div>
+          </div>
+          <div class="row mt-3">
+              <div class="col-12">
+
+                    <div class="card">
+                        <div class="card-header">
+                            Test Sequences
+                        </div>
+                        @if (IsLoadingSelectedModel)
+                        {
+                            <div class="mx-auto">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <table class="table table-borderless mt-1">
+                                <thead class="table-white">
+                                    <tr>
+                                        <th scope="col"></th> <!-- Icon -->
+                                        <th scope="col">Start data/time</th>
+                                        <th scope="col">Number of steps</th>
+                                        <th scope="col">Quirks</th>
+                                        <th scope="col">Deterministic run</th>
+                                        <th scope="col"></th> <!-- button -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var sequence in TestSequences)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @if (sequence.Verdict == Verdict.Success)
+                                                {
+                                                    <i class="bi bi-hand-thumbs-up-fill text-success"></i>
+                                                }
+                                                @if (sequence.Verdict == Verdict.InterruptBySystem)
+                                                {
+                                                    <i class="bi bi-exclamation text-error"></i>
+                                                }
+                                                @if (sequence.Verdict == Verdict.InterruptByUser)
+                                                {
+                                                    <i class="bi bi-hand-index text-primary"></i>
+                                                }
+                                                @if (sequence.Verdict == Verdict.Unknown)
+                                                {
+                                                    <i class="bi bi-question text-primary"></i>
+                                                }
+                                            </td>
+                                            <td>@sequence.StartDateTime.ToString("MMM dd, yyyy h:mm:ss tt")</td>
+                                            <td>@sequence.NumberOfSteps</td>
+                                            <td>@sequence.NumberOfErrors</td>
+                                            <td>
+                                                @if (@sequence.IsSequenceDeterministic)
+                                                {
+                                                    <i class="fs-6 bi bi-check text-success"></i>
+                                                }
+                                                @if (!@sequence.IsSequenceDeterministic)
+                                                {
+                                                    <i class="fs-6 bi bi-x text-error"></i>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-secondary" @onclick="(e) => ShowTestSequenceAsync(e, sequence)">Show</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+              </div>
+          </div>
+      </div>
+  }
+</div>
     </Authorized>
 </AuthorizeView>
 
-@code{
 
+
+@code {
+    [Parameter] public string? ModelIdentifier { get; set; }
+    [CascadingParameter] public IModalService Modal { get; set; }
+    public Model? SelectedModel { get; set; }
+    public List<Model> models = new();
+    public List<TestSequence> TestSequences = new();
+    public bool IsLoadingModels { get; set; }
+    public bool IsLoadingSelectedModel { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (!models.Any())
+        {
+            IsLoadingModels = true;
+            StateHasChanged();
+            models = await modelService.AllModels().ToListAsync();
+            IsLoadingModels = false;
+            StateHasChanged();
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private EventCallback ShowTestSequenceAsync(MouseEventArgs s, TestSequence testSequence)
+    {
+        var options = new ModalOptions();
+        var parameters = new ModalParameters();
+        parameters.Add("TestSequence", testSequence);
+
+        var loading = Modal.Show<TestSequenceVisualisations>("Test Sequence Visualisation", parameters, options );
+
+        return EventCallback.Empty;
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        TestSequences.Clear();
+
+        if (ModelIdentifier is not null)
+        {
+            IsLoadingSelectedModel = true;
+            StateHasChanged();
+
+            var modelId = new ModelIdentifier(ModelIdentifier);
+            SelectedModel = models.FirstOrDefault(x => x.ModelIdentifier == modelId);
+            TestSequences = await modelService.TestSequences(modelId).ToListAsync();
+
+            IsLoadingSelectedModel = false;
+            StateHasChanged();
+        }
+
+        if (ModelIdentifier is not null && SelectedModel is null)
+        {
+            // something odd here TODO handle this case
+            SelectedModel = new Model
+            {
+                Name = $"Model with {ModelIdentifier} not found.",
+                Version = "",
+                AbstractionAttributes = Array.Empty<string>(),
+                AbstractStates = Array.Empty<AbstractState>(),
+                ModelIdentifier = new ModelIdentifier(""),
+             };
+        }
+    }
 }

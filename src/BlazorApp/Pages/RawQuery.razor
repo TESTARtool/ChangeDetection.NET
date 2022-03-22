@@ -1,0 +1,85 @@
+﻿@page "/Query"
+@inject IJSRuntime JS
+@inject IChangeDetectionHttpClient client
+@using System.Text.RegularExpressions
+@using Testar.ChangeDetection.Core
+
+<div class="p-3 h-100 container-fluid" style="display: flex; flex-direction: column; height:100%">
+    <div class="row">
+        <EditForm OnSubmit="ExecuteQuery" Model="QueryModel">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col">
+                        <div class="input-group">
+                            <div class="input-group-text" id="btnGroupQuery">Query</div>
+                            <InputText class="form-control" @bind-Value="QueryModel.Query" aria-label="Input for query" aria-describedby="btnGroupQuery" />
+                        </div>
+                    </div>
+                    <div class="col-md-auto">
+                        <button type="submit" class="btn btn-warning">Execute</button>
+                    </div>
+                </div>
+                <div class="row px-2 py-2">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-muted">Parameter</th>
+                                <th scope="col" class="text-muted">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var parameter in QueryModel.Parameters)
+                            {
+                                <tr>
+                                    <th scope="row">@parameter.Name</th>
+                                    <td><InputText @bind-Value="parameter.Value" /></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+    <div class="row flex-grow-1">
+        <div class="col-12 h-100">
+            <ul class="nav nav-pills mb-3 h-100" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="btn" id="pills-pretty-json-tab" data-bs-toggle="pill" data-bs-target="#pills-pretty-json" type="button" role="tab" aria-controls="pills-pretty-json" aria-selected="true">Pretty Json</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="btn" id="pills-raw-json-tab" data-bs-toggle="pill" data-bs-target="#pills-raw-json" type="button" role="tab" aria-controls="pills-raw-json" aria-selected="false">Raw Json</button>
+                </li>
+            </ul>
+            <div class="tab-content h-100" id="pills-tabContent">
+                <div class="tab-pane show" id="pills-pretty-json" role="tabpanel" aria-labelledby="pills-pretty-json-tab">
+                    <pre class="h-100" style="overflow:scroll">@PrettyJson</pre>
+                </div>
+                <div class="tab-pane" id="pills-raw-json" role="tabpanel" aria-labelledby="pills-raw-json-tab">
+                    <pre class="h-100"  style="overflow:scroll">@RawJson</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public QueryModel QueryModel = new();
+    public MarkupString PrettyJson { get; set; } = new();
+    public string RawJson { get; set; } = default!;
+
+    public async void ExecuteQuery()
+    {
+        var command = new OrientDbCommand(QueryModel.Query);
+
+        foreach(var parameter in QueryModel.Parameters)
+        {
+            command.AddParameter(parameter.Name, parameter.Value);
+        }
+
+        RawJson = await ((ChangeDetectionHttpClient)client).QueryRaw(command);
+        var prettyJson = await JS.InvokeAsync<string>("prettifyJson", RawJson);
+
+        PrettyJson = new MarkupString(prettyJson);
+    }
+}

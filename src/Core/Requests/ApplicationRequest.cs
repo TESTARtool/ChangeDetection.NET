@@ -2,13 +2,13 @@
 
 namespace Testar.ChangeDetection.Core.Requests;
 
-public class ApplicationRequest : IRequest<Application>
+public class ApplicationRequest : IRequest<Model>
 {
     public string ApplicationName { get; init; }
     public string ApplicationVersion { get; init; }
 }
 
-public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, Application>
+public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, Model>
 {
     private readonly IChangeDetectionHttpClient client;
 
@@ -17,7 +17,7 @@ public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, App
         this.client = client;
     }
 
-    public async Task<Application> Handle(ApplicationRequest request, CancellationToken cancellationToken)
+    public async Task<Model> Handle(ApplicationRequest request, CancellationToken cancellationToken)
     {
         var application = await GetApplicationAsync(request);
         var states = new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
@@ -35,13 +35,13 @@ public class ApplicationRequestHandler : IRequestHandler<ApplicationRequest, App
             })
             .ToArrayAsync();
 
-        return new Application
+        return new Model
         {
-            ApplicationName = request.ApplicationName,
-            ApplicationVersion = request.ApplicationVersion,
+            Name = request.ApplicationName,
+            Version = request.ApplicationVersion,
             ModelIdentifier = new ModelIdentifier(application.ModelIdentifier),
             AbstractionAttributes = application.AbstractionAttributes,
-            AbstractStates = await states
+            AbstractStates = await states,
         };
     }
 

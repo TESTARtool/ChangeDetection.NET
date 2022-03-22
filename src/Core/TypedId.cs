@@ -12,3 +12,5 @@ public record struct OrientDbId(string Id)
 
 public record struct AbstractStateId(string Value);
 public record struct WidgetId(string Value);
+
+public record struct SequenceId(string Value);

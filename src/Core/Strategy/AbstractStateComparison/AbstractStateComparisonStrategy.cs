@@ -13,7 +13,7 @@ public class AbstractStateComparisonStrategy : IChangeDetectionStrategy
 
     public string Name => "Proof Of concept - Abstract State Comparison";
 
-    public async Task ExecuteChangeDetectionAsync(Application control, Application test, IFileOutputHandler fileOutputHandler)
+    public async Task ExecuteChangeDetectionAsync(Model control, Model test, IFileOutputHandler fileOutputHandler)
     {
         var abstractStatesEqual = control.AbstractionAttributes.SequenceEqual(test.AbstractionAttributes);
 

@@ -1,0 +1,18 @@
+﻿@page "/OldIndex"
+@inject ISyncLocalStorageService LocalStorageService
+
+<PageTitle>Index</PageTitle>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <h1>Welcome to TESTAR Change Detection Tool</h1>
+        Please sign in to view your available models.
+    </NotAuthorized>
+    <Authorized>
+       <ApplicationList />
+    </Authorized>
+</AuthorizeView>
+
+@code{
+
+}

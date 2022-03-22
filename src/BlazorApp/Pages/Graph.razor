@@ -90,49 +90,31 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //if (!Directory.Exists(ModelIdentifier))
-        //{
-            try
+        var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), false);
+
+        foreach (var element in elements)
+        {
+            if (element.Document.Properties.TryGetValue("screenshot", out var screenshotId))
             {
-                Directory.CreateDirectory(ModelIdentifier);
-
-                var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), false);
-
-                foreach (var element in elements)
-                {
-                    if (element.Document.Properties.TryGetValue("screenshot", out var screenshotId))
-                    {
-                        ProgressStatus = $"Download image {screenshotId.ToString()}.png";
-                        StateHasChanged();
-
-                        var bytes = await graphService.DownloadScreenshotAsync(screenshotId.ToString()!);
-
-                        await File.WriteAllBytesAsync($"{ModelIdentifier}/{screenshotId}.png", bytes);
-                    }
-                }
-
-                var epocMili = DateTime.UtcNow.Millisecond;
-                var graphName = $"{ModelIdentifier}_AC_{epocMili}_elements.json";
-
-                ProgressStatus = "Transforming graph data";
+                ProgressStatus = $"Download image {screenshotId.ToString()}.png";
                 StateHasChanged();
 
-                GraphInJson = JsonSerializer.Serialize(elements);
-                Console.WriteLine(Directory.GetCurrentDirectory());
-                await File.WriteAllTextAsync($"{ModelIdentifier}/graph.json", GraphInJson);
+                var base64screenshot = await graphService.DownloadScreenshotAsync(screenshotId.ToString()!);
+
+                element.Document.Properties["screenshot"] = base64screenshot;
             }
-            catch (Exception)
-            {
-                //if (Directory.Exists(ModelIdentifier))
-                //{
-                //    Directory.Delete(ModelIdentifier, recursive: true);
-                //}
-                throw;
-            }
-        //}
+        }
+
+        var epocMili = DateTime.UtcNow.Millisecond;
+        var graphName = $"{ModelIdentifier}_AC_{epocMili}_elements.json";
+
+        ProgressStatus = "Transforming graph data";
+        StateHasChanged();
+
+        GraphInJson = JsonSerializer.Serialize(elements);
          
-         ProgressStatus = "Loading graph done";
-         IsGraphAvailable = true;
+        ProgressStatus = "Loading graph done";
+        IsGraphAvailable = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

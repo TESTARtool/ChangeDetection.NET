@@ -16,7 +16,7 @@ public interface IGraphService
 
     Task<GraphElement[]> FetchDiffGraph(ModelIdentifier modelIdentifier1, ModelIdentifier modelIdentifier2);
 
-    Task<byte[]> DownloadScreenshotAsync(string id);
+    Task<string> DownloadScreenshotAsync(string id);
 
     string GenerateJsonString(GraphElement[] elements);
 }
@@ -41,9 +41,11 @@ public class GraphService : IGraphService
         return JsonSerializer.Serialize(elements, options);
     }
 
-    public Task<byte[]> DownloadScreenshotAsync(string id)
+    public async Task<string> DownloadScreenshotAsync(string id)
     {
-        return httpClient.DocumentAsync(new OrientDbId(id.Replace('_', ':')));
+        var screenshot = await httpClient.DocumentAsBase64Async(new OrientDbId(id.Replace('_', ':')));
+
+        return screenshot ?? string.Empty;
     }
 
     public async Task<GraphElement[]> FetchAbstractConcreteConnectors(ModelIdentifier modelIdentifier)

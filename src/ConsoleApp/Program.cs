@@ -8,6 +8,7 @@ using Testar.ChangeDetection.ConsoleApp;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
+using Testar.ChangeDetection.Core.Services;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
@@ -24,6 +25,7 @@ await Host.CreateDefaultBuilder(args)
         services.Configure<CompareOptions>(
             hostContext.Configuration.GetSection(CompareOptions.ConfigName));
 
+        services.AddScoped<IModelService, ModelService>();
         services.AddScoped<IGraphService, GraphService>();
         services.AddSingleton<IChangeDetectionHttpClient, ConsoleToClient>();
 
