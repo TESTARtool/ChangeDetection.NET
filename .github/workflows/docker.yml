@@ -2,7 +2,7 @@ name: Docker Build
 
 on:
   push:
-    branches: [ features/docker-build ]
+    branches: [ features/dockerbuild ]
 
 jobs:
   pubh_to_registry:
