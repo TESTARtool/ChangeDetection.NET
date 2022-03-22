@@ -1,0 +1,39 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  pubh_to_registry:
+    name: Push Testar-Net-UI image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: CheckOut Repository
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      
+      - name: Build and push testar-net-ui
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./src/BlazorApp/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:latest
+
+      - name: Build and push testar-net-server
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./src/ChangeDetection.Server/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-server:latest
+
