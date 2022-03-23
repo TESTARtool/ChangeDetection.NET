@@ -15,7 +15,7 @@
     height: calc(100% - 70px);
 }
 .screenshot{
-    max-height: calc(100% - 70px);
+    max-height: 100%
 }
 .text-row{
     height: 60px;
@@ -97,10 +97,10 @@
                         <div class="carousel-item h-100 @((visualisation.Order == 1)? "active" : "")">
                             <div class="container-fluid h-100">
                                 <div class="row image-row">
-                                    <div class="col text-center">
+                                    <div class="col text-center h-100">
                                         <img src="data:image/png;base64,@visualisation.BeforeImage" alt="before image" class="img-fluid screenshot" >
                                     </div>
-                                    <div class="col text-center">
+                                    <div class="col text-center h-100">
                                         <img src="data:image/png;base64,@visualisation.AfterImage" alt="after image" class="img-fluid screenshot">
                                     </div>
                                 </div>
