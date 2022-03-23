@@ -6,15 +6,25 @@
     width:80%;
 }
 .blazored-modal-content{
-    height:100%;
-    overflow-y:auto;
-    overflow-x: hidden;
+    height: calc(100% - 70px);
+}
+.take-rest{
+    height: calc(100% - 60px);
+}
+.image-row{
+    height: calc(100% - 70px);
+}
+.screenshot{
+    max-height: calc(100% - 70px);
+}
+.text-row{
+    height: 60px;
 }
 </style>
 
 <div class="h-100" >
 
-    <div class="row">
+    <div class="row" style="max-height:52px; height:52px; overflow:hidden">
         <div class="col">
             <h6>Sequence verdict</h6>
             @if (TestSequence.Verdict == Verdict.Success) 
@@ -62,63 +72,64 @@
              }
         </div>
     </div>
-    <br/>
-
-    @if (IsLoading)
-    {
-        <div class="row align-items-center">
-          <div class="col text-center">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden">Loading...</span>
+        @if (IsLoading)
+        {
+            <div class="row align-items-center" style="margin-top:20px">
+              <div class="col text-center">
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-    }
-    else
-    {
-    
-        <div id="visualisationCarousel" class="carousel carousel-dark carousel-fade" data-bs-ride="carousel" data-bs-interval="false">
-            <div class="carousel-indicators">
-                @foreach(var visualisation in visulations)
-                {
-                    <button type="button" data-bs-target="#visualisationCarousel" data-bs-slide-to="@visualisation.Order" class="active" aria-current="true" aria-label="Slide @visualisation.Order"></button>
-                }
-            </div>
-            <div class="carousel-inner">
-                @foreach(var visualisation in visulations)
-                {
-                    <div class="carousel-item @((visualisation.Order == 0)? "active" : "")">
-                        <div class="container-fluid">
-                            <div class="row">
-                                <div class="col">
-                                    <img src="data:image/png;base64,@visualisation.BeforeImage" class="d-block w-100">
+        }
+        else
+        {
+            <div id="visualisationCarousel" class="carousel carousel-dark carousel-fade take-rest" data-bs-ride="carousel" data-bs-interval="false"  style="margin-top:20px">
+                <div class="carousel-indicators">
+                    @foreach(var visualisation in visulations)
+                    {
+                        <button type="button" data-bs-target="#visualisationCarousel" data-bs-slide-to="@visualisation.Order" class="active" aria-current="true" aria-label="Slide @visualisation.Order"></button>
+                    }
+                </div>
+                <div class="carousel-inner h-100">
+                    @foreach(var visualisation in visulations)
+                    {
+                        <div class="carousel-item h-100 @((visualisation.Order == 1)? "active" : "")">
+                            <div class="container-fluid h-100">
+                                <div class="row image-row">
+                                    <div class="col text-center">
+                                        <img src="data:image/png;base64,@visualisation.BeforeImage" alt="before image" class="img-fluid screenshot" >
+                                    </div>
+                                    <div class="col text-center">
+                                        <img src="data:image/png;base64,@visualisation.AfterImage" alt="after image" class="img-fluid screenshot">
+                                    </div>
                                 </div>
-                                <div class="col">
-                                    <img src="data:image/png;base64,@visualisation.AfterImage" class="d-block w-100">
+                                <div class="row text-row">
+                                    <div class="col text-center">
+                                        <h5>@visualisation.Order</h5>
+                                    </div>
+                                    <div class="col text-center">
+                                        <h5>@visualisation.ActionDescription</h5>
+                                    </div>
+                                    <div class="col text-center">
+                                         <h5>@(visualisation.Order + 1)</h5>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row text-center">
-                                <br/>
-                                <h5>@visualisation.ActionDescription</h5>
-                                <br/>
-                                <br/>
-                                <br/>
                             </div>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#visualisationCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#visualisationCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#visualisationCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#visualisationCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
-        </div>
-    }
-</div>
+        }
+    </div>
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     [Parameter] public TestSequence TestSequence { get; set; }

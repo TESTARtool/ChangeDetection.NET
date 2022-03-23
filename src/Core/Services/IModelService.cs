@@ -94,7 +94,7 @@ public class ModelService : IModelService
             yield break;
         }
 
-        var order = 0;
+        var order = 1;
         var selectedNode = firstNode;
         var beforeImage = await GetImageFromSequenceNode(selectedNode);
         do
