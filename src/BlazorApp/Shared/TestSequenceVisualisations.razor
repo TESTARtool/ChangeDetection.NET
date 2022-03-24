@@ -12,10 +12,13 @@
     height: calc(100% - 60px);
 }
 .image-row{
-    height: calc(100% - 70px);
+    height: calc(100% - 104px);
 }
 .screenshot{
     max-height: 100%
+}
+.order-text{
+    height: 24px;
 }
 .text-row{
     height: 60px;
@@ -96,6 +99,14 @@
                     {
                         <div class="carousel-item h-100 @((visualisation.Order == 1)? "active" : "")">
                             <div class="container-fluid h-100">
+                                <div class="row order-text">
+                                    <div class="col text-center">
+                                        <h5>@visualisation.Order</h5>
+                                    </div>
+                                    <div class="col text-center">
+                                        <h5>@(visualisation.Order + 1)</h5>
+                                    </div>
+                                </div>
                                 <div class="row image-row">
                                     <div class="col text-center h-100">
                                         <img src="data:image/png;base64,@visualisation.BeforeImage" alt="before image" class="img-fluid screenshot" >
@@ -106,13 +117,7 @@
                                 </div>
                                 <div class="row text-row">
                                     <div class="col text-center">
-                                        <h5>@visualisation.Order</h5>
-                                    </div>
-                                    <div class="col text-center">
                                         <h5>@visualisation.ActionDescription</h5>
-                                    </div>
-                                    <div class="col text-center">
-                                         <h5>@(visualisation.Order + 1)</h5>
                                     </div>
                                 </div>
                             </div>
