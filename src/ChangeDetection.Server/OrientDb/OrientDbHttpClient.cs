@@ -11,7 +11,8 @@ public class OrientDbHttpClient
 {
     private readonly HttpClient client;
     private readonly OrientDbOptions orientDbOptions;
-    private JsonSerializerOptions jsonOptions;
+    private readonly JsonSerializerOptions jsonOptions;
+    private string? dbName;
 
     public OrientDbHttpClient(HttpClient client, IOptions<OrientDbOptions> orientDbOptions)
     {
@@ -34,6 +35,16 @@ public class OrientDbHttpClient
         var orientDbSession = claims.First(x => x.Type == "OrientDbSession").Value;
         client.DefaultRequestHeaders.Add("Cookie", orientDbSession);
 
+        if (orientDbOptions.MultiDatabaseSupport)
+        {
+            dbName = claims.FirstOrDefault(x => x.Type == "DatabaseName")?.Value;
+        }
+
+        if (string.IsNullOrWhiteSpace(dbName))
+        {
+            dbName = orientDbOptions.StateDatabaseName;
+        }
+
         return this;
     }
 
@@ -45,10 +56,10 @@ public class OrientDbHttpClient
         return this;
     }
 
-    public async Task<OrientDbSession?> LoginAsync(Database database)
+    public async Task<OrientDbSession?> LoginAsync(string? databaseName)
     {
-        var databaseName = DatabaseToName(database);
-        var response = await client.GetAsync($"connect/{databaseName}");
+        var dbName = databaseName ?? orientDbOptions.StateDatabaseName;
+        var response = await client.GetAsync($"connect/{dbName}");
 
         if (!response.IsSuccessStatusCode)
         {
@@ -57,12 +68,12 @@ public class OrientDbHttpClient
 
         var sessionId = OrientDbSession.ParseSessionId(response.Headers);
 
-        return new OrientDbSession(orientDbOptions.OrientDbServerUrl, sessionId, databaseName);
+        return new OrientDbSession(orientDbOptions.OrientDbServerUrl, sessionId, dbName!);
     }
 
-    public async Task<OrientDbResult> QueryAsync(OrientDbCommand orientDbCommand, Database database)
+    public async Task<OrientDbResult> QueryAsync(OrientDbCommand orientDbCommand)
     {
-        var url = $"/command/{DatabaseToName(database)}/sql";
+        var url = $"/command/{dbName}/sql";
 
         var json = JsonSerializer.Serialize(orientDbCommand);
         using var httpContent = new HttpRequestMessage(HttpMethod.Post, url)
@@ -81,9 +92,9 @@ public class OrientDbHttpClient
         return orientDbResult;
     }
 
-    public async Task<OrientDbDocumentResult> DocumentAsync(OrientDbId orientDbId, Database database)
+    public async Task<OrientDbDocumentResult> DocumentAsync(OrientDbId orientDbId)
     {
-        var url = $"/document/{DatabaseToName(database)}/{orientDbId.FormatId()}";
+        var url = $"/document/{dbName}/{orientDbId.FormatId()}";
 
         var response = await client.GetAsync(url);
         response.EnsureSuccessStatusCode();
@@ -95,11 +106,4 @@ public class OrientDbHttpClient
 
         return orientDbResult;
     }
-
-    private string DatabaseToName(Database database) => database switch
-    {
-        Database.StateDatabase => orientDbOptions.StateDatabaseName,
-        //Database.CompareDatabase => orientDbOptions.CompareDatabaseName,
-        _ => throw new ArgumentException("Value not found"),
-    };
 }
