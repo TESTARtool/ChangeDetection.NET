@@ -117,7 +117,14 @@
                                 </div>
                                 <div class="row text-row">
                                     <div class="col text-center">
-                                        <h5>@visualisation.ActionDescription</h5>
+                                        @if (!visualisation.IsDeterministic)
+                                        {
+                                            <h5>Non-deterministic - @visualisation.ActionDescription</h5>
+                                        }
+                                        else
+                                        {
+                                            <h5>@visualisation.ActionDescription</h5>
+                                        }
                                     </div>
                                 </div>
                             </div>
