@@ -12,7 +12,7 @@ The service is unhealthy when something is wrong with the environment variables 
 ## Docker
 A docker image can be run with the following example settings
 ```
-docker run -i -dp 5000:80 --name="Testar-Server" -e JwTokenGenerator__JwtSecurityKey="hfjdhfdifngyuernguinfdfs4235tfmguh" -e JwTokenGenerator__JwtIssuer="http://localhost" -e JwTokenGenerator__JwtAudience="http://localhost" -e JwTokenGenerator__JwtExpiryInSeconds=3600 -e OrientDb__OrientDbServerUrl="http://192.168.188.28:2480" -e OrientDb__StateDatabaseName="testar" <image-name>
+docker run -i -dp 5000:80 --name="Testar-Server" -e JwTokenGenerator__JwtSecurityKey="hfjdhfdifngyuernguinfdfs4235tfmguh" -e JwTokenGenerator__JwtIssuer="http://localhost" -e JwTokenGenerator__JwtAudience="http://localhost" -e JwTokenGenerator__JwtExpiryInSeconds=3600 -e OrientDb__OrientDbServerUrl="http://192.168.188.28:2480" -e OrientDb__StateDatabaseName="testar" rneeft/testar-net-server
 ```
 
 ### OrientDB multi database support

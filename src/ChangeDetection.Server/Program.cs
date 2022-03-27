@@ -35,10 +35,11 @@ builder.Services.AddCors(setup =>
     });
 });
 
-builder.Services.AddHttpClient<OrientDbHttpClient>();
 builder.Services.AddControllers();
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>()
+    .AddTransient<OrientDbHttpClient>();
 
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

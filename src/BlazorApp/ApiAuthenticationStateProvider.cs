@@ -56,20 +56,28 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         NotifyAuthenticationStateChanged(authState);
     }
 
+    private static byte[] ParseBase64WithoutPadding(string base64)
+    {
+        switch (base64.Length % 4)
+        {
+            case 2: base64 += "=="; break;
+            case 3: base64 += "="; break;
+        }
+        return Convert.FromBase64String(base64);
+    }
+
     private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
     {
         var claims = new List<Claim>();
         var payload = jwt.Split('.')[1];
         var jsonBytes = ParseBase64WithoutPadding(payload);
-        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-        // TODO we moeten hier de exp nog testen...
-        keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
-
-        if (roles != null)
+        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes) ?? new Dictionary<string, object>();
+        if (keyValuePairs.TryGetValue(ClaimTypes.Role, out var roles) && roles?.ToString() is not null)
         {
-            if (roles.ToString().Trim().StartsWith("["))
+            var rolesString = roles?.ToString();
+            if (rolesString is not null && rolesString.Trim().StartsWith("["))
             {
-                var parsedRoles = JsonSerializer.Deserialize<string[]>(roles.ToString());
+                var parsedRoles = JsonSerializer.Deserialize<string[]>(rolesString) ?? Array.Empty<string>();
 
                 foreach (var parsedRole in parsedRoles)
                 {
@@ -78,24 +86,14 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
             }
             else
             {
-                claims.Add(new Claim(ClaimTypes.Role, roles.ToString()));
+                claims.Add(new Claim(ClaimTypes.Role, rolesString ?? string.Empty));
             }
 
             keyValuePairs.Remove(ClaimTypes.Role);
         }
 
-        claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString())));
+        claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value?.ToString() ?? string.Empty)));
 
         return claims;
-    }
-
-    private byte[] ParseBase64WithoutPadding(string base64)
-    {
-        switch (base64.Length % 4)
-        {
-            case 2: base64 += "=="; break;
-            case 3: base64 += "="; break;
-        }
-        return Convert.FromBase64String(base64);
     }
 }
