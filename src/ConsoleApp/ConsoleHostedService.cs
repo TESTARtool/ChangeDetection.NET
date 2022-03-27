@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Testar.ChangeDetection.ConsoleApp.Scenarios;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Graph;
 
@@ -14,6 +15,7 @@ internal sealed partial class ConsoleHostedService : IHostedService
     private readonly IChangeDetectionHttpClient changeDetectionHttpClient;
     private readonly IGraphService graphService;
     private readonly IMediator mediator;
+    private readonly IScenario scenario;
     private readonly CompareOptions compareOptions;
     private Task? applicationTask;
     private int? exitCode;
@@ -25,7 +27,8 @@ internal sealed partial class ConsoleHostedService : IHostedService
         IOptions<TestarServerOptions> orientDbOptions,
         IChangeDetectionHttpClient changeDetectionHttpClient,
         IGraphService graphService,
-        IMediator mediator
+        IMediator mediator,
+        IScenario scenario
         )
     {
         this.logger = logger;
@@ -34,25 +37,8 @@ internal sealed partial class ConsoleHostedService : IHostedService
         this.changeDetectionHttpClient = changeDetectionHttpClient;
         this.graphService = graphService;
         this.mediator = mediator;
+        this.scenario = scenario;
         this.compareOptions = compareOptions.Value;
-    }
-
-    public async Task RunAsync()
-    {
-        await changeDetectionHttpClient.LoginAsync(orientDbOptions.Value.Url, new LoginModel
-        {
-            Username = orientDbOptions.Value.Username,
-            Password = "testar"
-        });
-
-        //var modelId1 = new ModelIdentifier("1chdi5230521708089");
-        //var modelId2 = new ModelIdentifier("1chxaqf301488509161");
-
-        //var elements = await graphService.FetchDiffGraph(modelId1, modelId2);
-
-        //var json = graphService.GenerateJsonString(elements);
-
-        //File.WriteAllText("my-json.json", json);
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -72,7 +58,7 @@ internal sealed partial class ConsoleHostedService : IHostedService
             {
                 try
                 {
-                    await RunAsync();
+                    await scenario.RunAsync();
 
                     exitCode = 0;
                 }
