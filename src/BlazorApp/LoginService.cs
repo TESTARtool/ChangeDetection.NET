@@ -53,7 +53,7 @@ public class AuthService : IAuthService
                 await localStorage.SetItemAsStringAsync("authToken", token);
                 await localStorage.SetItemAsync<Uri>("serverLocation", new Uri(user.ServerUrl));
 
-                ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsAuthenticated(user.UserName);
+                ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsAuthenticated(new JwToken(token));
 
                 return true;
             }
