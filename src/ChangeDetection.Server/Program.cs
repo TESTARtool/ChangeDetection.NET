@@ -21,9 +21,11 @@ builder.Services.Configure<GeneratorOptions>(
 builder.Services.Configure<OrientDbOptions>(
     builder.Configuration.GetSection(OrientDbOptions.ConfigName));
 
-var xx = builder.Configuration[$"{OrientDbOptions.ConfigName}:{nameof(OrientDbOptions.MultiDatabaseSupport)}"];
+var hasMultiDatabaseSupport = builder.Configuration
+    .GetSection(OrientDbOptions.ConfigName)
+    .GetValue<bool>(nameof(OrientDbOptions.MultiDatabaseSupport));
 
-if (xx is not null && xx == bool.TrueString)
+if (hasMultiDatabaseSupport)
 {
     builder.Services.AddTransient<IDatabaseSelector, ClaimsDatabaseSelector>();
 }
