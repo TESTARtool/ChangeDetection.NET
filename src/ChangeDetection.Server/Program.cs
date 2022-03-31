@@ -21,6 +21,17 @@ builder.Services.Configure<GeneratorOptions>(
 builder.Services.Configure<OrientDbOptions>(
     builder.Configuration.GetSection(OrientDbOptions.ConfigName));
 
+var xx = builder.Configuration[$"{OrientDbOptions.ConfigName}:{nameof(OrientDbOptions.MultiDatabaseSupport)}"];
+
+if (xx is not null && xx == bool.TrueString)
+{
+    builder.Services.AddTransient<IDatabaseSelector, ClaimsDatabaseSelector>();
+}
+else
+{
+    builder.Services.AddTransient<IDatabaseSelector, OptionsDatabaseSelector>();
+}
+
 var corsPolicyName = "myCors";
 
 builder.Services.AddCors(setup =>
