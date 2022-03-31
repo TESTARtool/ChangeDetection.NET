@@ -17,9 +17,7 @@ docker run -i -dp 5000:80 --name="Testar-Server" -e JwTokenGenerator__JwtSecurit
 
 ### OrientDB multi database support
 Available from version 1.1.0
-Optionaly the server supports Multi dabatabase approach. Setting the `OrientDb__StateDatabaseName` 
-is optional and can provide a fallback value. The user must prefix the username with the name of 
-the database. For example: DataName\UserName. 
+Optionaly the server supports Multi dabatabase approach. Setting the `OrientDb__StateDatabaseName` is optional. The user must prefix the username with the name of the database. For example: DataName\UserName. 
 
 Add the following setting to the `docker run` command
 

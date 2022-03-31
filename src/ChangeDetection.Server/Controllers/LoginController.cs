@@ -60,8 +60,8 @@ public class LoginController : Controller
         }
 
         var result = await orientDbHttpClient
-        .WithUsernameAndPassword(username, login.Password)
-        .LoginAsync(databaseName);
+            .WithUsernameAndPassword(username, login.Password)
+            .LoginAsync(databaseName);
 
         if (result is null)
         {

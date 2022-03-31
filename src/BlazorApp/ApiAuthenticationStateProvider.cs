@@ -38,7 +38,8 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
-        return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(savedToken), "jwt")));
+        var claims = ParseClaimsFromJwt(savedToken);
+        return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claims, "jwt")));
     }
 
     public void MarkUserAsAuthenticated(string username)
@@ -72,26 +73,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         var payload = jwt.Split('.')[1];
         var jsonBytes = ParseBase64WithoutPadding(payload);
         var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes) ?? new Dictionary<string, object>();
-        if (keyValuePairs.TryGetValue(ClaimTypes.Role, out var roles) && roles?.ToString() is not null)
-        {
-            var rolesString = roles?.ToString();
-            if (rolesString is not null && rolesString.Trim().StartsWith("["))
-            {
-                var parsedRoles = JsonSerializer.Deserialize<string[]>(rolesString) ?? Array.Empty<string>();
-
-                foreach (var parsedRole in parsedRoles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, parsedRole));
-                }
-            }
-            else
-            {
-                claims.Add(new Claim(ClaimTypes.Role, rolesString ?? string.Empty));
-            }
-
-            keyValuePairs.Remove(ClaimTypes.Role);
-        }
-
+       
         claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value?.ToString() ?? string.Empty)));
 
         return claims;

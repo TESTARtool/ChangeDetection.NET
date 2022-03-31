@@ -83,7 +83,11 @@ public class OrientDbHttpClient
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            response = await client.SendAsync(httpContent);
+            using var httpContent2 = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(json),
+            };
+            response = await client.SendAsync(httpContent2);
         }
 
         response.EnsureSuccessStatusCode();

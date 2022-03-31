@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿
+@inherits LayoutComponentBase
 
 <div class="page">
     <main>
@@ -12,16 +13,26 @@
                 <div class="text-end">
                     <AuthorizeView>
                         <Authorized>
-                            <div class="input-group bg-dark">
+                            <button class="btn-link btn text-warning" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false" >
+                                <i class="bi bi-person-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li><h6 class="dropdown-header">Username</h6></li>
+                                <li><div class="dropdown-header">
+                                        @context.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value
+                                </div></li>
 
-                                @if (context.User.Claims.Any(x => x.Type == "DatabaseName"))
+                                @if (context.User.Claims.Any(x => x.Type == OrientDbClaims.DatabaseName))
                                 {
-                                    <i class="input-group-text bi bi-person-fill text-warning bg-dark"></i>
-                                    <span class="input-group-text bg-dark text-light">@context.User.Claims.First(x => x.Type =="DatabaseName").Value</span>
+                                    <li><h6 class="dropdown-header">Database name</h6></li>
+                                    <li><div class="dropdown-header">
+                                        @context.User.Claims.FirstOrDefault(x => x.Type == OrientDbClaims.DatabaseName)?.Value
+                                    </div></li>
                                 }
-                               
-                                <a class="input-group-text btn btn-outline-light me-2" href="Logout">Logout</a>
-                            </div>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="Logout">Logout</a></li>
+                            </ul>
                         </Authorized>
                         <NotAuthorized>
                             <a href="Login" class="btn btn-warning">Login</a>
@@ -37,4 +48,3 @@
     </main>
 
 </div>
-
