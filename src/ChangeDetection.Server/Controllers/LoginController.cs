@@ -15,12 +15,16 @@ namespace Testar.ChangeDetection.Server.Controllers;
 public class LoginController : Controller
 {
     private readonly GeneratorOptions jwtOptions;
+    private readonly ILogger<LoginController> logger;
     private readonly OrientDbHttpClient orientDbHttpClient;
+    private readonly IOptions<OrientDbOptions> orientDbOptions;
 
-    public LoginController(OrientDbHttpClient orientDbHttpClient, IOptions<GeneratorOptions> options)
+    public LoginController(ILogger<LoginController> logger, OrientDbHttpClient orientDbHttpClient, IOptions<GeneratorOptions> options, IOptions<OrientDbOptions> orientDbOptions)
     {
         this.jwtOptions = options.Value;
+        this.logger = logger;
         this.orientDbHttpClient = orientDbHttpClient;
+        this.orientDbOptions = orientDbOptions;
     }
 
     /// <summary>
@@ -33,7 +37,7 @@ public class LoginController : Controller
     ///
     ///     POST /api/Login
     ///     {
-    ///         "username" : "orientDb user",
+    ///         "username" : "orientDb username",
     ///         "password" : "orientDb password"
     ///     }
     ///
@@ -41,33 +45,60 @@ public class LoginController : Controller
     [HttpPost]
     public async Task<IActionResult> Login([FromBody] LoginModel login)
     {
-        var result = await orientDbHttpClient
-            .WithUsernameAndPassword(login.Username, login.Password)
-            .LoginAsync(Database.StateDatabase);
+        var (username, databaseName) = GetUsernameAndDatabaseName(login);
 
-        if (result is null)
+        if (orientDbOptions.Value.MultiDatabaseSupport && databaseName is null)
         {
+            logger.LogWarning("Server support multiple database but client did not specified a databaseName");
             return BadRequest();
         }
 
-        var claims = new[]
+        if (!orientDbOptions.Value.MultiDatabaseSupport && databaseName is not null)
         {
-            new Claim(ClaimTypes.Name, login.Username),
-            new Claim("OrientDbSession", result.SessionId),
+            logger.LogWarning("User tried signin to a database but server does not support multiple databases");
+            return BadRequest();
+        }
+
+        var result = await orientDbHttpClient
+            .WithUsernameAndPassword(username, login.Password)
+            .LoginAsync(databaseName);
+
+        if (result is null)
+        {
+            logger.LogWarning("OrientDb refused request");
+            return Unauthorized();
+        }
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, username),
+            new Claim(OrientDbClaims.OrientDbSession, result.SessionId),
         };
 
+        if (databaseName is not null)
+        {
+            claims.Add(new Claim(OrientDbClaims.DatabaseName, databaseName));
+        }
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.JwtSecurityKey));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expiry = DateTime.Now.AddSeconds(jwtOptions.JwtExpiryInSeconds);
 
         var token = new JwtSecurityToken(jwtOptions.JwtIssuer, jwtOptions.JwtAudience,
             claims,
-            expires: expiry,
-            signingCredentials: creds
+            expires: DateTime.UtcNow.AddSeconds(jwtOptions.JwtExpiryInSeconds),
+            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
         );
 
         var jsonToken = new JwtSecurityTokenHandler().WriteToken(token);
 
         return Ok(jsonToken);
+    }
+
+    public (string username, string? databaseName) GetUsernameAndDatabaseName(LoginModel login)
+    {
+        var splits = login.Username.Split(new[] { '/', '\\' });
+
+        return splits.Length == 2
+            ? (splits[1], splits[0])
+            : (login.Username, null);
     }
 }

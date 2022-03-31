@@ -23,6 +23,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{EDE99C8E-68C7-4D90-9720-09ABC7F7BD5D}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\corebuild.yml = .github\workflows\corebuild.yml
+		.github\workflows\docker.yml = .github\workflows\docker.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChangeDetection.Server", "src\ChangeDetection.Server\ChangeDetection.Server.csproj", "{5E9D8722-8369-4445-80BD-29DE0CCF057F}"

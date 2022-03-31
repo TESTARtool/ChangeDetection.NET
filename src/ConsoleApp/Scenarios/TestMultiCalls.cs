@@ -18,6 +18,9 @@ public class TestMultiCalls : IScenario
 
     public async Task RunAsync()
     {
+        Console.WriteLine("Press key to start");
+        Console.ReadKey();
+
         //var testCases = new List<TestCase>
         //{
         //    new TestCase { Uri = new Uri("http://localhost:5001"), Username ="Rick", Password = "Rick" },
@@ -32,32 +35,42 @@ public class TestMultiCalls : IScenario
 
         var testCases = new List<TestCase>
         {
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar\\Rick", Password = "Rick" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar\\Rick", Password = "Rick" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar2\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar2\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar2\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar2\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar2\\testar", Password = "testar" },
-            new TestCase { Uri = new Uri("http://localhost:5000"), Username ="testar\\testar", Password = "testar" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar\\Rick", Password = "Rick" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar\\testar", Password = "testar" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar\\Rick", Password = "Rick" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar2\\testar", Password = "testar" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar\\testar", Password = "testar" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar2\\testar", Password = "testar" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar\\testar", Password = "testar" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar2\\testar", Password = "testar" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar\\testar", Password = "testar" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar2\\testar", Password = "testar" },
+            new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar\\testar", Password = "testar" },
         };
+
+        //var testCases = new List<TestCase>
+        //{
+        //    //new TestCase { Uri = new Uri("https://localhost:7092"), Username ="Rick", Password = "Rick" },
+        //    new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar", Password = "testar" },
+        //    //new TestCase { Uri = new Uri("https://localhost:7092"), Username ="Rick", Password = "Rick" },
+        //    new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar", Password = "testar" },
+        //    new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar", Password = "testar" },
+        //    new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar", Password = "testar" },
+        //    new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar", Password = "testar" },
+        //    new TestCase { Uri = new Uri("https://localhost:7092"), Username ="testar", Password = "testar" },
+        //};
 
         Console.Write("Running Test ");
 
-        var testTasks = testCases.Select(x => RunTest(x))
-            .ToList();
+        //var testTasks = testCases.Select(x => RunTest(x))
+        //    .ToList();
 
-        await Task.WhenAll(testTasks);
+        //await Task.WhenAll(testTasks);
 
-        //foreach (var test in testCases)
-        //{
-        //    await RunTest(test);
-        //}
+        foreach (var test in testCases)
+        {
+            await RunTest(test);
+        }
 
         Console.WriteLine("[DONE]");
 
@@ -71,6 +84,8 @@ public class TestMultiCalls : IScenario
             Console.WriteLine($"    Query : {test.StatusCodeQuery?.ToString() ?? "XX"}");
             Console.WriteLine($"    oDbID : {test.SessionId?.ToString() ?? "XXXXX"}");
         }
+
+        Console.ReadKey();
     }
 
     private async Task RunTest(TestCase test)

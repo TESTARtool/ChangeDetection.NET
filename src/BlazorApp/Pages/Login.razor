@@ -1,6 +1,7 @@
 ﻿@page "/login"
 @inject NavigationManager NavigationManager;
 @inject IAuthService authService;
+@inject ILocalStorageService localStorage;
 
 @if (ShowErrors)
 {
@@ -11,8 +12,8 @@
 <div class="text-center">
     <div class="form-signin">
         <EditForm Model="user" OnSubmit="HandleLogin">
-        <img class="mb-4" src="images/testar_logo.png" alt="Testar logo" >
-        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+            <img class="mb-4" src="images/testar_logo.png" alt="Testar logo" >
+            <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
 
             <DataAnnotationsValidator />
             <div class="form-floating">
@@ -20,15 +21,14 @@
                 <label for="url" >Server URL</label>
             </div>
 
-            <div class="form-floating">
+            <div class="form-floating mt-1">
                 <InputText id="username" @bind-Value="user.UserName" type="username" class="form-control"
-                            placeholder="username" />
+                           name="username" placeholder="username" />
                 <label for="username">Username</label>
             </div>
 
-            <div class="form-floating">
-                <InputText id="password" @bind-Value="user.Password" type="password" class="form-control"
-                placeholder="password"/>
+            <div class="form-floating mt-1">
+                <InputText id="password" @bind-Value="user.Password" type="password" class="form-control" name="password" placeholder="password"/>
                 <label for="password">Password</label>
             </div>
             <br/>
@@ -56,6 +56,15 @@
     private bool ShowErrors { get; set; }
     private string Error { get; set; }
     private User user = new User();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var location = await localStorage.GetItemAsync<Uri?>("serverLocation");
+        if (location is not null)
+        {
+            user.ServerUrl = location.ToString();
+        }
+    }
 
     private async void HandleLogin()
     {

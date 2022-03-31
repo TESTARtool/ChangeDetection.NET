@@ -13,4 +13,4 @@ Application can run on:
 ## Docs
 - [Development](docs/development.md)
 - [Getting-Started](docs/getting-started.md)
-
+- [Running server in docker](src/ChangeDetection.Server/readme.md)

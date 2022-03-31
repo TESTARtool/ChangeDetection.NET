@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿
+@inherits LayoutComponentBase
 
 <div class="page">
     <main>
@@ -7,17 +8,31 @@
                 <a class="navbar-brand text-warning" href="#">TESTAR.NET</a>
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-left mb-md-0">
                     <li><a href="" class="nav-link px-2 text-white">Home</a></li>
-                    <AuthorizeView>
-                        <Authorized>
-                            <li><a href="/Models" class="nav-link px-2 text-white">Models</a></li>
-                        </Authorized>
-                    </AuthorizeView>
                     <li><a href="https://testar.org/" target="_blank" class="nav-link px-2 text-white">About Testar</a></li>
                 </ul>
                 <div class="text-end">
                     <AuthorizeView>
                         <Authorized>
-                            <a href="Logout" class="btn btn-outline-light me-2">Logout</a>
+                            <button class="btn-link btn text-warning" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false" >
+                                <i class="bi bi-person-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li><h6 class="dropdown-header">Username</h6></li>
+                                <li><div class="dropdown-header">
+                                        @context.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value
+                                </div></li>
+
+                                @if (context.User.Claims.Any(x => x.Type == OrientDbClaims.DatabaseName))
+                                {
+                                    <li><h6 class="dropdown-header">Database name</h6></li>
+                                    <li><div class="dropdown-header">
+                                        @context.User.Claims.FirstOrDefault(x => x.Type == OrientDbClaims.DatabaseName)?.Value
+                                    </div></li>
+                                }
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="Logout">Logout</a></li>
+                            </ul>
                         </Authorized>
                         <NotAuthorized>
                             <a href="Login" class="btn btn-warning">Login</a>

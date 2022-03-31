@@ -20,7 +20,7 @@ public class DocumentController : Controller
     /// <summary>
     /// Gets a document from OrientDB
     /// </summary>
-    /// <param name="orientDbId">Orient DB Id of the document</param>
+    /// <param name="id">Orient DB Id of the document</param>
     /// <returns>Base64 representation of the document</returns>
     /// <remarks>
     /// Sample request
@@ -33,7 +33,7 @@ public class DocumentController : Controller
     {
         var result = await orientDbHttpClient
             .WithSession(User.Claims)
-            .DocumentAsync(new OrientDbId(id), Database.StateDatabase);
+            .DocumentAsync(new OrientDbId(id));
 
         return Ok(result.Value);
     }

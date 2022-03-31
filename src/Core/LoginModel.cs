@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Testar.ChangeDetection.Core;
+﻿namespace Testar.ChangeDetection.Core;
 
 public class LoginModel
 {

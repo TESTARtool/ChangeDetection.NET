@@ -45,7 +45,7 @@ public class QueryController : Controller
         {
             var result = await orientDbHttpClient
                 .WithSession(User.Claims)
-                .QueryAsync(command, Database.StateDatabase);
+                .QueryAsync(command);
 
             return Ok(result.Result);
         }
