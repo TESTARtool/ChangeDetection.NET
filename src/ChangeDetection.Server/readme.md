@@ -22,7 +22,7 @@ Optionaly the server supports Multi dabatabase approach. Setting the `OrientDb__
 Add the following setting to the `docker run` command
 
 ```
-OrientDb__MultiDatabaseSupport = false
+-e OrientDb__MultiDatabaseSupport="true"
 ```
 
 | Setting | Explanation |
