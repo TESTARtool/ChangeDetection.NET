@@ -21,7 +21,13 @@ public class OrientDbHealthCheck : IHealthCheck
             BaseAddress = orientDbOptions.CurrentValue.OrientDbServerUrl
         };
 
-        var response = await httpClient.GetAsync($"connect/{databaseName}");
+        var getUrl = $"connect/{databaseName}";
+        if (orientDbOptions.CurrentValue.MultiDatabaseSupport)
+        {
+            getUrl = "server";
+        }
+
+        var response = await httpClient.GetAsync(getUrl, cancellationToken);
 
         return response.StatusCode == System.Net.HttpStatusCode.Unauthorized
             ? new HealthCheckResult(HealthStatus.Healthy)
