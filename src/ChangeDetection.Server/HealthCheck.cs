@@ -43,7 +43,7 @@ public class OptionsHealthCheck : IHealthCheck
 
         var orientOptions = orientDbOptions.CurrentValue;
 
-        if (string.IsNullOrWhiteSpace(orientOptions.StateDatabaseName))
+        if (!orientDbOptions.CurrentValue.MultiDatabaseSupport && string.IsNullOrWhiteSpace(orientOptions.StateDatabaseName))
         {
             return Task.FromResult(HealthCheckResult.Unhealthy($"{nameof(orientOptions.StateDatabaseName)} is null or empty"));
         }
