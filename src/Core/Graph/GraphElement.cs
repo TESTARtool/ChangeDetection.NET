@@ -34,6 +34,21 @@ public class GraphElement
     [JsonIgnore]
     public bool IsInitial => Classes.Any(x => x == "isInitial");
 
+    [JsonIgnore]
+    public bool IsAbstractState => Classes.Any(x => x == "AbstractState" && Document is Vertex);
+
+    [JsonIgnore]
+    public bool IsConcreteState => Classes.Any(x => x == "ConcreteState" && Document is Vertex);
+
+    [JsonIgnore]
+    public bool IsAbstractAction => Classes.Any(x => x == "AbstractAction" && Document is Edge);
+
+    [JsonIgnore]
+    public bool IsConcreteAction => Classes.Any(x => x == "ConcreteAction" && Document is Edge);
+
+    [JsonIgnore]
+    public bool IsHandeld { get; set; }
+
     public void AddClass(string className)
     {
         Classes.Add(className);

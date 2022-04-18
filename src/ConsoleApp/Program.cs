@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using Testar.ChangeDetection.ConsoleApp;
 using Testar.ChangeDetection.ConsoleApp.Scenarios;
 using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Differences;
 using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Services;
@@ -30,6 +31,7 @@ await Host.CreateDefaultBuilder(args)
         services.AddScoped<IGraphService, GraphService>();
         services.AddSingleton<IChangeDetectionHttpClient, ConsoleToClient>();
         services.AddSingleton<IScenario, ComparisonScenario>();
+        services.AddSingleton<IGraphComparer, GraphComparer>();
 
         services.AddHttpClient();
 

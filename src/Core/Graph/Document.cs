@@ -33,4 +33,11 @@ public abstract class Document
     {
         Properties.Add(key, value);
     }
+
+    public string Property(string key)
+    {
+        return Properties.TryGetValue(key, out var value)
+            ? value?.ToString() ?? string.Empty
+            : string.Empty;
+    }
 }

@@ -8,6 +8,20 @@ public class CompareResults
     public List<GraphElement> GraphApp2 { get; set; }
 }
 
+public class AppGraph
+{
+    public AppGraph(List<GraphElement> elements)
+    {
+        Elements = elements;
+    }
+
+    public List<GraphElement> Elements { get; }
+    public IEnumerable<GraphElement> AbstractStates => Elements.Where(x => x.IsAbstractState);
+    public IEnumerable<GraphElement> AbstractActions => Elements.Where(x => x.IsAbstractAction);
+    public IEnumerable<GraphElement> ConcreteActions => Elements.Where(x => x.IsConcreteAction);
+    public IEnumerable<GraphElement> ConcreteStates => Elements.Where(x => x.IsConcreteState);
+}
+
 public interface IGraphComparer
 {
     Task<CompareResults> Compare(Model model1, Model model2);
@@ -22,21 +36,42 @@ public class GraphComparer : IGraphComparer
         this.graphService = graphService;
     }
 
+    private string[] ParseArray(string value) => value.ToString().Replace("[", "").Replace("]", "").Split(',');
+
     public async Task<CompareResults> Compare(Model model1, Model model2)
     {
+        var graphApp1 = await FetchGraph(model1);
+        var graphApp2 = await FetchGraph(model2);
+
+        var abstractStates = graphApp1.Where(x => x.IsAbstractState);
+        var abstractActions = graphApp1.Where(x => x.IsAbstractAction);
+
+        foreach (var abstractState in abstractStates)
+        {
+            var uy = "concreteActionIds";
+            var id = abstractState.Document.Id;
+            var outgoingActions = abstractActions.Where(x => x.Document.SourceId == id);
+
+
+        }
+
         return new CompareResults
         {
-            GraphApp1 = await FetchGraph(model1),
-            GraphApp2 = await FetchGraph(model2)
+            GraphApp1 = graphApp1,
+            GraphApp2 = graphApp2
         };
     }
 
     private async Task<List<GraphElement>> FetchGraph(Model model)
     {
         var appNameVersion = $"{model.Name} - {model.Version}";
+        var parent = new GraphElement(GraphElement.GroupNodes, new Vertex(appNameVersion), "Parent");
+        parent.Document.AddProperty(nameof(model.Name), model.Name);
+        parent.Document.AddProperty(nameof(model.Version), model.Version);
+
         var appGraph = new List<GraphElement>
         {
-            new GraphElement(GraphElement.GroupNodes, new Vertex(appNameVersion), "Parent")
+            parent
         };
 
         var abstractLayer = await graphService.FetchAbstractLayerAsync(model.ModelIdentifier, false);
