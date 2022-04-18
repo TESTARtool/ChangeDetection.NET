@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Differences;
 using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Services;
@@ -33,7 +34,8 @@ builder.Services
     ;
 
 builder.Services
-    .AddScoped<IGraphService, GraphService>();
+    .AddScoped<IGraphService, GraphService>()
+    .AddScoped<IGraphComparer, GraphComparer>();
 
 builder.Services
     .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()

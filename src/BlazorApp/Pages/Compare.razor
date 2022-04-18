@@ -1,5 +1,8 @@
-﻿@page "/Graph/{ModelIdentifier}"
+﻿@page "/Compare/{App1ModelIdentifier}"
+@page "/Compare/{App1ModelIdentifier}/To/{App2ModelIdentifier}"
 @inject IJSRuntime JS
+@inject IGraphComparer graphCompareService;
+@inject IModelService modelService;
 @inject IGraphService graphService;
 
     <div class="container-fluid p-3">
@@ -8,14 +11,14 @@
             <div class="input-group me-2" >
                 <span class="input-group-text" id="Layout-text">Layout</span>
                 <select id="layout-control" class="form-control text-secondary" aria-label="Default select example"
-                    aria-describedby="Layout-text">
-                    <option value="grid" selected>Grid</option>
+                    aria-describedby="Layout-text" >
+                    <option value="grid">Grid</option>
                     <option value="random">Random</option>
                     <option value="circle">Circle</option>
                     <option value="concentric">Concentric</option>
                     <option value="breadthfirst">Breadthfirst</option>
                     <option value="cose">Cose</option>
-                    <option value="cose-bilkent">Cose-bilkent</option>
+                    <option value="cose-bilkent" selected>Cose-bilkent</option>
                     <option value="cola">Cola</option>
                     <option value="euler">Euler</option>
                     <option value="dagre">Dagre</option>
@@ -29,34 +32,12 @@
             </div>
 
 
-            <div class="btn-group me-2" role="group" aria-label="Show layers for the graph group">
-                <button id="show-all" class="btn btn-warning" type="submit">Show all nodes</button>
-
-                <input type="checkbox" class="btn-check" id="toggle-abstract-layer" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="toggle-abstract-layer">Abstract layer</label>
-
-                <input type="checkbox" class="btn-check" id="toggle-concrete-layer" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="toggle-concrete-layer">Concrete layer</label>
-
-                <input type="checkbox" class="btn-check" id="toggle-sequence-layer" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="toggle-sequence-layer">Sequence layer</label>
-
-                <input type="checkbox" class="btn-check" id="toggle-layer-transitions" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="toggle-layer-transitions">Inter-layer edges</label>
-            </div>
-
             <div class="btn-group" role="group" aria-label="Show amount of nodes">
                 <button type="button" class="btn btn-secondary" disabled>
                   Abstract States <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-states"></span>
                 </button>
                 <button type="button" class="btn btn-secondary" disabled>
                   Abstract Actions <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-actions"></span>
-                </button>
-                <button type="button" class="btn btn-secondary" disabled>
-                  Concrete States <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-states"></span>
-                </button>
-                <button type="button" class="btn btn-secondary" disabled>
-                  Concrete Actions <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-actions"></span>
                 </button>
             </div>
         </div>
@@ -107,6 +88,7 @@
             </div>
         </div>
     </footer>
+
 @if (IsGraphAvailable)
 {
     <div class="viewpane" id="cy">
@@ -120,6 +102,7 @@
             </div> <!-- cd-panel__content -->
         </div> <!-- cd-panel__container -->
     </div>
+    
 }
 else
 {
@@ -134,12 +117,23 @@ else
 @code {
     public bool IsGraphAvailable { get; set; } = false;
     public string ProgressStatus { get; set; } = "Loading graph data...";
-    [Parameter] public string ModelIdentifier { get; set; }
+    [Parameter] public string App1ModelIdentifier { get; set; }
+    [Parameter] public string? App2ModelIdentifier { get; set; }
+
     public string? GraphInJson { get; set; }
+    public Model? App1Model { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), true);
+        var model = await modelService.ByIdentifier(new ModelIdentifier(App1ModelIdentifier));
+        Model? model2 = null;
+
+        if (App2ModelIdentifier is not null)
+        {
+            model2 = await modelService.ByIdentifier(new ModelIdentifier(App2ModelIdentifier));
+        }
+
+        var elements = await graphCompareService.Compare(model, model2);
 
         foreach (var element in elements)
         {
@@ -158,7 +152,7 @@ else
         StateHasChanged();
 
         GraphInJson = JsonSerializer.Serialize(elements);
-         
+        App1Model = model;
         ProgressStatus = "Loading graph done";
         IsGraphAvailable = true;
     }

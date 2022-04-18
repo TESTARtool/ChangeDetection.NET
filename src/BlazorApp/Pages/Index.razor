@@ -58,7 +58,23 @@
                       </div>
                       <div class="col-4 text-end align-self-center">
                           <a href="/Graph/@SelectedModel.ModelIdentifier.Value" class="btn btn-secondary">Open Graph</a>
-                          <a href="Diff" class="btn btn-secondary disabled">Compare with</a>
+
+                          <div class="btn-group">
+                          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Compare with
+                          </button>
+                          <ul class="dropdown-menu">
+                            @foreach(var model in models)
+                            {
+                                <li>
+                                    <a class="dropdown-item @(model == SelectedModel ? "disabled" : "")" href="/Compare/@SelectedModel.ModelIdentifier.Value/To/@model.ModelIdentifier.Value">
+                                        <div>@model.Name</div>
+                                        <div class="text-muted">@model.Version</div>
+                                    </a>
+                                </li>
+                            }
+                          </ul>
+                        </div>
                       </div>
                   </div>
                   <div class="row mt-3">
@@ -203,7 +219,6 @@
 
         if (ModelIdentifier is not null && SelectedModel is null)
         {
-            // something odd here TODO handle this case
             SelectedModel = new Model
             {
                 Name = $"Model with {ModelIdentifier} not found.",

@@ -15,6 +15,8 @@ public interface IModelService
 {
     IAsyncEnumerable<Model> AllModels();
 
+    Task<Model> ByIdentifier(ModelIdentifier identifier);
+
     IAsyncEnumerable<TestSequence> TestSequences(ModelIdentifier modelIdentifier);
 
     IAsyncEnumerable<TestSequenceVisualisation> GetTestSequenceActions(SequenceId testSequenceId);
@@ -116,6 +118,23 @@ public class ModelService : IModelService
             // lets re-use it to prevent extra database calls
             beforeImage = afterImage;
         } while (selectedNode is not null && selectedNode.Out_SequenceStep.Any());
+    }
+
+    public async Task<Model> ByIdentifier(ModelIdentifier identifier)
+    {
+        var model = await new OrientDbCommand("SELECT FROM AbstractStateModel WHERE modelIdentifier = :modelIdentifier")
+          .AddParameter("modelIdentifier", identifier.Value)
+          .ExecuteOn<ModelJson>(client)
+          .FirstAsync();
+
+        return new Model
+        {
+            AbstractionAttributes = model.AbstractionAttributes,
+            AbstractStates = Array.Empty<AbstractState>(),
+            Name = model.ApplicationName,
+            Version = model.ApplicationVersion,
+            ModelIdentifier = new ModelIdentifier(model.ModelIdentifier),
+        };
     }
 
     private static Verdict StringToVerdict(string value) => value switch

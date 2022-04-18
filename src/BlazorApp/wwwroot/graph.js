@@ -1,8 +1,13 @@
 ﻿function loadGraphCanvas(graph) {
     // global object that will hold some config values
+    let savedLayout = 'cose-bilkent';
+    if (localStorage.graphLayout) {
+        savedLayout = localStorage.graphLayout;
+    }
+
     let appStatus = {};
     appStatus.graph = {};
-    console.log(graph);
+
     let cy = cytoscape({
         container: document.getElementById("cy"),
 
@@ -313,33 +318,40 @@
         ],
 
         layout: {
-            name: 'grid'
+            name: savedLayout
         },
 
         wheelSensitivity: 0.5
     });
 
     let layoutControl = document.getElementById("layout-control");
-    layoutControl.addEventListener("change", function () {
-        let selectedLayout = layoutControl.value;
-        cy.layout({
-            name: selectedLayout,
-            animate: 'end',
-            animationEasing: 'ease-out',
-            animationDuration: 1000
-        }).run();
-    });
+    if (layoutControl != null) {
+        layoutControl.value = savedLayout;
+
+        layoutControl.addEventListener("change", function () {
+            let selectedLayout = layoutControl.value;
+            localStorage.setItem("graphLayout", selectedLayout);
+            cy.layout({
+                name: selectedLayout,
+                animate: 'end',
+                animationEasing: 'ease-out',
+                animationDuration: 1000
+            }).run();
+        });
+    }
 
     let showLabels = document.getElementById("show-labels");
-    showLabels.addEventListener("change", function () {
-        if (showLabels.checked) {
-            cy.$('.no-label').removeClass('no-label');
-        }
-        else {
-            cy.$('node').addClass('no-label');
-            cy.$('edge').addClass('no-label');
-        }
-    });
+    if (showLabels != null) {
+        showLabels.addEventListener("change", function () {
+            if (showLabels.checked) {
+                cy.$('.no-label').removeClass('no-label');
+            }
+            else {
+                cy.$('node').addClass('no-label');
+                cy.$('edge').addClass('no-label');
+            }
+        });
+    }
 
     // when nodes get clicked, we need to open the side bar
     cy.on('tap', 'node', function (evt) {
@@ -829,11 +841,13 @@
     });
 
     let showAllButton = document.getElementById("show-all");
-    showAllButton.addEventListener("click", function () {
-        cy.$('.invisible').removeClass('invisible');
-        cy.$('.dim').removeClass('dim');
-        initLayers();
-    });
+    if (showAllButton != null) {
+        showAllButton.addEventListener("click", function () {
+            cy.$('.invisible').removeClass('invisible');
+            cy.$('.dim').removeClass('dim');
+            initLayers();
+        });
+    }
 
     function initLayers() {
         appStatus.nrOfAbstractStates = cy.$('node.AbstractState').size();
@@ -851,96 +865,111 @@
         // ready several toggle buttons
         // abstract layer toggle
         let abstractLayerToggle = document.getElementById("toggle-abstract-layer");
-        if (appStatus.abstractLayerPresent) {
-            appStatus.nrOfLayersPresent++;
-            abstractLayerToggle.checked = true;
-            abstractLayerToggle.addEventListener("change", (e) => {
-                if (abstractLayerToggle.checked) {
-                    cy.$('node.AbstractState').union(cy.$('node.BlackHole')).union(cy.$('node.AbstractState').parent()).removeClass("invisible");
-                }
-                else {
-                    cy.$('node.AbstractState').union(cy.$('node.BlackHole')).union(cy.$('node.AbstractState').parent()).addClass("invisible");
-                }
-            });
-        }
-        else {
-            abstractLayerToggle.checked = false;
-            abstractLayerToggle.disabled = true;
+        if (abstractLayerToggle != null) {
+            if (appStatus.abstractLayerPresent) {
+                appStatus.nrOfLayersPresent++;
+                abstractLayerToggle.checked = true;
+                abstractLayerToggle.addEventListener("change", (e) => {
+                    if (abstractLayerToggle.checked) {
+                        cy.$('node.AbstractState').union(cy.$('node.BlackHole')).union(cy.$('node.AbstractState').parent()).removeClass("invisible");
+                    }
+                    else {
+                        cy.$('node.AbstractState').union(cy.$('node.BlackHole')).union(cy.$('node.AbstractState').parent()).addClass("invisible");
+                    }
+                });
+            }
+            else {
+                abstractLayerToggle.checked = false;
+                abstractLayerToggle.disabled = true;
+            }
         }
 
         // concrete layer toggle
         let concreteLayerToggle = document.getElementById("toggle-concrete-layer");
-        if (appStatus.concreteLayerPresent) {
-            appStatus.nrOfLayersPresent++;
-            concreteLayerToggle.checked = true;
-            concreteLayerToggle.addEventListener("change", (e) => {
-                if (concreteLayerToggle.checked) {
-                    cy.$('node.ConcreteState').union(cy.$('node.ConcreteState').parent()).removeClass("invisible");
-                }
-                else {
-                    cy.$('node.ConcreteState').union(cy.$('node.ConcreteState').parent()).addClass("invisible");
-                }
-            });
-        }
-        else {
-            concreteLayerToggle.checked = false;
-            concreteLayerToggle.disabled = true;
+        if (concreteLayerToggle != null) {
+            if (appStatus.concreteLayerPresent) {
+                appStatus.nrOfLayersPresent++;
+                concreteLayerToggle.checked = true;
+                concreteLayerToggle.addEventListener("change", (e) => {
+                    if (concreteLayerToggle.checked) {
+                        cy.$('node.ConcreteState').union(cy.$('node.ConcreteState').parent()).removeClass("invisible");
+                    }
+                    else {
+                        cy.$('node.ConcreteState').union(cy.$('node.ConcreteState').parent()).addClass("invisible");
+                    }
+                });
+            }
+            else {
+                concreteLayerToggle.checked = false;
+                concreteLayerToggle.disabled = true;
+            }
         }
 
         // sequence layer toggle
         let sequenceLayerToggle = document.getElementById("toggle-sequence-layer");
-        if (appStatus.sequenceLayerPresent) {
-            appStatus.nrOfLayersPresent++;
-            sequenceLayerToggle.checked = true;
-            sequenceLayerToggle.addEventListener("change", (e) => {
-                if (sequenceLayerToggle.checked) {
-                    cy.$('node.SequenceNode').union(cy.$('node.SequenceNode').parent()).removeClass("invisible");
-                }
-                else {
-                    cy.$('node.SequenceNode').union(cy.$('node.SequenceNode').parent()).addClass("invisible");
-                }
-            });
+        if (sequenceLayerToggle != null) {
+            if (appStatus.sequenceLayerPresent) {
+                appStatus.nrOfLayersPresent++;
+                sequenceLayerToggle.checked = true;
+                sequenceLayerToggle.addEventListener("change", (e) => {
+                    if (sequenceLayerToggle.checked) {
+                        cy.$('node.SequenceNode').union(cy.$('node.SequenceNode').parent()).removeClass("invisible");
+                    }
+                    else {
+                        cy.$('node.SequenceNode').union(cy.$('node.SequenceNode').parent()).addClass("invisible");
+                    }
+                });
+            }
+            else {
+                sequenceLayerToggle.checked = false;
+                sequenceLayerToggle.disabled = true;
+            }
         }
-        else {
-            sequenceLayerToggle.checked = false;
-            sequenceLayerToggle.disabled = true;
-        }
-
         // toggle for edges between the layers
         let interLayerEdgesToggle = document.getElementById("toggle-layer-transitions");
-        if (appStatus.nrOfLayersPresent > 1 && appStatus.concreteLayerPresent) {
-            interLayerEdgesToggle.checked = true;
-            interLayerEdgesToggle.addEventListener("change", (e) => {
-                if (interLayerEdgesToggle.checked) {
-                    cy.$('edge.isAbstractedBy').union(cy.$('edge.Accessed')).removeClass("invisible");
-                }
-                else {
-                    cy.$('edge.isAbstractedBy').union(cy.$('edge.Accessed')).addClass("invisible");
-                }
-            });
-        }
-        else {
-            interLayerEdgesToggle.checked = false;
-            interLayerEdgesToggle.disabled = true;
+        if (interLayerEdgesToggle != null) {
+            if (appStatus.nrOfLayersPresent > 1 && appStatus.concreteLayerPresent) {
+                interLayerEdgesToggle.checked = true;
+                interLayerEdgesToggle.addEventListener("change", (e) => {
+                    if (interLayerEdgesToggle.checked) {
+                        cy.$('edge.isAbstractedBy').union(cy.$('edge.Accessed')).removeClass("invisible");
+                    }
+                    else {
+                        cy.$('edge.isAbstractedBy').union(cy.$('edge.Accessed')).addClass("invisible");
+                    }
+                });
+            }
+            else {
+                interLayerEdgesToggle.checked = false;
+                interLayerEdgesToggle.disabled = true;
+            }
         }
     }
 
     function initStats() {
         let div = document.getElementById('stats-abstract-states');
-        let text = document.createTextNode(appStatus.nrOfAbstractStates);
-        div.append(text);
+        if (div != null) {
+            let text = document.createTextNode(appStatus.nrOfAbstractStates);
+            div.append(text);
+        }
 
         div = document.getElementById('stats-abstract-actions');
-        text = document.createTextNode(appStatus.nrOfAbstractActions);
-        div.append(text);
+        if (div != null) {
+            text = document.createTextNode(appStatus.nrOfAbstractActions);
+            div.append(text);
+        }
 
         div = document.getElementById('stats-concrete-states');
-        text = document.createTextNode(appStatus.nrOfConcreteStates);
-        div.append(text);
+        if (div != null) {
+            text = document.createTextNode(appStatus.nrOfConcreteStates);
+            div.append(text);
+        }
 
         div = document.getElementById('stats-concrete-actions');
-        text = document.createTextNode(appStatus.nrOfConcreteActions);
-        div.append(text);
+        if (div != null) {
+            text = document.createTextNode(appStatus.nrOfConcreteActions);
+            div.append(text);
+        }
     }
 
     function filterDataFields(filterValue) {

@@ -29,7 +29,7 @@ await Host.CreateDefaultBuilder(args)
         services.AddScoped<IModelService, ModelService>();
         services.AddScoped<IGraphService, GraphService>();
         services.AddSingleton<IChangeDetectionHttpClient, ConsoleToClient>();
-        services.AddSingleton<IScenario, TestMultiCalls>();
+        services.AddSingleton<IScenario, ComparisonScenario>();
 
         services.AddHttpClient();
 
