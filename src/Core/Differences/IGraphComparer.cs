@@ -2,9 +2,15 @@
 
 namespace Testar.ChangeDetection.Core.Differences;
 
+public class CompareResults
+{
+    public List<GraphElement> GraphApp1 { get; set; }
+    public List<GraphElement> GraphApp2 { get; set; }
+}
+
 public interface IGraphComparer
 {
-    Task<List<GraphElement>> Compare(Model model1, Model? model2);
+    Task<CompareResults> Compare(Model model1, Model model2);
 }
 
 public class GraphComparer : IGraphComparer
@@ -16,19 +22,13 @@ public class GraphComparer : IGraphComparer
         this.graphService = graphService;
     }
 
-    public async Task<List<GraphElement>> Compare(Model model1, Model? model2)
+    public async Task<CompareResults> Compare(Model model1, Model model2)
     {
-        var combinedGraph = new List<GraphElement>();
-        var app1Graph = await FetchGraph(model1);
-        combinedGraph.AddRange(app1Graph);
-
-        if (model2 is not null)
+        return new CompareResults
         {
-            var app2Graph = await FetchGraph(model2);
-            combinedGraph.AddRange(app2Graph);
-        }
-
-        return combinedGraph;
+            GraphApp1 = await FetchGraph(model1),
+            GraphApp2 = await FetchGraph(model2)
+        };
     }
 
     private async Task<List<GraphElement>> FetchGraph(Model model)

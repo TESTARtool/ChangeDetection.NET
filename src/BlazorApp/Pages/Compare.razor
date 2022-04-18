@@ -91,8 +91,25 @@
 
 @if (IsGraphAvailable)
 {
-    <div class="viewpane" id="cy">
+<div class="container-fluid" style="height: calc(100% - 70px); ">
+    <div class="row" style="height:100%" >
+        <div class="col-6 border-end" style="height:100%;">
+            <div id="cyApp1" style="height:100%;">
+            </div>
+        </div>
+        
+        <div class="col-6 border-end" style="height: 100%;">
+            <div id="cyApp2" style="height:100%;" >
+            </div>
+        </div>
+      @*  <div class="col">
+            <div class="viewpane" id="cy">
+            </div>
+        </div>*@
     </div>
+</div>
+
+   
 
     <div class="cd-panel cd-panel--from-right js-cd-panel-main">
         <div class="cd-panel__container">
@@ -118,23 +135,38 @@ else
     public bool IsGraphAvailable { get; set; } = false;
     public string ProgressStatus { get; set; } = "Loading graph data...";
     [Parameter] public string App1ModelIdentifier { get; set; }
-    [Parameter] public string? App2ModelIdentifier { get; set; }
+    [Parameter] public string App2ModelIdentifier { get; set; }
 
-    public string? GraphInJson { get; set; }
+    public string? App1GraphInJson { get; set; }
+    public string? App2GraphInJson { get; set; }
     public Model? App1Model { get; set; }
+    public Model? App2Model { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        var model = await modelService.ByIdentifier(new ModelIdentifier(App1ModelIdentifier));
-        Model? model2 = null;
+        var model1 = await modelService.ByIdentifier(new ModelIdentifier(App1ModelIdentifier));
+        var model2 = await modelService.ByIdentifier(new ModelIdentifier(App2ModelIdentifier));
 
-        if (App2ModelIdentifier is not null)
-        {
-            model2 = await modelService.ByIdentifier(new ModelIdentifier(App2ModelIdentifier));
-        }
+        var results = await graphCompareService.Compare(model1, model2);
 
-        var elements = await graphCompareService.Compare(model, model2);
+        await DownloadScreenshotAsync(results.GraphApp1);
+        await DownloadScreenshotAsync(results.GraphApp2);
 
+        ProgressStatus = "Transforming graph data";
+        StateHasChanged();
+
+        App1GraphInJson = JsonSerializer.Serialize(results.GraphApp1);
+        App2GraphInJson = JsonSerializer.Serialize(results.GraphApp2);
+
+        App1Model = model1;
+        App2Model = model2;
+
+        ProgressStatus = "Loading graph done";
+        IsGraphAvailable = true;
+    }
+
+    private async Task DownloadScreenshotAsync(List<GraphElement> elements)
+    {
         foreach (var element in elements)
         {
             if (element.Document.Properties.TryGetValue("screenshot", out var screenshotId))
@@ -147,21 +179,14 @@ else
                 element.Document.Properties["screenshot"] = base64screenshot;
             }
         }
-
-        ProgressStatus = "Transforming graph data";
-        StateHasChanged();
-
-        GraphInJson = JsonSerializer.Serialize(elements);
-        App1Model = model;
-        ProgressStatus = "Loading graph done";
-        IsGraphAvailable = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (IsGraphAvailable)
         {
-            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson);
+            await JS.InvokeVoidAsync("loadGraphCanvas", App1GraphInJson, "cyApp1");
+            await JS.InvokeVoidAsync("loadGraphCanvas", App2GraphInJson, "cyApp2");
         }
     }
 }

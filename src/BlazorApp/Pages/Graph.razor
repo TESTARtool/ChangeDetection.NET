@@ -167,7 +167,7 @@ else
     {
         if (IsGraphAvailable)
         {
-            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson);
+            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy");
         }
     }
 }

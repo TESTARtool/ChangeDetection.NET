@@ -1,4 +1,4 @@
-﻿function loadGraphCanvas(graph) {
+﻿function loadGraphCanvas(graph, elementId) {
     // global object that will hold some config values
     let savedLayout = 'cose-bilkent';
     if (localStorage.graphLayout) {
@@ -8,8 +8,10 @@
     let appStatus = {};
     appStatus.graph = {};
 
+    console.log(graph);
+
     let cy = cytoscape({
-        container: document.getElementById("cy"),
+        container: document.getElementById(elementId),
 
         elements: JSON.parse(graph),
 
