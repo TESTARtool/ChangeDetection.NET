@@ -31,7 +31,14 @@ public abstract class Document
 
     public void AddProperty(string key, string value)
     {
-        Properties.Add(key, value);
+        if (this.Properties.ContainsKey(key))
+        {
+            this.Properties[key] = value;
+        }
+        else
+        {
+            Properties.Add(key, value);
+        }
     }
 
     public string Property(string key)

@@ -49,6 +49,18 @@ public class GraphElement
     [JsonIgnore]
     public bool IsHandeld { get; set; }
 
+    public string this[string name]
+    {
+        get
+        {
+            return Document.Property(name);
+        }
+        set
+        {
+            Document.AddProperty(name, value);
+        }
+    }
+
     public void AddClass(string className)
     {
         Classes.Add(className);
