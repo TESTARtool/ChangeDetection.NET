@@ -15,8 +15,20 @@
             <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-light" style="width: 450px;">
                 <div style="overflow-y:auto">
                     <div class="d-flex align-items-center flex-shrink-0 link-dark text-decoration-none pb-1">
-                        <div class="px-3 py-3">
+                        <div class="px-3 pt-3">
                             <span class="fs-5 fw-semibold">Models</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center flex-shrink-0 link-dark text-decoration-none pb-1">
+                        <div class="px-3 py-3 input-group mb-3">
+                          <span class="input-group-text" id="basic-addon1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                            </svg>
+                          </span>
+
+                          <input type="text" @oninput="@(e => { Search((string?)e.Value);})" placeholder="Search"
+                                 class="form-control" aria-label="Search box">
                         </div>
                     </div>
                     @if (IsLoadingModels)
@@ -43,6 +55,11 @@
                                     <small class="text-muted">@string.Join(", ", model.AbstractionAttributes)</small>
                                 </a>
                             </div>
+                        }
+
+                        if(!models.Any() && !string.IsNullOrEmpty(SearchString))
+                        {
+                            <span class="px-3 text-muted">Unable to find any models with your search</span>
                         }
                     }
                 </div>
@@ -164,9 +181,36 @@
     [CascadingParameter] public IModalService Modal { get; set; }
     public Model? SelectedModel { get; set; }
     public List<Model> models = new();
+    public List<Model> allModels = new();
     public List<TestSequence> TestSequences = new();
     public bool IsLoadingModels { get; set; }
     public bool IsLoadingSelectedModel { get; set; }
+    public string? SearchString
+    {
+        get;set;
+    }
+
+    public void Search(string? value)
+    {
+        if (value is not null)
+        {
+            SearchString = value;
+
+            models = allModels.Where(x => 
+                x.Version.ToString().Contains(SearchString) ||
+                x.Name.Contains(SearchString) ||
+                x.ModelIdentifier.Value.Contains(SearchString)
+            ).ToList();
+
+        }
+        else
+        {
+            models = allModels.ToList();
+        }
+
+        StateHasChanged();
+
+    }
 
     protected async override Task OnInitializedAsync()
     {
@@ -176,13 +220,13 @@
         if (user is not null && user.Identity.IsAuthenticated)
         {
 
-            if (!models.Any())
+            if (!allModels.Any())
             {
                 IsLoadingModels = true;
                 StateHasChanged();
-                models = await modelService.AllModels().ToListAsync();
+                allModels = await modelService.AllModels().ToListAsync();
                 IsLoadingModels = false;
-                StateHasChanged();
+                Search(SearchString);
             }
 
             await base.OnInitializedAsync();
