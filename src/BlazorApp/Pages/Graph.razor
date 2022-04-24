@@ -1,6 +1,9 @@
 ﻿@page "/Graph/{ModelIdentifier}"
 @inject IJSRuntime JS
 @inject IGraphService graphService;
+@inject ILocalStorageService localStorage;
+@inject ShowCompoundLayerSetting showCompoundLayer
+
 
     <div class="container-fluid p-3">
         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
@@ -139,7 +142,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), true);
+        var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), showCompoundLayer.Value);
 
         foreach (var element in elements)
         {

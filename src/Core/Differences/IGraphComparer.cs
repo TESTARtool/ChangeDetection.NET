@@ -140,6 +140,11 @@ public class GraphComparer : IGraphComparer
             {
                 element.Document.AddProperty("parent", appNameVersion);
             }
+
+            if (element.Document is Edge)
+            {
+                element["uiLabel"] = element["actionId"];
+            }
         }
 
         return new AppGraph(elements);

@@ -38,6 +38,9 @@ builder.Services
     .AddScoped<IGraphComparer, GraphComparer>();
 
 builder.Services
+    .AddScoped<ShowCompoundLayerSetting>();
+
+builder.Services
     .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
     .AddScoped<IFindStateDifferences, FindStateDifferences>()
     .AddScoped<ICompareImages, SkipImageComparison>() // SkiaSharp isn't supporting BlazorApp at the moment; https://github.com/mono/SkiaSharp/issues/1219

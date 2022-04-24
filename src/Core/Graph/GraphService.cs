@@ -330,6 +330,8 @@ public class GraphService : IGraphService
             element.AddClass(extraClass);
         }
 
+        jsonEdge.AddProperty("uiLabel", element["counter"]);
+
         return element;
     }
 
@@ -339,12 +341,13 @@ public class GraphService : IGraphService
 
         var jsonVertex = new Vertex("n" + FormatId(id));
 
-        foreach (var property in jsonElement.EnumerateObject())
+        var elementToParse = jsonElement.EnumerateObject()
+            .Where(x => !x.Name.StartsWith("in_") || !x.Name.StartsWith("out_") || !x.Name.StartsWith("@"))
+            .ToList();
+
+        foreach (var property in elementToParse)
         {
-            if (property.Name.StartsWith("in_") || property.Name.StartsWith("out_") || property.Name.StartsWith("@"))
-            {
-            }
-            else if (property.Name == "screenshot")
+            if (property.Name == "screenshot")
             {
                 var orientDb = new OrientDbId(property.Value.ToString());
                 var formattedId = FormatId(orientDb);
@@ -363,18 +366,17 @@ public class GraphService : IGraphService
         }
 
         var element = new GraphElement(GraphElement.GroupNodes, jsonVertex, className);
-        if (jsonElement.TryGetProperty("isInitial", out var isInitialElement))
+        if (jsonElement.TryGetProperty("isInitial", out var isInitialElement) && isInitialElement.GetBoolean())
         {
-            if (isInitialElement.GetBoolean())
-            {
-                element.AddClass("isInitial");
-            }
+            element.AddClass("isInitial");
         }
 
         foreach (var extraClass in extraClasses)
         {
             element.AddClass(extraClass);
         }
+
+        jsonVertex.AddProperty("uiLabel", element["counter"]);
 
         return element;
     }

@@ -61,7 +61,7 @@
             {
                 selector: 'edge[counter]',
                 style: {
-                    'label': 'data(counter)',
+                    'label': 'data(uiLabel)',
                 }
             },
             {
@@ -957,7 +957,7 @@
 
         div = document.getElementById('stats-abstract-actions');
         if (div != null) {
-            text = document.createTextNode(appStatus.nrOfAbstractActions);
+            let text = document.createTextNode(appStatus.nrOfAbstractActions);
             div.append(text);
         }
 
@@ -1011,10 +1011,30 @@
         );
 
         // create custom labels for several classes
+
+        var asDataName = "stateId";
+        var snDataName = "nodeNr";
+        var tsDataName = "sequenceId";
+        var csDataName = "ConcreteIDCustom";
+        var concreteActionDataName = "ConcreteIDCustom"
+
+        if (localStorage.asDataName) {
+            asDataName = localStorage.asDataName;
+        }
+        if (localStorage.snDataName) {
+            snDataName = localStorage.snDataName;
+        }
+        if (localStorage.tsDataName) {
+            tsDataName = localStorage.tsDataName;
+        }
+        if (localStorage.csDataName) {
+            csDataName = localStorage.csDataName;
+        }
+
         // concrete state:
         cy.$(".ConcreteState").forEach(
             (w) => {
-                w.data("customLabel", "CS-" + w.data("counter"));
+                w.data("customLabel", w.data(csDataName));
                 if (w.data('oracleVerdictCode') && ["2", "3"].includes(w.data('oracleVerdictCode'))) {
                     w.addClass('errorState');
                 }
@@ -1023,17 +1043,17 @@
 
         // abstract state
         cy.$(".AbstractState").forEach(
-            (w) => w.data("customLabel", "AS-" + w.data("counter"))
+            (w) => w.data("customLabel", w.data(asDataName))
         );
 
         // sequence node
         cy.$(".SequenceNode").forEach(
-            (w) => w.data("customLabel", "SN-" + w.data("counter"))
+            (w) => w.data("customLabel", w.data(snDataName))
         );
 
         // test sequence
         cy.$(".TestSequence").forEach(
-            (w) => w.data("customLabel", "TS-" + w.data("counter"))
+            (w) => w.data("customLabel", w.data(tsDataName))
         );
 
         // add a mouseover event to the concrete actions
