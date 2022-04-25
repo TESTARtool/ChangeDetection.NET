@@ -22,11 +22,11 @@ public class AppGraph
     public IEnumerable<GraphElement> ConcreteStates => Elements.Where(x => x.IsConcreteState);
     public bool ContainsUnhandledAbstractStates => AbstractStates.Any(x => !x.IsHandeld);
 
-    public GraphElement InitialAbstractState => Elements.First(x => x.IsInitial);
+    public Vertex? InitialAbstractState => AbstractStates.FirstOrDefault(x => x.IsInitial)?.DocumentAsVertex;
 
-    public IEnumerable<GraphElement> FindAbstractActionsFor(GraphElement state)
+    public IEnumerable<Edge> FindAbstractActionsFor(Vertex state)
     {
-        return AbstractActions.Where(x => x.Document.SourceId == state.Document.Id);
+        return AbstractActions.Where(x => x.Document.SourceId == state.Id);
     }
 }
 
@@ -50,11 +50,6 @@ public class GraphComparer : IGraphComparer
         var graphApp1 = await FetchGraph(model1);
         var graphApp2 = await FetchGraph(model2);
 
-        // this information is not present in the abstract action
-        // so find for each abstract action a description.
-        ForEveryAbstractActionSetTheDescriptionFromConcreteAction(graphApp1);
-        ForEveryAbstractActionSetTheDescriptionFromConcreteAction(graphApp2);
-
         // we will start from the initial value and asume it is the same vertex
         // the initial vertex may still be different offcourse, but we need to
         // get an inital start.
@@ -63,6 +58,12 @@ public class GraphComparer : IGraphComparer
         // vertex is not the same
 
         var initalStateApp1 = graphApp1.InitialAbstractState;
+
+        if (initalStateApp1 is null)
+        {
+            throw new ComparisonException("Unable to find abstract state in graph app 1");
+        }
+
         var initalStateApp2 = graphApp2.InitialAbstractState;
 
         // mark steps as handeld since we do not want to loop around
@@ -70,12 +71,7 @@ public class GraphComparer : IGraphComparer
         initalStateApp1.IsHandeld = true;
         initalStateApp2.IsHandeld = true;
 
-        var actionsStateApp1 = graphApp1.FindAbstractActionsFor(initalStateApp1);
-        var actionsStateApp2 = graphApp2.FindAbstractActionsFor(initalStateApp2);
-
-        foreach (var action in actionsStateApp2)
-        {
-        }
+        FF(graphApp1, graphApp2, initalStateApp1, initalStateApp2);
 
         return new CompareResults
         {
@@ -84,8 +80,59 @@ public class GraphComparer : IGraphComparer
         };
     }
 
-    private void FindDifferences(GraphElement abstractState, AppGraph appGraph2)
+    private void FF(AppGraph graphApp1, AppGraph graphApp2, Vertex abstractState1, Vertex abstractState2)
     {
+        var actionsStateApp1 = graphApp1.FindAbstractActionsFor(abstractState1);
+        var actionsStateApp2 = graphApp2.FindAbstractActionsFor(abstractState2);
+
+        foreach (var action in actionsStateApp2)
+        {
+            if (!action.IsHandeld)
+            {
+                FindDifferences(action, actionsStateApp1, graphApp1, graphApp2);
+            }
+        }
+    }
+
+    private void FindDifferences(Edge action, IEnumerable<Edge> actionsStateApp1, AppGraph graphApp1, AppGraph graphApp2)
+    {
+        // always mark as handeld for prevent double handling
+        action.IsHandeld = true;
+
+        var correspondingAction = actionsStateApp1.FirstOrDefault(x => x["actionId"] == action["actionId"]);
+        if (correspondingAction is null)
+        {
+            // this must be a new or altered action since a corresponding action
+            // was not found in the abstract state.
+            // not the first version lets mark it as new
+
+            action["CD_CompareResult"] = "new";
+        }
+        else
+        {
+            // corresponding action found. continue with outgoing state
+            correspondingAction.IsHandeld = true;
+
+            var targetState = graphApp2.AbstractStates
+                .First(x => x.Document.Id == action["target"])
+                .DocumentAsVertex;
+
+            var correspondingTargetState = graphApp1.AbstractStates
+                .First(x => x.Document.Id == correspondingAction["target"])
+                .DocumentAsVertex;
+
+            // first check it handling is needed
+            if (!(targetState.IsHandeld || correspondingTargetState.IsHandeld))
+            {
+                // we now have two states that are coresponding in each graph.
+                targetState.IsHandeld = true;
+                correspondingTargetState.IsHandeld = true;
+
+                // check the differnces.
+
+                FF(graphApp1, graphApp2, targetState, correspondingTargetState);
+            }
+        }
     }
 
     private void ForEveryAbstractActionSetTheDescriptionFromConcreteAction(AppGraph appGraph)
@@ -147,7 +194,12 @@ public class GraphComparer : IGraphComparer
             }
         }
 
-        return new AppGraph(elements);
+        var appGraph = new AppGraph(elements);
+        // this information is not present in the abstract action
+        // so find for each abstract action a description.
+        ForEveryAbstractActionSetTheDescriptionFromConcreteAction(appGraph);
+
+        return appGraph;
     }
 }
 
@@ -158,5 +210,12 @@ public class ApplicationContainsBlackHoleException : Exception
     public ApplicationContainsBlackHoleException(Model model)
     {
         this.model = model;
+    }
+}
+
+public class ComparisonException : Exception
+{
+    public ComparisonException(string message) : base(message)
+    {
     }
 }

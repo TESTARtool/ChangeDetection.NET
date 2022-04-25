@@ -26,8 +26,23 @@ public abstract class Document
     [JsonPropertyName("target")]
     public string? TargetId { get; set; }
 
+    [JsonIgnore]
+    public bool IsHandeld { get; set; }
+
     [JsonExtensionData]
     public IDictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
+
+    public string this[string name]
+    {
+        get
+        {
+            return Property(name);
+        }
+        set
+        {
+            AddProperty(name, value);
+        }
+    }
 
     public void AddProperty(string key, string value)
     {

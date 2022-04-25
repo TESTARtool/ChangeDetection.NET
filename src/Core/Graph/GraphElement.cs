@@ -6,6 +6,9 @@ public class GraphElement
 
     public const string GroupEdges = "edges";
 
+    [JsonIgnore]
+    public Edge DocumentAsEdge = > (Edge)Document;
+
     public GraphElement(string group, Document document)
     {
         this.Group = group;
@@ -32,6 +35,9 @@ public class GraphElement
     public List<string> Classes { get; set; } = new();
 
     [JsonIgnore]
+    public Vertex DocumentAsVertex => (Vertex)Document;
+
+    [JsonIgnore]
     public bool IsInitial => Classes.Any(x => x == "isInitial");
 
     [JsonIgnore]
@@ -47,7 +53,8 @@ public class GraphElement
     public bool IsConcreteAction => Classes.Any(x => x == "ConcreteAction" && Document is Edge);
 
     [JsonIgnore]
-    public bool IsHandeld { get; set; }
+    public bool IsHandeld
+    { get { return Document.IsHandeld; } set { Document.IsHandeld = value; } }
 
     public string this[string name]
     {
