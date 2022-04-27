@@ -330,7 +330,7 @@ public class GraphService : IGraphService
             element.AddClass(extraClass);
         }
 
-        jsonEdge.AddProperty("uiLabel", element["counter"]);
+        jsonEdge["uiLabel"] = element["counter"];
 
         return element;
     }
@@ -376,7 +376,7 @@ public class GraphService : IGraphService
             element.AddClass(extraClass);
         }
 
-        jsonVertex.AddProperty("uiLabel", element["counter"]);
+        jsonVertex["uiLabel"] = element["counter"];
 
         return element;
     }

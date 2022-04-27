@@ -8,28 +8,6 @@ public class CompareResults
     public List<GraphElement> GraphApp2 { get; set; }
 }
 
-public class AppGraph
-{
-    public AppGraph(List<GraphElement> elements)
-    {
-        Elements = elements;
-    }
-
-    public List<GraphElement> Elements { get; }
-    public IEnumerable<GraphElement> AbstractStates => Elements.Where(x => x.IsAbstractState);
-    public IEnumerable<GraphElement> AbstractActions => Elements.Where(x => x.IsAbstractAction);
-    public IEnumerable<GraphElement> ConcreteActions => Elements.Where(x => x.IsConcreteAction);
-    public IEnumerable<GraphElement> ConcreteStates => Elements.Where(x => x.IsConcreteState);
-    public bool ContainsUnhandledAbstractStates => AbstractStates.Any(x => !x.IsHandeld);
-
-    public Vertex? InitialAbstractState => AbstractStates.FirstOrDefault(x => x.IsInitial)?.DocumentAsVertex;
-
-    public IEnumerable<Edge> FindAbstractActionsFor(Vertex state)
-    {
-        return AbstractActions.Where(x => x.Document.SourceId == state.Id);
-    }
-}
-
 public interface IGraphComparer
 {
     Task<CompareResults> Compare(Model model1, Model model2);
@@ -38,10 +16,14 @@ public interface IGraphComparer
 public class GraphComparer : IGraphComparer
 {
     private readonly IGraphService graphService;
+    private readonly ICompareVertices verticesComparer;
+    private readonly IStartingAbstractState startingAbstractStates;
 
-    public GraphComparer(IGraphService graphService)
+    public GraphComparer(IGraphService graphService, ICompareVertices verticesComparer, IStartingAbstractState startingAbstractStates)
     {
         this.graphService = graphService;
+        this.verticesComparer = verticesComparer;
+        this.startingAbstractStates = startingAbstractStates;
     }
 
     public async Task<CompareResults> Compare(Model model1, Model model2)
@@ -50,29 +32,13 @@ public class GraphComparer : IGraphComparer
         var graphApp1 = await FetchGraph(model1);
         var graphApp2 = await FetchGraph(model2);
 
-        // we will start from the initial value and asume it is the same vertex
-        // the initial vertex may still be different offcourse, but we need to
-        // get an inital start.
+        // then we get some starting states
+        var (abstractState1, abstractState2) = startingAbstractStates.DetemineStartingStates(graphApp1, graphApp2);
 
-        // prehaps later we can find a starting point when the initial
-        // vertex is not the same
+        // lets start checking the states
+        CheckStateDifferences(graphApp1, graphApp2, abstractState1, abstractState2);
 
-        var initalStateApp1 = graphApp1.InitialAbstractState;
-
-        if (initalStateApp1 is null)
-        {
-            throw new ComparisonException("Unable to find abstract state in graph app 1");
-        }
-
-        var initalStateApp2 = graphApp2.InitialAbstractState;
-
-        // mark steps as handeld since we do not want to loop around
-        // the graph and handeld states twice
-        initalStateApp1.IsHandeld = true;
-        initalStateApp2.IsHandeld = true;
-
-        FF(graphApp1, graphApp2, initalStateApp1, initalStateApp2);
-
+        // report the results
         return new CompareResults
         {
             GraphApp1 = graphApp1.Elements,
@@ -80,17 +46,44 @@ public class GraphComparer : IGraphComparer
         };
     }
 
-    private void FF(AppGraph graphApp1, AppGraph graphApp2, Vertex abstractState1, Vertex abstractState2)
+    private static void ForEveryAbstractActionSetTheDescriptionFromConcreteAction(AppGraph appGraph)
     {
-        var actionsStateApp1 = graphApp1.FindAbstractActionsFor(abstractState1);
-        var actionsStateApp2 = graphApp2.FindAbstractActionsFor(abstractState2);
-
-        foreach (var action in actionsStateApp2)
+        foreach (var item in appGraph.AbstractActions)
         {
-            if (!action.IsHandeld)
+            var concreteActionIds = item["concreteActionIds"].AsArray();
+
+            foreach (var id in concreteActionIds)
             {
-                FindDifferences(action, actionsStateApp1, graphApp1, graphApp2);
+                var firstConcreteAction = appGraph.ConcreteActions.FirstOrDefault(x => x["actionId"] == id);
+                if (firstConcreteAction is not null)
+                {
+                    item["Description"] = firstConcreteAction["Desc"];
+                    break;
+                }
             }
+        }
+    }
+
+    private void CheckStateDifferences(AppGraph graphApp1, AppGraph graphApp2, Vertex abstractState1, Vertex abstractState2)
+    {
+        // set corresponding ids for each state
+        abstractState2["CD_CorrespondingId"] = abstractState1["stateId"];
+        abstractState1["CD_CorrespondingId"] = abstractState2["stateId"];
+
+        // mark steps as handeld since we do not want to loop around
+        // the graph and handeld states twice
+        abstractState1.IsHandeld = true;
+        abstractState2.IsHandeld = true;
+
+        verticesComparer.CompareProperties(abstractState1, abstractState2);
+
+        var actionsStateApp1 = graphApp1.FindAbstractActionsFor(abstractState1);
+        var unhandeldActions = graphApp2.FindAbstractActionsFor(abstractState2)
+            .Where(x => !x.IsHandeld);
+
+        foreach (var action in unhandeldActions)
+        {
+            FindDifferences(action, actionsStateApp1, graphApp1, graphApp2);
         }
     }
 
@@ -106,7 +99,7 @@ public class GraphComparer : IGraphComparer
             // was not found in the abstract state.
             // not the first version lets mark it as new
 
-            action["CD_CompareResult"] = "new";
+            action["CD_CompareResult"] = new PropertyValue("new");
         }
         else
         {
@@ -114,11 +107,11 @@ public class GraphComparer : IGraphComparer
             correspondingAction.IsHandeld = true;
 
             var targetState = graphApp2.AbstractStates
-                .First(x => x.Document.Id == action["target"])
+                .First(x => x.Document.Id == action["target"].Value)
                 .DocumentAsVertex;
 
             var correspondingTargetState = graphApp1.AbstractStates
-                .First(x => x.Document.Id == correspondingAction["target"])
+                .First(x => x.Document.Id == correspondingAction["target"].Value)
                 .DocumentAsVertex;
 
             // first check it handling is needed
@@ -129,52 +122,25 @@ public class GraphComparer : IGraphComparer
                 correspondingTargetState.IsHandeld = true;
 
                 // check the differnces.
-
-                FF(graphApp1, graphApp2, targetState, correspondingTargetState);
+                CheckStateDifferences(graphApp1, graphApp2, targetState, correspondingTargetState);
             }
         }
     }
-
-    private void ForEveryAbstractActionSetTheDescriptionFromConcreteAction(AppGraph appGraph)
-    {
-        foreach (var item in appGraph.AbstractActions)
-        {
-            var concreteActionIds = ParseArray(item["concreteActionIds"]);
-
-            foreach (var id in concreteActionIds)
-            {
-                var firstConcreteAction = appGraph.ConcreteActions.FirstOrDefault(x => x["actionId"] == id);
-                if (firstConcreteAction is not null)
-                {
-                    item["Description"] = firstConcreteAction["Desc"];
-                    break;
-                }
-            }
-        }
-    }
-
-    private string[] ParseArray(string value) => value.ToString().Replace("[", "").Replace("]", "").Split(',');
 
     private async Task<AppGraph> FetchGraph(Model model)
     {
         var appNameVersion = $"{model.Name} - {model.Version}";
         var parent = new GraphElement(GraphElement.GroupNodes, new Vertex(appNameVersion), "Parent");
-        parent.Document.AddProperty(nameof(model.Name), model.Name);
-        parent.Document.AddProperty(nameof(model.Version), model.Version);
+        parent[nameof(model.Name)] = new PropertyValue(model.Name);
+        parent[nameof(model.Version)] = new PropertyValue(model.Version);
 
         var elements = new List<GraphElement>
         {
             parent
         };
 
-        var abstractLayer = await graphService.FetchAbstractLayerAsync(model.ModelIdentifier, false);
-
-        //if (abstractLayer.Any(x => x.Classes.Any(y => y == "BlackHole")))
-        //{
-        //    throw new ApplicationContainsBlackHoleException(model);
-        //}
-
-        var concreteLayer = await graphService.FetchConcreteLayerAsync(model.ModelIdentifier, false);
+        var abstractLayer = await graphService.FetchAbstractLayerAsync(model.ModelIdentifier, showCompoundGraph: false);
+        var concreteLayer = await graphService.FetchConcreteLayerAsync(model.ModelIdentifier, showCompoundGraph: false);
         var connections = await graphService.FetchAbstractConcreteConnectors(model.ModelIdentifier);
 
         elements.AddRange(abstractLayer);
@@ -185,7 +151,7 @@ public class GraphComparer : IGraphComparer
         {
             if (element.Document is Vertex)
             {
-                element.Document.AddProperty("parent", appNameVersion);
+                element.Document["parent"] = new PropertyValue(appNameVersion);
             }
 
             if (element.Document is Edge)
@@ -195,27 +161,11 @@ public class GraphComparer : IGraphComparer
         }
 
         var appGraph = new AppGraph(elements);
+
         // this information is not present in the abstract action
         // so find for each abstract action a description.
         ForEveryAbstractActionSetTheDescriptionFromConcreteAction(appGraph);
 
         return appGraph;
-    }
-}
-
-public class ApplicationContainsBlackHoleException : Exception
-{
-    private readonly Model model;
-
-    public ApplicationContainsBlackHoleException(Model model)
-    {
-        this.model = model;
-    }
-}
-
-public class ComparisonException : Exception
-{
-    public ComparisonException(string message) : base(message)
-    {
     }
 }

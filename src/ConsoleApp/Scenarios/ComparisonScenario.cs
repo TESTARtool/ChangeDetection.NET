@@ -21,8 +21,6 @@ public class ComparisonScenario : IScenario
     {
         await client.LoginAsync(new Uri("http://localhost:5000/"), new LoginModel { Username = "testar2\\testar", Password = "testar" });
 
-        //         var modelIdentifier = "1chdi5230521708089";
-
         var model1 = await modelService.ByIdentifier(new ModelIdentifier("1chxaqf301488509161"));
         var model2 = await modelService.ByIdentifier(new ModelIdentifier("1chdi5230521708089"));
 

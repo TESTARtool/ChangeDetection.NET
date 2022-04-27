@@ -6,9 +6,6 @@ public class GraphElement
 
     public const string GroupEdges = "edges";
 
-    [JsonIgnore]
-    public Edge DocumentAsEdge = > (Edge)Document;
-
     public GraphElement(string group, Document document)
     {
         this.Group = group;
@@ -21,6 +18,9 @@ public class GraphElement
         this.Document = document;
         Classes.Add(className);
     }
+
+    [JsonIgnore]
+    public Edge DocumentAsEdge => (Edge)Document;
 
     [JsonInclude]
     [JsonPropertyName("group")]
@@ -56,15 +56,15 @@ public class GraphElement
     public bool IsHandeld
     { get { return Document.IsHandeld; } set { Document.IsHandeld = value; } }
 
-    public string this[string name]
+    public PropertyValue this[string name]
     {
         get
         {
-            return Document.Property(name);
+            return Document[name];
         }
         set
         {
-            Document.AddProperty(name, value);
+            Document.AddProperty(name, value.Value);
         }
     }
 

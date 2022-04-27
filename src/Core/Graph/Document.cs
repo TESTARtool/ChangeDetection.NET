@@ -32,15 +32,15 @@ public abstract class Document
     [JsonExtensionData]
     public IDictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
 
-    public string this[string name]
+    public PropertyValue this[string name]
     {
         get
         {
-            return Property(name);
+            return new PropertyValue(Property(name));
         }
         set
         {
-            AddProperty(name, value);
+            AddProperty(name, value.Value);
         }
     }
 

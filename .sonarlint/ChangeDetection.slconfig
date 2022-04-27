@@ -1,0 +1,15 @@
+{
+  "ServerUri": "https://sonarcloud.io/",
+  "Organization": {
+    "Key": "rneeft",
+    "Name": "Rick"
+  },
+  "ProjectKey": "changedetection.net",
+  "ProjectName": "ChangeDetection .NET",
+  "Profiles": {
+    "CSharp": {
+      "ProfileKey": "AYBsS4zYUJ_gJXxcwxyo",
+      "ProfileTimestamp": "2022-03-31T10:15:41Z"
+    }
+  }
+}
