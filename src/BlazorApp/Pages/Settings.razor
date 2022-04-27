@@ -1,6 +1,10 @@
 ﻿@page "/Settings"
 @inject ISyncLocalStorageService localStorage
 @inject ShowCompoundLayerSetting showCompoundLayer
+@inject AbstractStateLabelSetting abstractStateLabelSetting
+@inject ConcreteStateLabelSetting concreteStateLabelSetting
+@inject TestSequenceLabelSetting testSequenceLabelSetting
+@inject SequenceNodeLabelSetting sequenceNodeLabelSetting
 
 <div class="p-3">
     <h3>Settings</h3>
@@ -11,6 +15,33 @@
         Show the compound layer in the graph viewer
       </label>
     </div>
+
+    <div class="card">
+      <div class="card-header">
+        Graph element labels
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Please specify which what the label of the element should show</h5>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Abstract State</span>
+            <input type="text" class="form-control" @bind-value="abstractStateLabelSetting.Value" >
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Concrete State</span>
+            <input type="text" class="form-control" @bind-value="concreteStateLabelSetting.Value" >
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Test Sequence</span>
+            <input type="text" class="form-control" @bind-value="testSequenceLabelSetting.Value" >
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Sequence Node</span>
+            <input type="text" class="form-control" @bind-value="sequenceNodeLabelSetting.Value" >
+        </div>
+      </div>
+    </div>
+
+
 
 </div>
 

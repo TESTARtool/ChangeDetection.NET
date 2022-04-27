@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Testar.ChangeDetection.Core.Settings;
 
 namespace Testar.ChangeDetection.Core.Graph;
 
@@ -26,10 +27,25 @@ public interface IGraphService
 public class GraphService : IGraphService
 {
     private readonly IChangeDetectionHttpClient httpClient;
+    private readonly AbstractStateLabelSetting abstractStateLabelSetting;
+    private readonly TestSequenceLabelSetting testSequenceLabelSetting;
+    private readonly SequenceNodeLabelSetting sequenceNodeLabelSetting;
+    private readonly ConcreteStateLabelSetting concreteStateLabelSetting;
+    private readonly ShowPrefixLabelSettings showPrefixLabelSetting;
 
-    public GraphService(IChangeDetectionHttpClient httpClient)
+    public GraphService(IChangeDetectionHttpClient httpClient,
+        AbstractStateLabelSetting abstractStateLabelSetting,
+        TestSequenceLabelSetting testSequenceLabelSetting,
+        SequenceNodeLabelSetting sequenceNodeLabelSetting,
+        ConcreteStateLabelSetting concreteStateLabelSetting,
+        ShowPrefixLabelSettings showPrefixLabelSetting)
     {
         this.httpClient = httpClient;
+        this.abstractStateLabelSetting = abstractStateLabelSetting;
+        this.testSequenceLabelSetting = testSequenceLabelSetting;
+        this.sequenceNodeLabelSetting = sequenceNodeLabelSetting;
+        this.concreteStateLabelSetting = concreteStateLabelSetting;
+        this.showPrefixLabelSetting = showPrefixLabelSetting;
     }
 
     public string GenerateJsonString(GraphElement[] elements)
@@ -335,7 +351,16 @@ public class GraphService : IGraphService
         return element;
     }
 
-    private static GraphElement AsVertex(JsonElement jsonElement, string className, string? parent, params string[] extraClasses)
+    // this helper method formats the @RID property into something that can be used in a web frontend
+    private static string FormatId(OrientDbId id)
+    {
+        if (id.Id.IndexOf("#") != 0) return id.Id; // not an orientdb id
+        return id.Id
+            .Replace("#", "")
+            .Replace(":", "_");
+    }
+
+    private GraphElement AsVertex(JsonElement jsonElement, string className, string? parent, params string[] extraClasses)
     {
         var id = new OrientDbId(jsonElement.GetProperty("@rid").ToString());
 
@@ -376,17 +401,51 @@ public class GraphService : IGraphService
             element.AddClass(extraClass);
         }
 
-        jsonVertex["uiLabel"] = element["counter"];
+        if (className == "AbstractState")
+        {
+            jsonVertex["customLabel"] = element[abstractStateLabelSetting.Value];
+        }
+        else if (className == "ConcreteState")
+        {
+            jsonVertex["customLabel"] = element[concreteStateLabelSetting.Value];
+        }
+        else if (className == "SequenceNode")
+        {
+            jsonVertex["customLabel"] = element[sequenceNodeLabelSetting.Value];
+        }
+        else if (className == "TestSequence")
+        {
+            jsonVertex["customLabel"] = element[testSequenceLabelSetting.Value];
+        }
+        else
+        {
+            jsonVertex["customLabel"] = element["counter"];
+        }
+
+        if (showPrefixLabelSetting.Value)
+        {
+            if (className == "AbstractState")
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"AS-{jsonVertex["customLabel"].Value}");
+            }
+            else if (className == "ConcreteState")
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"CS-{jsonVertex["customLabel"].Value}");
+            }
+            else if (className == "SequenceNode")
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"SN-{jsonVertex["customLabel"].Value}");
+            }
+            else if (className == "TestSequence")
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"TS-{jsonVertex["customLabel"].Value}");
+            }
+            else
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"??-{jsonVertex["customLabel"].Value}");
+            }
+        }
 
         return element;
-    }
-
-    // this helper method formats the @RID property into something that can be used in a web frontend
-    private static string FormatId(OrientDbId id)
-    {
-        if (id.Id.IndexOf("#") != 0) return id.Id; // not an orientdb id
-        return id.Id
-            .Replace("#", "")
-            .Replace(":", "_");
     }
 }

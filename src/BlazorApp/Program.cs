@@ -12,6 +12,7 @@ using Testar.ChangeDetection.Core.Differences;
 using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Services;
+using Testar.ChangeDetection.Core.Settings;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
@@ -40,7 +41,14 @@ builder.Services
     .AddScoped<IStartingAbstractState, InitialStartingAbstractState>();
 
 builder.Services
-    .AddScoped<ShowCompoundLayerSetting>();
+    .AddScoped<ISaveLoadSettings, BlazorSaveLoadSettings>()
+    .AddScoped<ShowCompoundLayerSetting>()
+    .AddScoped<ShowPrefixLabelSettings>()
+    .AddScoped<AbstractStateLabelSetting>()
+    .AddScoped<TestSequenceLabelSetting>()
+    .AddScoped<SequenceNodeLabelSetting>()
+    .AddScoped<ConcreteStateLabelSetting>()
+    ;
 
 builder.Services
     .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
@@ -49,7 +57,8 @@ builder.Services
     .AddScoped<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
     .AddScoped<IHtmlOutputter, HtmlOutputter>();
 
-builder.Services.AddScoped<IStrategyBuilder, AllStrats>()
+builder.Services
+    .AddScoped<IStrategyBuilder, AllStrats>()
     .AddScoped<IChangeDetectionStrategy, DiffPageStrategy>();
 //builder.Services.AddScoped<IChangeDetectionStrategy, WidgetTreeInitialStateStrategy>();
 
