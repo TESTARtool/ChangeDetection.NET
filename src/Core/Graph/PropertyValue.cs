@@ -8,4 +8,6 @@ public record struct PropertyValue(string Value)
         .Split(',')
         .Select(x => new PropertyValue(x))
         .ToArray();
+
+    public bool AsBool() => bool.Parse(Value);
 }

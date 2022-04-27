@@ -27,7 +27,17 @@ public abstract class Document
     public string? TargetId { get; set; }
 
     [JsonIgnore]
-    public bool IsHandeld { get; set; }
+    public bool IsHandeld
+    {
+        get
+        {
+            return this["CD_IsHandeld"].AsBool();
+        }
+        set
+        {
+            AddProperty("CD_IsHandeld", value.ToString());
+        }
+    }
 
     [JsonExtensionData]
     public IDictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();

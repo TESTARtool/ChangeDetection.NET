@@ -83,11 +83,11 @@ public class GraphComparer : IGraphComparer
 
         foreach (var action in unhandeldActions)
         {
-            FindDifferences(action, actionsStateApp1, graphApp1, graphApp2);
+            FindDifferencesFromAction(action, actionsStateApp1, graphApp1, graphApp2);
         }
     }
 
-    private void FindDifferences(Edge action, IEnumerable<Edge> actionsStateApp1, AppGraph graphApp1, AppGraph graphApp2)
+    private void FindDifferencesFromAction(Edge action, IEnumerable<Edge> actionsStateApp1, AppGraph graphApp1, AppGraph graphApp2)
     {
         // always mark as handeld for prevent double handling
         action.IsHandeld = true;
@@ -107,11 +107,11 @@ public class GraphComparer : IGraphComparer
             correspondingAction.IsHandeld = true;
 
             var targetState = graphApp2.AbstractStates
-                .First(x => x.Document.Id == action["target"].Value)
+                .First(x => x.Document.Id == action.TargetId)
                 .DocumentAsVertex;
 
             var correspondingTargetState = graphApp1.AbstractStates
-                .First(x => x.Document.Id == correspondingAction["target"].Value)
+                .First(x => x.Document.Id == correspondingAction.TargetId)
                 .DocumentAsVertex;
 
             // first check it handling is needed

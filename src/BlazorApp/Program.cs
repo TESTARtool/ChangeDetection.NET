@@ -35,7 +35,9 @@ builder.Services
 
 builder.Services
     .AddScoped<IGraphService, GraphService>()
-    .AddScoped<IGraphComparer, GraphComparer>();
+    .AddScoped<IGraphComparer, GraphComparer>()
+    .AddScoped<ICompareVertices, CompareVertices>()
+    .AddScoped<IStartingAbstractState, InitialStartingAbstractState>();
 
 builder.Services
     .AddScoped<ShowCompoundLayerSetting>();
