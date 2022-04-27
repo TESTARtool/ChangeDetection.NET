@@ -9,5 +9,8 @@ public record struct PropertyValue(string Value)
         .Select(x => new PropertyValue(x))
         .ToArray();
 
-    public bool AsBool() => bool.Parse(Value);
+    public bool AsBool()
+    {
+        return bool.TryParse(Value, out var value) && value;
+    }
 }
