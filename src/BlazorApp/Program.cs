@@ -48,6 +48,7 @@ builder.Services
     .AddScoped<TestSequenceLabelSetting>()
     .AddScoped<SequenceNodeLabelSetting>()
     .AddScoped<ConcreteStateLabelSetting>()
+    .AddScoped<EnableCompareExperimentalFeature>()
     ;
 
 builder.Services

@@ -38,6 +38,6 @@ public class ShowPrefixLabelSettings : SettingBase<bool>
 public class EnableCompareExperimentalFeature : SettingBase<bool>
 {
     public EnableCompareExperimentalFeature(ISaveLoadSettings storage) :
-       base(storage, nameof(EnableCompareExperimentalFeature), true)
+       base(storage, nameof(EnableCompareExperimentalFeature), false)
     { }
 }
