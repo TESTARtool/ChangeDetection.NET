@@ -19,6 +19,9 @@ public class GraphElement
         Classes.Add(className);
     }
 
+    [JsonIgnore]
+    public Edge DocumentAsEdge => (Edge)Document;
+
     [JsonInclude]
     [JsonPropertyName("group")]
     public string Group { get; set; }
@@ -32,7 +35,38 @@ public class GraphElement
     public List<string> Classes { get; set; } = new();
 
     [JsonIgnore]
+    public Vertex DocumentAsVertex => (Vertex)Document;
+
+    [JsonIgnore]
     public bool IsInitial => Classes.Any(x => x == "isInitial");
+
+    [JsonIgnore]
+    public bool IsAbstractState => Classes.Any(x => x == "AbstractState" && Document is Vertex);
+
+    [JsonIgnore]
+    public bool IsConcreteState => Classes.Any(x => x == "ConcreteState" && Document is Vertex);
+
+    [JsonIgnore]
+    public bool IsAbstractAction => Classes.Any(x => x == "AbstractAction" && Document is Edge);
+
+    [JsonIgnore]
+    public bool IsConcreteAction => Classes.Any(x => x == "ConcreteAction" && Document is Edge);
+
+    [JsonIgnore]
+    public bool IsHandeld
+    { get { return Document.IsHandeld; } set { Document.IsHandeld = value; } }
+
+    public PropertyValue this[string name]
+    {
+        get
+        {
+            return Document[name];
+        }
+        set
+        {
+            Document.AddProperty(name, value.Value);
+        }
+    }
 
     public void AddClass(string className)
     {

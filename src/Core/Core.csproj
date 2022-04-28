@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Testar.ChangeDetection.Core</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
+    <CodeAnalysisRuleSet>..\..\.sonarlint\changedetection.netcsharp.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +12,10 @@
     <None Remove="Strategy\AbstractStateComparison\DisappearedStateTemplate.html" />
     <None Remove="Strategy\AbstractStateComparison\Template.html" />
     <None Remove="Strategy\WidgetTreeInitialState\Template.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\changedetection.net\CSharp\SonarLint.xml" Link="SonarLint.xml" />
   </ItemGroup>
 
   <ItemGroup>

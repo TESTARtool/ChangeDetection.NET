@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Testar.ChangeDetection.Core.Settings;
 
 namespace Testar.ChangeDetection.Core.Graph;
 
@@ -16,6 +17,8 @@ public interface IGraphService
 
     Task<GraphElement[]> FetchDiffGraph(ModelIdentifier modelIdentifier1, ModelIdentifier modelIdentifier2);
 
+    Task<GraphElement[]> FetchConcreteSequenceConnectors(ModelIdentifier modelIdentifier);
+
     Task<string> DownloadScreenshotAsync(string id);
 
     string GenerateJsonString(GraphElement[] elements);
@@ -24,10 +27,25 @@ public interface IGraphService
 public class GraphService : IGraphService
 {
     private readonly IChangeDetectionHttpClient httpClient;
+    private readonly AbstractStateLabelSetting abstractStateLabelSetting;
+    private readonly TestSequenceLabelSetting testSequenceLabelSetting;
+    private readonly SequenceNodeLabelSetting sequenceNodeLabelSetting;
+    private readonly ConcreteStateLabelSetting concreteStateLabelSetting;
+    private readonly ShowPrefixLabelSettings showPrefixLabelSetting;
 
-    public GraphService(IChangeDetectionHttpClient httpClient)
+    public GraphService(IChangeDetectionHttpClient httpClient,
+        AbstractStateLabelSetting abstractStateLabelSetting,
+        TestSequenceLabelSetting testSequenceLabelSetting,
+        SequenceNodeLabelSetting sequenceNodeLabelSetting,
+        ConcreteStateLabelSetting concreteStateLabelSetting,
+        ShowPrefixLabelSettings showPrefixLabelSetting)
     {
         this.httpClient = httpClient;
+        this.abstractStateLabelSetting = abstractStateLabelSetting;
+        this.testSequenceLabelSetting = testSequenceLabelSetting;
+        this.sequenceNodeLabelSetting = sequenceNodeLabelSetting;
+        this.concreteStateLabelSetting = concreteStateLabelSetting;
+        this.showPrefixLabelSetting = showPrefixLabelSetting;
     }
 
     public string GenerateJsonString(GraphElement[] elements)
@@ -69,7 +87,7 @@ public class GraphService : IGraphService
         var result1 = new OrientDbCommand("SELECT FROM (TRAVERSE in() FROM (SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier)) WHERE @class = 'ConcreteState'")
             .AddParameter("modelIdentifier", modelIdentifier.Value)
             .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsNode(x, "ConcreteState", showCompoundGraph ? "ConcreteLayer" : null))
+            .Select(x => AsVertex(x, "ConcreteState", showCompoundGraph ? "ConcreteLayer" : null))
             .ToArrayAsync();
 
         var result2 = new OrientDbCommand("SELECT FROM (TRAVERSE in('isAbstractedBy').outE('ConcreteAction') FROM (SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier)) WHERE @class = 'ConcreteAction'")
@@ -89,13 +107,13 @@ public class GraphService : IGraphService
         var result1 = await new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier1.Value)
             .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsNode(x, "AbstractState", modelIdentifier1.Value, modelIdentifier1.Value))
+            .Select(x => AsVertex(x, "AbstractState", modelIdentifier1.Value, modelIdentifier1.Value))
             .ToArrayAsync();
 
         var result2 = await new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier2.Value)
             .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsNode(x, "AbstractState", modelIdentifier2.Value, modelIdentifier2.Value))
+            .Select(x => AsVertex(x, "AbstractState", modelIdentifier2.Value, modelIdentifier2.Value))
             .ToArrayAsync();
 
         var result2Docs = result2.Select(x => (Vertex)x.Document);
@@ -209,7 +227,7 @@ public class GraphService : IGraphService
         var result1 = new OrientDbCommand("SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier")
             .AddParameter("modelIdentifier", modelIdentifier.Value)
             .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsNode(x, "AbstractState", showCompoundGraph ? "AbstractLayer" : null))
+            .Select(x => AsVertex(x, "AbstractState", showCompoundGraph ? "AbstractLayer" : null))
             .ToArrayAsync();
 
         var result2 = new OrientDbCommand("SELECT FROM AbstractAction WHERE modelIdentifier = :modelIdentifier")
@@ -221,7 +239,7 @@ public class GraphService : IGraphService
         var result3 = new OrientDbCommand("SELECT FROM (TRAVERSE out() FROM  (SELECT FROM AbstractState WHERE modelIdentifier = :modelIdentifier)) WHERE @class = 'BlackHole'")
             .AddParameter("modelIdentifier", modelIdentifier.Value)
             .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsNode(x, "BlackHole", showCompoundGraph ? "AbstractLayer" : null))
+            .Select(x => AsVertex(x, "BlackHole", showCompoundGraph ? "AbstractLayer" : null))
             .ToArrayAsync();
 
         var result4 = new OrientDbCommand("SELECT FROM UnvisitedAbstractAction WHERE modelIdentifier = :modelIdentifier")
@@ -242,9 +260,9 @@ public class GraphService : IGraphService
     {
         var abstractLayer = await FetchAbstractLayerAsync(modelIdentifier, showCompoundGraph);
         var concreteLayer = await FetchConcreteLayerAsync(modelIdentifier, showCompoundGraph);
-        var sequenceLayer = await FetchSequenceLayerAsync(modelIdentifier, showCompoundGraph);
         var connections = await FetchAbstractConcreteConnectors(modelIdentifier);
         var sequenceConnections = await FetchConcreteSequenceConnectors(modelIdentifier);
+        var sequenceLayer = await FetchSequenceLayerAsync(modelIdentifier, showCompoundGraph);
 
         var elements = new List<GraphElement>();
         elements.AddRange(abstractLayer);
@@ -268,13 +286,13 @@ public class GraphService : IGraphService
         var result1 = new OrientDbCommand("SELECT FROM TestSequence WHERE modelIdentifier = :identifier")
             .AddParameter("identifier", modelIdentifier.Value)
             .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsNode(x, "TestSequence", showCompoundGraph ? "SequenceLayer" : null))
+            .Select(x => AsVertex(x, "TestSequence", showCompoundGraph ? "SequenceLayer" : null))
             .ToArrayAsync();
 
         var result2 = new OrientDbCommand("SELECT FROM (TRAVERSE in('isAbstractedBy').in('Accessed') FROM (SELECT FROM AbstractState WHERE modelIdentifier = :identifier)) WHERE @class = 'SequenceNode'")
             .AddParameter("identifier", modelIdentifier.Value)
             .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsNode(x, "SequenceNode", showCompoundGraph ? "SequenceLayer" : null))
+            .Select(x => AsVertex(x, "SequenceNode", showCompoundGraph ? "SequenceLayer" : null))
             .ToArrayAsync();
 
         var result3 = new OrientDbCommand("SELECT FROM (TRAVERSE in('isAbstractedBy').in('Accessed').outE('SequenceStep') FROM (SELECT FROM AbstractState WHERE modelIdentifier = :identifier)) WHERE @class = 'SequenceStep'")
@@ -297,7 +315,16 @@ public class GraphService : IGraphService
         return elements.ToArray();
     }
 
-    private GraphElement AsEdge(JsonElement jsonElement, string className, params string[] extraClasses)
+    public async Task<GraphElement[]> FetchConcreteSequenceConnectors(ModelIdentifier modelIdentifier)
+    {
+        return await new OrientDbCommand("SELECT FROM (TRAVERSE in('isAbstractedBy').inE('Accessed') FROM (SELECT FROM AbstractState WHERE modelIdentifier = :identifier)) WHERE @class = 'Accessed'")
+            .AddParameter("identifier", modelIdentifier.Value)
+            .ExecuteOn<JsonElement>(httpClient)
+            .Select(x => AsEdge(x, "Accessed"))
+            .ToArrayAsync();
+    }
+
+    private static GraphElement AsEdge(JsonElement jsonElement, string className, params string[] extraClasses)
     {
         var id = new OrientDbId(jsonElement.GetProperty("@rid").ToString());
         var sourceId = new OrientDbId(jsonElement.GetProperty("out").ToString());
@@ -319,21 +346,33 @@ public class GraphService : IGraphService
             element.AddClass(extraClass);
         }
 
+        jsonEdge["uiLabel"] = element["counter"];
+
         return element;
     }
 
-    private GraphElement AsNode(JsonElement jsonElement, string className, string? parent, params string[] extraClasses)
+    // this helper method formats the @RID property into something that can be used in a web frontend
+    private static string FormatId(OrientDbId id)
+    {
+        if (id.Id.IndexOf("#") != 0) return id.Id; // not an orientdb id
+        return id.Id
+            .Replace("#", "")
+            .Replace(":", "_");
+    }
+
+    private GraphElement AsVertex(JsonElement jsonElement, string className, string? parent, params string[] extraClasses)
     {
         var id = new OrientDbId(jsonElement.GetProperty("@rid").ToString());
 
         var jsonVertex = new Vertex("n" + FormatId(id));
 
-        foreach (var property in jsonElement.EnumerateObject())
+        var elementToParse = jsonElement.EnumerateObject()
+            .Where(x => !x.Name.StartsWith("in_") || !x.Name.StartsWith("out_") || !x.Name.StartsWith("@"))
+            .ToList();
+
+        foreach (var property in elementToParse)
         {
-            if (property.Name.StartsWith("in_") || property.Name.StartsWith("out_") || property.Name.StartsWith("@"))
-            {
-            }
-            else if (property.Name == "screenshot")
+            if (property.Name == "screenshot")
             {
                 var orientDb = new OrientDbId(property.Value.ToString());
                 var formattedId = FormatId(orientDb);
@@ -352,12 +391,9 @@ public class GraphService : IGraphService
         }
 
         var element = new GraphElement(GraphElement.GroupNodes, jsonVertex, className);
-        if (jsonElement.TryGetProperty("isInitial", out var isInitialElement))
+        if (jsonElement.TryGetProperty("isInitial", out var isInitialElement) && isInitialElement.GetBoolean())
         {
-            if (isInitialElement.GetBoolean())
-            {
-                element.AddClass("isInitial");
-            }
+            element.AddClass("isInitial");
         }
 
         foreach (var extraClass in extraClasses)
@@ -365,24 +401,51 @@ public class GraphService : IGraphService
             element.AddClass(extraClass);
         }
 
+        if (className == "AbstractState")
+        {
+            jsonVertex["customLabel"] = element[abstractStateLabelSetting.Value];
+        }
+        else if (className == "ConcreteState")
+        {
+            jsonVertex["customLabel"] = element[concreteStateLabelSetting.Value];
+        }
+        else if (className == "SequenceNode")
+        {
+            jsonVertex["customLabel"] = element[sequenceNodeLabelSetting.Value];
+        }
+        else if (className == "TestSequence")
+        {
+            jsonVertex["customLabel"] = element[testSequenceLabelSetting.Value];
+        }
+        else
+        {
+            jsonVertex["customLabel"] = element["counter"];
+        }
+
+        if (showPrefixLabelSetting.Value)
+        {
+            if (className == "AbstractState")
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"AS-{jsonVertex["customLabel"].Value}");
+            }
+            else if (className == "ConcreteState")
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"CS-{jsonVertex["customLabel"].Value}");
+            }
+            else if (className == "SequenceNode")
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"SN-{jsonVertex["customLabel"].Value}");
+            }
+            else if (className == "TestSequence")
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"TS-{jsonVertex["customLabel"].Value}");
+            }
+            else
+            {
+                jsonVertex["customLabel"] = new PropertyValue($"??-{jsonVertex["customLabel"].Value}");
+            }
+        }
+
         return element;
-    }
-
-    private async Task<GraphElement[]> FetchConcreteSequenceConnectors(ModelIdentifier modelIdentifier)
-    {
-        return await new OrientDbCommand("SELECT FROM (TRAVERSE in('isAbstractedBy').inE('Accessed') FROM (SELECT FROM AbstractState WHERE modelIdentifier = :identifier)) WHERE @class = 'Accessed'")
-            .AddParameter("identifier", modelIdentifier.Value)
-            .ExecuteOn<JsonElement>(httpClient)
-            .Select(x => AsEdge(x, "Accessed"))
-            .ToArrayAsync();
-    }
-
-    // this helper method formats the @RID property into something that can be used in a web frontend
-    private string FormatId(OrientDbId id)
-    {
-        if (id.Id.IndexOf("#") != 0) return id.Id; // not an orientdb id
-        return id.Id
-            .Replace("#", "")
-            .Replace(":", "_");
     }
 }

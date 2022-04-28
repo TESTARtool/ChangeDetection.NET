@@ -1,10 +1,17 @@
-﻿function loadGraphCanvas(graph) {
+﻿function loadGraphCanvas(graph, elementId) {
     // global object that will hold some config values
+    let savedLayout = 'cose-bilkent';
+    if (localStorage.graphLayout) {
+        savedLayout = localStorage.graphLayout;
+    }
+
     let appStatus = {};
     appStatus.graph = {};
+
     console.log(graph);
+
     let cy = cytoscape({
-        container: document.getElementById("cy"),
+        container: document.getElementById(elementId),
 
         elements: JSON.parse(graph),
 
@@ -54,7 +61,7 @@
             {
                 selector: 'edge[counter]',
                 style: {
-                    'label': 'data(counter)',
+                    'label': 'data(uiLabel)',
                 }
             },
             {
@@ -177,7 +184,6 @@
                 selector: '.BlackHole',
                 style: {
                     'background-color': '#000000',
-                    'label': 'data(id)',
                     'background-image': "img/blackhole-bg.jpg",
                     'background-fit': 'contain',
                     'label': 'BlackHole'
@@ -313,33 +319,40 @@
         ],
 
         layout: {
-            name: 'grid'
+            name: savedLayout
         },
 
         wheelSensitivity: 0.5
     });
 
     let layoutControl = document.getElementById("layout-control");
-    layoutControl.addEventListener("change", function () {
-        let selectedLayout = layoutControl.value;
-        cy.layout({
-            name: selectedLayout,
-            animate: 'end',
-            animationEasing: 'ease-out',
-            animationDuration: 1000
-        }).run();
-    });
+    if (layoutControl != null) {
+        layoutControl.value = savedLayout;
+
+        layoutControl.addEventListener("change", function () {
+            let selectedLayout = layoutControl.value;
+            localStorage.setItem("graphLayout", selectedLayout);
+            cy.layout({
+                name: selectedLayout,
+                animate: 'end',
+                animationEasing: 'ease-out',
+                animationDuration: 1000
+            }).run();
+        });
+    }
 
     let showLabels = document.getElementById("show-labels");
-    showLabels.addEventListener("change", function () {
-        if (showLabels.checked) {
-            cy.$('.no-label').removeClass('no-label');
-        }
-        else {
-            cy.$('node').addClass('no-label');
-            cy.$('edge').addClass('no-label');
-        }
-    });
+    if (showLabels != null) {
+        showLabels.addEventListener("change", function () {
+            if (showLabels.checked) {
+                cy.$('.no-label').removeClass('no-label');
+            }
+            else {
+                cy.$('node').addClass('no-label');
+                cy.$('edge').addClass('no-label');
+            }
+        });
+    }
 
     // when nodes get clicked, we need to open the side bar
     cy.on('tap', 'node', function (evt) {
@@ -530,13 +543,11 @@
                 // next, for each concrete action in the neighborhoor, attempt to fetch the corresponding abstract action
                 let selectedAbstractActionNodes = [];
                 sequenceElements.edges('.ConcreteAction').forEach(
-                    (edge) => abstractActionNodes.forEach(
-                        (abstractActionNode) => {
-                            if (abstractActionNode.data('concreteActionIds').indexOf(edge.data('actionId')) != -1) {
-                                selectedAbstractActionNodes.push(abstractActionNode);
-                            }
+                    (edge) => abstractActionNodes.forEach((abstractActionNode) => {
+                        if (abstractActionNode.data('concreteActionIds').indexOf(edge.data('actionId')) != -1) {
+                            selectedAbstractActionNodes.push(abstractActionNode);
                         }
-                    )
+                    })
                 );
 
                 // now join the nodes
@@ -672,7 +683,6 @@
         ////////// end data segment //////////
 
         sidePanel.classList.add("cd-panel--is-visible");
-        // console.log( 'tapped ' + node.id() );
     });
 
     // when edges get selected, we also open the side panel, but show just the close button and the data
@@ -829,11 +839,13 @@
     });
 
     let showAllButton = document.getElementById("show-all");
-    showAllButton.addEventListener("click", function () {
-        cy.$('.invisible').removeClass('invisible');
-        cy.$('.dim').removeClass('dim');
-        initLayers();
-    });
+    if (showAllButton != null) {
+        showAllButton.addEventListener("click", function () {
+            cy.$('.invisible').removeClass('invisible');
+            cy.$('.dim').removeClass('dim');
+            initLayers();
+        });
+    }
 
     function initLayers() {
         appStatus.nrOfAbstractStates = cy.$('node.AbstractState').size();
@@ -851,96 +863,111 @@
         // ready several toggle buttons
         // abstract layer toggle
         let abstractLayerToggle = document.getElementById("toggle-abstract-layer");
-        if (appStatus.abstractLayerPresent) {
-            appStatus.nrOfLayersPresent++;
-            abstractLayerToggle.checked = true;
-            abstractLayerToggle.addEventListener("change", (e) => {
-                if (abstractLayerToggle.checked) {
-                    cy.$('node.AbstractState').union(cy.$('node.BlackHole')).union(cy.$('node.AbstractState').parent()).removeClass("invisible");
-                }
-                else {
-                    cy.$('node.AbstractState').union(cy.$('node.BlackHole')).union(cy.$('node.AbstractState').parent()).addClass("invisible");
-                }
-            });
-        }
-        else {
-            abstractLayerToggle.checked = false;
-            abstractLayerToggle.disabled = true;
+        if (abstractLayerToggle != null) {
+            if (appStatus.abstractLayerPresent) {
+                appStatus.nrOfLayersPresent++;
+                abstractLayerToggle.checked = true;
+                abstractLayerToggle.addEventListener("change", (e) => {
+                    if (abstractLayerToggle.checked) {
+                        cy.$('node.AbstractState').union(cy.$('node.BlackHole')).union(cy.$('node.AbstractState').parent()).removeClass("invisible");
+                    }
+                    else {
+                        cy.$('node.AbstractState').union(cy.$('node.BlackHole')).union(cy.$('node.AbstractState').parent()).addClass("invisible");
+                    }
+                });
+            }
+            else {
+                abstractLayerToggle.checked = false;
+                abstractLayerToggle.disabled = true;
+            }
         }
 
         // concrete layer toggle
         let concreteLayerToggle = document.getElementById("toggle-concrete-layer");
-        if (appStatus.concreteLayerPresent) {
-            appStatus.nrOfLayersPresent++;
-            concreteLayerToggle.checked = true;
-            concreteLayerToggle.addEventListener("change", (e) => {
-                if (concreteLayerToggle.checked) {
-                    cy.$('node.ConcreteState').union(cy.$('node.ConcreteState').parent()).removeClass("invisible");
-                }
-                else {
-                    cy.$('node.ConcreteState').union(cy.$('node.ConcreteState').parent()).addClass("invisible");
-                }
-            });
-        }
-        else {
-            concreteLayerToggle.checked = false;
-            concreteLayerToggle.disabled = true;
+        if (concreteLayerToggle != null) {
+            if (appStatus.concreteLayerPresent) {
+                appStatus.nrOfLayersPresent++;
+                concreteLayerToggle.checked = true;
+                concreteLayerToggle.addEventListener("change", (e) => {
+                    if (concreteLayerToggle.checked) {
+                        cy.$('node.ConcreteState').union(cy.$('node.ConcreteState').parent()).removeClass("invisible");
+                    }
+                    else {
+                        cy.$('node.ConcreteState').union(cy.$('node.ConcreteState').parent()).addClass("invisible");
+                    }
+                });
+            }
+            else {
+                concreteLayerToggle.checked = false;
+                concreteLayerToggle.disabled = true;
+            }
         }
 
         // sequence layer toggle
         let sequenceLayerToggle = document.getElementById("toggle-sequence-layer");
-        if (appStatus.sequenceLayerPresent) {
-            appStatus.nrOfLayersPresent++;
-            sequenceLayerToggle.checked = true;
-            sequenceLayerToggle.addEventListener("change", (e) => {
-                if (sequenceLayerToggle.checked) {
-                    cy.$('node.SequenceNode').union(cy.$('node.SequenceNode').parent()).removeClass("invisible");
-                }
-                else {
-                    cy.$('node.SequenceNode').union(cy.$('node.SequenceNode').parent()).addClass("invisible");
-                }
-            });
+        if (sequenceLayerToggle != null) {
+            if (appStatus.sequenceLayerPresent) {
+                appStatus.nrOfLayersPresent++;
+                sequenceLayerToggle.checked = true;
+                sequenceLayerToggle.addEventListener("change", (e) => {
+                    if (sequenceLayerToggle.checked) {
+                        cy.$('node.SequenceNode').union(cy.$('node.SequenceNode').parent()).removeClass("invisible");
+                    }
+                    else {
+                        cy.$('node.SequenceNode').union(cy.$('node.SequenceNode').parent()).addClass("invisible");
+                    }
+                });
+            }
+            else {
+                sequenceLayerToggle.checked = false;
+                sequenceLayerToggle.disabled = true;
+            }
         }
-        else {
-            sequenceLayerToggle.checked = false;
-            sequenceLayerToggle.disabled = true;
-        }
-
         // toggle for edges between the layers
         let interLayerEdgesToggle = document.getElementById("toggle-layer-transitions");
-        if (appStatus.nrOfLayersPresent > 1 && appStatus.concreteLayerPresent) {
-            interLayerEdgesToggle.checked = true;
-            interLayerEdgesToggle.addEventListener("change", (e) => {
-                if (interLayerEdgesToggle.checked) {
-                    cy.$('edge.isAbstractedBy').union(cy.$('edge.Accessed')).removeClass("invisible");
-                }
-                else {
-                    cy.$('edge.isAbstractedBy').union(cy.$('edge.Accessed')).addClass("invisible");
-                }
-            });
-        }
-        else {
-            interLayerEdgesToggle.checked = false;
-            interLayerEdgesToggle.disabled = true;
+        if (interLayerEdgesToggle != null) {
+            if (appStatus.nrOfLayersPresent > 1 && appStatus.concreteLayerPresent) {
+                interLayerEdgesToggle.checked = true;
+                interLayerEdgesToggle.addEventListener("change", (e) => {
+                    if (interLayerEdgesToggle.checked) {
+                        cy.$('edge.isAbstractedBy').union(cy.$('edge.Accessed')).removeClass("invisible");
+                    }
+                    else {
+                        cy.$('edge.isAbstractedBy').union(cy.$('edge.Accessed')).addClass("invisible");
+                    }
+                });
+            }
+            else {
+                interLayerEdgesToggle.checked = false;
+                interLayerEdgesToggle.disabled = true;
+            }
         }
     }
 
     function initStats() {
         let div = document.getElementById('stats-abstract-states');
-        let text = document.createTextNode(appStatus.nrOfAbstractStates);
-        div.append(text);
+        if (div != null) {
+            let text = document.createTextNode(appStatus.nrOfAbstractStates);
+            div.append(text);
+        }
 
         div = document.getElementById('stats-abstract-actions');
-        text = document.createTextNode(appStatus.nrOfAbstractActions);
-        div.append(text);
+        if (div != null) {
+            let text = document.createTextNode(appStatus.nrOfAbstractActions);
+            div.append(text);
+        }
 
         div = document.getElementById('stats-concrete-states');
-        text = document.createTextNode(appStatus.nrOfConcreteStates);
-        div.append(text);
+        if (div != null) {
+            let text = document.createTextNode(appStatus.nrOfConcreteStates);
+            div.append(text);
+        }
 
         div = document.getElementById('stats-concrete-actions');
-        text = document.createTextNode(appStatus.nrOfConcreteActions);
-        div.append(text);
+        if (div != null) {
+            let text = document.createTextNode(appStatus.nrOfConcreteActions);
+            div.append(text);
+        }
     }
 
     function filterDataFields(filterValue) {
@@ -948,21 +975,21 @@
         let dataTableBody = dataTable.getElementsByTagName("tbody")[0];
         let tableRows = dataTableBody.getElementsByTagName("tr");
         filterValue = filterValue.toLowerCase();
-        for (i = 0; i < tableRows.length; i++) {
+        for (let row of tableRows) {
             if (filterValue == '') {
-                tableRows[i].style.display = "";
+                row.style.display = "";
             }
             else {
                 // check if the attribute name matches
-                let tableCell = tableRows[i].getElementsByTagName("td")[0];
+                let tableCell = row.getElementsByTagName("td")[0];
                 if (tableCell) {
                     let cellContent = tableCell.textContent || tableCell.innerText;
                     cellContent = cellContent.toLowerCase();
                     if (cellContent.indexOf(filterValue) > -1) {
-                        tableRows[i].style.display = "";
+                        row.style.display = "";
                     }
                     else {
-                        tableRows[i].style.display = "none";
+                        row.style.display = "none";
                     }
                 }
             }
@@ -979,96 +1006,79 @@
             (w) => w.data("customLabel", w.data("Role") + "-" + w.data("counter"))
         );
 
-        // create custom labels for several classes
         // concrete state:
         cy.$(".ConcreteState").forEach(
             (w) => {
-                w.data("customLabel", "CS-" + w.data("counter"));
                 if (w.data('oracleVerdictCode') && ["2", "3"].includes(w.data('oracleVerdictCode'))) {
                     w.addClass('errorState');
                 }
             }
         );
 
-        // abstract state
-        cy.$(".AbstractState").forEach(
-            (w) => w.data("customLabel", "AS-" + w.data("counter"))
-        );
-
-        // sequence node
-        cy.$(".SequenceNode").forEach(
-            (w) => w.data("customLabel", "SN-" + w.data("counter"))
-        );
-
-        // test sequence
-        cy.$(".TestSequence").forEach(
-            (w) => w.data("customLabel", "TS-" + w.data("counter"))
-        );
-
         // add a mouseover event to the concrete actions
-        cy.$(".ConcreteAction").on('mouseover', function (event) {
-            event.target.addClass("mouse-over-concrete-action");
+        cy.$(".ConcreteAction").on('mouseover', function (mouseoverEvent) {
+            mouseoverEvent.target.addClass("mouse-over-concrete-action");
         }).
-            on('mouseout', function (event) {
-                event.target.removeClass("mouse-over-concrete-action");
+            on('mouseout', function (mouseoutEvent) {
+                mouseoutEvent.target.removeClass("mouse-over-concrete-action");
             });
 
         // add a highlight when mousing over nodes
-        cy.$('node').on('mouseover', (event) => {
+        cy.$('node').on('mouseover', (nodeMouseOverEvent) => {
             // if there is currently a selected node or edge, we don't highlight, as there will already be a highlight in place
             if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
             if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
-            if (event.target.is(':parent')) return;
-            event.target.addClass(event.target.hasClass('isInitial') ? 'selected-initial-node' : 'selected-node');
+            if (nodeMouseOverEvent.target.is(':parent')) return;
+            nodeMouseOverEvent.target.addClass(nodeMouseOverEvent.target.hasClass('isInitial') ? 'selected-initial-node' : 'selected-node');
 
             // if the node is a sequence node, we want to also highlight the corresponding concrete action node
-            if (event.target.hasClass('SequenceNode')) {
-                cy.$(event.target).outgoers('.ConcreteState').addClass('selected-node');
+            if (nodeMouseOverEvent.target.hasClass('SequenceNode')) {
+                cy.$(nodeMouseOverEvent.target).outgoers('.ConcreteState').addClass('selected-node');
             }
         });
-        cy.$('node').on('mouseout', (event) => {
+        cy.$('node').on('mouseout', (nodeMouseOutEvent) => {
             // no action taken if there is a selected node or edge
             if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
             if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
-            if (event.target.is(':parent')) return;
+            if (nodeMouseOutEvent.target.is(':parent')) return;
 
-            if (event.target.hasClass('selected-node')) {
-                event.target.removeClass('selected-node');
+            if (nodeMouseOutEvent.target.hasClass('selected-node')) {
+                nodeMouseOutEvent.target.removeClass('selected-node');
             }
-            if (event.target.hasClass('selected-initial-node')) {
-                event.target.removeClass('selected-initial-node');
+            if (nodeMouseOutEvent.target.hasClass('selected-initial-node')) {
+                nodeMouseOutEvent.target.removeClass('selected-initial-node');
             }
 
-            if (event.target.hasClass('SequenceNode')) {
-                cy.$(event.target).outgoers('.ConcreteState').removeClass('selected-node');
+            if (nodeMouseOutEvent.target.hasClass('SequenceNode')) {
+                cy.$(nodeMouseOutEvent.target).outgoers('.ConcreteState').removeClass('selected-node');
             }
         });
 
-        cy.$('edge').on('mouseover', (event) => {
+        cy.$('edge').on('mouseover', (edgeMouseoverEvent) => {
             // if there is currently a selected node or edge, we don't highlight, as there will already be a highlight in place
             if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
             if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
 
-            if (event.target.hasClass('isAbstractedBy') || event.target.hasClass('Accessed')) return;
-            event.target.addClass('selected-edge');
+            if (edgeMouseoverEvent.target.hasClass('isAbstractedBy') || edgeMouseoverEvent.target.hasClass('Accessed')) return;
+            edgeMouseoverEvent.target.addClass('selected-edge');
 
             // we also want to highlight the concrete action if
-            if (event.target.hasClass('SequenceStep')) {
-                event.target.source().outgoers('.ConcreteState').connectedEdges('.ConcreteAction').filter((element) =>
-                    element.data('uid') == event.target.data('concreteActionUid')).addClass('selected-edge').addClass('mouse-over-concrete-action');
+            if (edgeMouseoverEvent.target.hasClass('SequenceStep')) {
+                edgeMouseoverEvent.target.source().outgoers('.ConcreteState').connectedEdges('.ConcreteAction').filter((element) =>
+                    element.data('uid') == edgeMouseoverEvent.target.data('concreteActionUid')).addClass('selected-edge').addClass('mouse-over-concrete-action');
             }
         });
-        cy.$('edge').on('mouseout', (event) => {
+        cy.$('edge').on('mouseout', (edgeMouseoutEvent) => {
             // no action taken if there is a selected node or edge
             if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
             if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
 
-            if (event.target.hasClass('isAbstractedBy') || event.target.hasClass('Accessed')) return;
-            event.target.removeClass('selected-edge');
+            if (edgeMouseoutEvent.target.hasClass('isAbstractedBy') || edgeMouseoutEvent.target.hasClass('Accessed')) return;
+            edgeMouseoutEvent.target.removeClass('selected-edge');
 
-            if (event.target.hasClass('SequenceStep')) {
-                event.target.source().outgoers('.ConcreteState').connectedEdges('.ConcreteAction').filter((element) =>
-                    element.data('uid') == event.target.data('concreteActionUid')).removeClass('selected-edge').removeClass('mouse-over-concrete-action');
+            if (edgeMouseoutEvent.target.hasClass('SequenceStep')) {
+                edgeMouseoutEvent.target.source().outgoers('.ConcreteState').connectedEdges('.ConcreteAction').filter((element) =>
+                    element.data('uid') == edgeMouseoutEvent.target.data('concreteActionUid')).removeClass('selected-edge').removeClass('mouse-over-concrete-action');
             }
         });
 

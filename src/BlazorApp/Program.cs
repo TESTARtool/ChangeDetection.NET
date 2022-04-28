@@ -8,9 +8,11 @@ using MediatR;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Testar.ChangeDetection.Core;
+using Testar.ChangeDetection.Core.Differences;
 using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Services;
+using Testar.ChangeDetection.Core.Settings;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
 
@@ -33,7 +35,21 @@ builder.Services
     ;
 
 builder.Services
-    .AddScoped<IGraphService, GraphService>();
+    .AddScoped<IGraphService, GraphService>()
+    .AddScoped<IGraphComparer, GraphComparer>()
+    .AddScoped<ICompareVertices, CompareVertices>()
+    .AddScoped<IStartingAbstractState, InitialStartingAbstractState>();
+
+builder.Services
+    .AddScoped<ISaveLoadSettings, BlazorSaveLoadSettings>()
+    .AddScoped<ShowCompoundLayerSetting>()
+    .AddScoped<ShowPrefixLabelSettings>()
+    .AddScoped<AbstractStateLabelSetting>()
+    .AddScoped<TestSequenceLabelSetting>()
+    .AddScoped<SequenceNodeLabelSetting>()
+    .AddScoped<ConcreteStateLabelSetting>()
+    .AddScoped<EnableCompareExperimentalFeature>()
+    ;
 
 builder.Services
     .AddScoped<IChangeDetectionStrategy, AbstractStateComparisonStrategy>()
@@ -42,7 +58,8 @@ builder.Services
     .AddScoped<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
     .AddScoped<IHtmlOutputter, HtmlOutputter>();
 
-builder.Services.AddScoped<IStrategyBuilder, AllStrats>()
+builder.Services
+    .AddScoped<IStrategyBuilder, AllStrats>()
     .AddScoped<IChangeDetectionStrategy, DiffPageStrategy>();
 //builder.Services.AddScoped<IChangeDetectionStrategy, WidgetTreeInitialStateStrategy>();
 

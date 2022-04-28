@@ -26,11 +26,50 @@ public abstract class Document
     [JsonPropertyName("target")]
     public string? TargetId { get; set; }
 
+    [JsonIgnore]
+    public bool IsHandeld
+    {
+        get
+        {
+            return this["CD_IsHandeld"].AsBool();
+        }
+        set
+        {
+            AddProperty("CD_IsHandeld", value.ToString());
+        }
+    }
+
     [JsonExtensionData]
     public IDictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
 
+    public PropertyValue this[string name]
+    {
+        get
+        {
+            return new PropertyValue(Property(name));
+        }
+        set
+        {
+            AddProperty(name, value.Value);
+        }
+    }
+
     public void AddProperty(string key, string value)
     {
-        Properties.Add(key, value);
+        if (this.Properties.ContainsKey(key))
+        {
+            this.Properties[key] = value;
+        }
+        else
+        {
+            Properties.Add(key, value);
+        }
+    }
+
+    public string Property(string key)
+    {
+        return Properties.TryGetValue(key, out var value)
+            ? value?.ToString() ?? string.Empty
+            : string.Empty;
     }
 }

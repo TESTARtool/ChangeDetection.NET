@@ -1,0 +1,26 @@
+﻿using Testar.ChangeDetection.Core.Graph;
+
+namespace Testar.ChangeDetection.Core.Differences;
+
+public class AppGraph
+{
+    public AppGraph(List<GraphElement> elements)
+    {
+        Elements = elements;
+    }
+
+    public List<GraphElement> Elements { get; }
+    public IEnumerable<GraphElement> AbstractStates => Elements.Where(x => x.IsAbstractState);
+    public IEnumerable<GraphElement> AbstractActions => Elements.Where(x => x.IsAbstractAction);
+    public IEnumerable<GraphElement> ConcreteActions => Elements.Where(x => x.IsConcreteAction);
+    public IEnumerable<GraphElement> ConcreteStates => Elements.Where(x => x.IsConcreteState);
+    public bool ContainsUnhandledAbstractStates => AbstractStates.Any(x => !x.IsHandeld);
+
+    public Vertex? InitialAbstractState => AbstractStates.FirstOrDefault(x => x.IsInitial)?.DocumentAsVertex;
+
+    public IEnumerable<Edge> FindAbstractActionsFor(Vertex state)
+    {
+        return AbstractActions.Where(x => x.Document.SourceId == state.Id)
+            .Select(x => x.DocumentAsEdge);
+    }
+}

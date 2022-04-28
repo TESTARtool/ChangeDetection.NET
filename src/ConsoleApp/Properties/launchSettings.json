@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "ConsoleApp": {
-      "commandName": "Project",
-      "commandLineArgs": "/Compare:ControlName=simpel_model /Compare:ControlVersion=1.0.0 /Compare:TestName=simpel_model /Compare:TestVersion=2.0.0"
-    }
-  }
-}
