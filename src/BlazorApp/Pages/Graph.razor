@@ -139,6 +139,15 @@ else
     public string ProgressStatus { get; set; } = "Loading graph data...";
     [Parameter] public string ModelIdentifier { get; set; }
     public string? GraphInJson { get; set; }
+    private DotNetObjectReference<Graph>? dotNetHelper;
+
+    public GraphElement SelectedElement { get; set; }
+
+    [JSInvokable]
+    public void UpdateSelectedElement(string rId)
+    {
+        Console.WriteLine($"Value received from js is {rId}");
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -170,7 +179,13 @@ else
     {
         if (IsGraphAvailable)
         {
-            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy");
+            dotNetHelper = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy", dotNetHelper);
         }
+    }
+
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
     }
 }

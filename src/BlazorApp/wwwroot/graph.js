@@ -1,4 +1,4 @@
-﻿function loadGraphCanvas(graph, elementId) {
+﻿function loadGraphCanvas(graph, elementId, dotNetHelper) {
     // global object that will hold some config values
     let savedLayout = 'cose-bilkent';
     if (localStorage.graphLayout) {
@@ -361,6 +361,9 @@
         let contentPanel = document.getElementById("cd-content-panel");
         let contentPanelHeader = document.getElementById("content-panel-header");
         appStatus.graph.selectedNode = targetNode;
+
+        dotNetHelper.invokeMethodAsync('UpdateSelectedElement', targetNode.data('@rid'));
+        //console.log(targetNode.data('@rid'));
 
         // highlight the selected node
         cy.$('edge.selected-edge').removeClass('selected-edge');
