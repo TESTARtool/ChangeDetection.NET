@@ -12,7 +12,7 @@ html {
     flex-wrap: nowrap;
     height: 100vh;
     height: -webkit-fill-available;
-    max-height: calc(100vh- 40px);
+    max-height: calc(100vh - 40px);
     overflow-x: auto;
     overflow-y: hidden;
 }
