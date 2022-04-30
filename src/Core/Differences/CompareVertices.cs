@@ -11,5 +11,6 @@ public class CompareVertices : ICompareVertices
 {
     public void CompareProperties(Vertex state1, Vertex state2)
     {
+        // this is still to be done
     }
 }
