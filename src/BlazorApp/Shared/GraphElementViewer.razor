@@ -1,0 +1,13 @@
+﻿<h3>GraphElement Viewer</h3>
+
+<p>Selected Id: @Id</p>
+
+@code {
+    public string Id { get; set; }
+
+    public void ShowGraphElement(string id)
+    {
+        Id = id;
+        StateHasChanged();
+    }
+}

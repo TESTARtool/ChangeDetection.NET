@@ -115,12 +115,15 @@
     <div class="viewpane" id="cy">
     </div>
 
-    <div class="cd-panel cd-panel--from-right js-cd-panel-main">
+  
+   <div class="cd-panel cd-panel--from-right js-cd-panel-main">
         <div class="cd-panel__container">
             <div class="panel-header" id="content-panel-header">
             </div>
             <div class="cd-panel__content" id="cd-content-panel">
             </div> <!-- cd-panel__content -->
+            <GraphElementViewer @ref="graphElementViewer"/>
+
         </div> <!-- cd-panel__container -->
     </div>
 }
@@ -140,13 +143,14 @@ else
     [Parameter] public string ModelIdentifier { get; set; }
     public string? GraphInJson { get; set; }
     private DotNetObjectReference<Graph>? dotNetHelper;
-
-    public GraphElement SelectedElement { get; set; }
+    public GraphElementViewer graphElementViewer;
+    public GraphElement? SelectedElement { get; set; }
 
     [JSInvokable]
     public void UpdateSelectedElement(string rId)
     {
         Console.WriteLine($"Value received from js is {rId}");
+        graphElementViewer.ShowGraphElement(rId);
     }
 
     protected override async Task OnInitializedAsync()
