@@ -54,7 +54,10 @@ public class GraphElement
 
     [JsonIgnore]
     public bool IsHandeld
-    { get { return Document.IsHandeld; } set { Document.IsHandeld = value; } }
+    {
+        get => Document.IsHandeld;
+        set => Document.IsHandeld = value;
+    }
 
     public PropertyValue this[string name]
     {

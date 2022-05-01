@@ -1,4 +1,4 @@
-﻿function loadGraphCanvas(graph, elementId, dotNetHelper) {
+﻿function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
     // global object that will hold some config values
     let savedLayout = 'cose-bilkent';
     if (localStorage.graphLayout) {
@@ -358,12 +358,7 @@
     cy.on('tap', 'node', function (evt) {
         let targetNode = evt.target;
         let sidePanel = document.getElementsByClassName("cd-panel")[0];
-        let contentPanel = document.getElementById("cd-content-panel");
-        let contentPanelHeader = document.getElementById("content-panel-header");
         appStatus.graph.selectedNode = targetNode;
-
-        dotNetHelper.invokeMethodAsync('UpdateSelectedElement', targetNode.data('@rid'));
-        //console.log(targetNode.data('@rid'));
 
         // highlight the selected node
         cy.$('edge.selected-edge').removeClass('selected-edge');
@@ -376,469 +371,461 @@
             targetNode.outgoers('.Accessed').target('.ConcreteState').addClass('connected-concrete-state-node');
         }
 
-        // remove all the current child elements for both panel and panel header
-        let child = contentPanel.lastChild;
-        while (child) {
-            contentPanel.removeChild(child);
-            child = contentPanel.lastChild;
-        }
+        dotNetHelper.invokeMethodAsync('UpdateSelectedElement', targetNode.data('id'));
+        sidePanel.classList.add("cd-panel--is-visible");
 
-        child = contentPanelHeader.lastChild;
-        while (child) {
-            contentPanelHeader.removeChild(child);
-            child = contentPanelHeader.lastChild;
-        }
-
-        ///////////// add button section ///////////////////////////
-        let closeButton = document.createElement("button");
-        closeButton.id = "close-panel";
-        closeButton.classList.add("skip");
-        closeButton.appendChild(document.createTextNode("Close"));
+        /////////////// add button section ///////////////////////////
+        let closeButton = document.getElementById("close-panel");
         closeButton.addEventListener("click", function () {
             let cdPanel = document.getElementsByClassName("cd-panel")[0];
             cdPanel.classList.remove("cd-panel--is-visible");
+
             // remove the highlight from the selected node
             cy.$('node.selected-node').union(cy.$('node.isInitial')).removeClass('selected-node').removeClass('selected-initial-node');
             if (targetNode.hasClass('SequenceNode')) {
                 targetNode.outgoers('.Accessed').target('.ConcreteState').removeClass('connected-concrete-state-node');
             }
+
             // remove the node selection
             appStatus.graph.selectedNode = null;
+
+            closeButton.removeEventListener("click");
         });
-        contentPanelHeader.appendChild(closeButton);
+        //contentPanelHeader.appendChild(closeButton);
 
-        // for concrete states we provide a button to retrieve the widget tree
-        if (targetNode.hasClass("ConcreteState")) {
-            let form = document.createElement("form");
-            let input = document.createElement("input");
-            input.type = "hidden";
-            input.value = targetNode.id();
-            input.name = "concrete_state_id";
-            form.appendChild(input);
+        //// for concrete states we provide a button to retrieve the widget tree
+        //if (targetNode.hasClass("ConcreteState")) {
+        //    let form = document.createElement("form");
+        //    let input = document.createElement("input");
+        //    input.type = "hidden";
+        //    input.value = targetNode.id();
+        //    input.name = "concrete_state_id";
+        //    form.appendChild(input);
 
-            form.method = "POST";
-            form.action = "graph";
-            form.target = "_blank";
-            contentPanel.appendChild(form);
+        //    form.method = "POST";
+        //    form.action = "graph";
+        //    form.target = "_blank";
+        //    contentPanel.appendChild(form);
 
-            let widgetTreeButton = document.createElement("button");
-            widgetTreeButton.id = "widget-tree-button";
-            widgetTreeButton.classList.add("skip");
-            widgetTreeButton.appendChild(document.createTextNode("Inspect widget tree"));
-            widgetTreeButton.addEventListener("click", function () {
-                form.submit();
-            });
-            contentPanelHeader.appendChild(widgetTreeButton);
-        }
+        //    let widgetTreeButton = document.createElement("button");
+        //    widgetTreeButton.id = "widget-tree-button";
+        //    widgetTreeButton.classList.add("skip");
+        //    widgetTreeButton.appendChild(document.createTextNode("Inspect widget tree"));
+        //    widgetTreeButton.addEventListener("click", function () {
+        //        form.submit();
+        //    });
+        //    contentPanelHeader.appendChild(widgetTreeButton);
+        //}
 
         // add a visibility button
-        let visibilityButton = document.createElement("button");
-        visibilityButton.id = "toggle-visible";
-        visibilityButton.classList.add("skip");
-        visibilityButton.appendChild(document.createTextNode("Make invisible"));
-        visibilityButton.addEventListener("click", function () {
-            targetNode.addClass("invisible");
-        });
-        contentPanelHeader.appendChild(visibilityButton);
+        //let visibilityButton = document.createElement("button");
+        //visibilityButton.id = "toggle-visible";
+        //visibilityButton.classList.add("skip");
+        //visibilityButton.appendChild(document.createTextNode("Make invisible"));
+        //visibilityButton.addEventListener("click", function () {
+        //    targetNode.addClass("invisible");
+        //});
+        //contentPanelHeader.appendChild(visibilityButton);
 
         // add a highlight button
-        let highlightButton = document.createElement("button");
-        highlightButton.id = "highlight";
-        highlightButton.classList.add("skip");
-        highlightButton.appendChild(document.createTextNode("Highlight"));
-        highlightButton.addEventListener("click", function () {
-            // we want to select the clicked node and its neighborhood
-            let allNodes = cy.$(targetNode).closedNeighborhood();
+        //let highlightButton = document.createElement("button");
+        //highlightButton.id = "highlight";
+        //highlightButton.classList.add("skip");
+        //highlightButton.appendChild(document.createTextNode("Highlight"));
+        //highlightButton.addEventListener("click", function () {
+        //    // we want to select the clicked node and its neighborhood
+        //    let allNodes = cy.$(targetNode).closedNeighborhood();
 
-            // next, in the case of a concrete action or an abstract action, we want to also fetch their concrete and
-            // abstract counterparts for the neighborhood
-            if (targetNode.hasClass('ConcreteState')) {
-                // get the connect abstract states and their connected abstract actions
-                let abstractStateNodes = allNodes.nodes('.ConcreteState').outgoers('.AbstractState');
-                let abstractionEdges = allNodes.nodes('.ConcreteState').outgoers('.isAbstractedBy');
-                let abstractActionNodes = abstractStateNodes.connectedEdges('.AbstractAction');
+        //    // next, in the case of a concrete action or an abstract action, we want to also fetch their concrete and
+        //    // abstract counterparts for the neighborhood
+        //    if (targetNode.hasClass('ConcreteState')) {
+        //        // get the connect abstract states and their connected abstract actions
+        //        let abstractStateNodes = allNodes.nodes('.ConcreteState').outgoers('.AbstractState');
+        //        let abstractionEdges = allNodes.nodes('.ConcreteState').outgoers('.isAbstractedBy');
+        //        let abstractActionNodes = abstractStateNodes.connectedEdges('.AbstractAction');
 
-                // next, for each concrete action in the neighborhoor, attempt to fetch the corresponding abstract action
-                let selectedAbstractActionNodes = [];
-                allNodes.edges('.ConcreteAction').forEach(
-                    (edge) => abstractActionNodes.forEach(
-                        (abstractActionNode) => {
-                            if (abstractActionNode.data('concreteActionIds').indexOf(edge.data('actionId')) != -1) {
-                                selectedAbstractActionNodes.push(abstractActionNode);
-                            }
-                        }
-                    )
-                );
+        //        // next, for each concrete action in the neighborhoor, attempt to fetch the corresponding abstract action
+        //        let selectedAbstractActionNodes = [];
+        //        allNodes.edges('.ConcreteAction').forEach(
+        //            (edge) => abstractActionNodes.forEach(
+        //                (abstractActionNode) => {
+        //                    if (abstractActionNode.data('concreteActionIds').indexOf(edge.data('actionId')) != -1) {
+        //                        selectedAbstractActionNodes.push(abstractActionNode);
+        //                    }
+        //                }
+        //            )
+        //        );
 
-                // now join the nodes
-                allNodes = allNodes.union(abstractStateNodes).union(selectedAbstractActionNodes).union(abstractionEdges);
-            }
+        //        // now join the nodes
+        //        allNodes = allNodes.union(abstractStateNodes).union(selectedAbstractActionNodes).union(abstractionEdges);
+        //    }
 
-            // we also need to select the parent nodes in case of a compound graph.
-            allNodes = allNodes.union(allNodes.parent());
-            cy.$("*").difference(allNodes).addClass("invisible");
-        });
-        contentPanelHeader.appendChild(highlightButton);
+        //    // we also need to select the parent nodes in case of a compound graph.
+        //    allNodes = allNodes.union(allNodes.parent());
+        //    cy.$("*").difference(allNodes).addClass("invisible");
+        //});
+        //contentPanelHeader.appendChild(highlightButton);
 
         // for concrete states, we offer a button that will trace the paths leading to that state
-        if (targetNode.hasClass("ConcreteState") && appStatus.sequenceLayerPresent) {
-            let traceButton = document.createElement("button");
-            traceButton.id = "trace-path-button";
-            traceButton.classList.add("skip");
-            traceButton.appendChild(document.createTextNode("Trace Path"));
-            traceButton.addEventListener("click", () => {
-                // get the sequence nodes that accessed this node
-                let sequenceNodes = cy.$(targetNode).incomers(".SequenceNode, .Accessed");
-                // get the complete list of sequence nodes that let to them
-                let predecessorNodes = sequenceNodes.predecessors();
-                // next get the concrete state nodes that were accessed by all these sequence nodes
-                let concreteStateNodes = predecessorNodes.outgoers();
-                // then, we have to get the concrete action nodes that correspond with the sequence steps
-                let concreteActionUids = predecessorNodes.filter((element) => element.hasClass('SequenceStep')).map((element) =>
-                    element.data('concreteActionUid'));
-                // now fetch the edges matching the collected ids
-                let concreteActions = concreteStateNodes.connectedEdges('.ConcreteAction').filter((element) =>
-                    concreteActionUids.includes(element.data('uid')));
-                let allElements = sequenceNodes.union(predecessorNodes).union(concreteStateNodes).union(targetNode).union(concreteActions);
-                // add the parent nodes, if there are any
-                allElements = allElements.union(cy.$(allElements).parent());
-                cy.$("*").difference(allElements).addClass("invisible");
-            });
-            contentPanelHeader.appendChild(traceButton);
-        }
+        //if (targetNode.hasClass("ConcreteState") && appStatus.sequenceLayerPresent) {
+        //    let traceButton = document.createElement("button");
+        //    traceButton.id = "trace-path-button";
+        //    traceButton.classList.add("skip");
+        //    traceButton.appendChild(document.createTextNode("Trace Path"));
+        //    traceButton.addEventListener("click", () => {
+        //        // get the sequence nodes that accessed this node
+        //        let sequenceNodes = cy.$(targetNode).incomers(".SequenceNode, .Accessed");
+        //        // get the complete list of sequence nodes that let to them
+        //        let predecessorNodes = sequenceNodes.predecessors();
+        //        // next get the concrete state nodes that were accessed by all these sequence nodes
+        //        let concreteStateNodes = predecessorNodes.outgoers();
+        //        // then, we have to get the concrete action nodes that correspond with the sequence steps
+        //        let concreteActionUids = predecessorNodes.filter((element) => element.hasClass('SequenceStep')).map((element) =>
+        //            element.data('concreteActionUid'));
+        //        // now fetch the edges matching the collected ids
+        //        let concreteActions = concreteStateNodes.connectedEdges('.ConcreteAction').filter((element) =>
+        //            concreteActionUids.includes(element.data('uid')));
+        //        let allElements = sequenceNodes.union(predecessorNodes).union(concreteStateNodes).union(targetNode).union(concreteActions);
+        //        // add the parent nodes, if there are any
+        //        allElements = allElements.union(cy.$(allElements).parent());
+        //        cy.$("*").difference(allElements).addClass("invisible");
+        //    });
+        //    contentPanelHeader.appendChild(traceButton);
+        //}
 
         // if the clicked node is a test sequence, we show a button that will show just the nodes of that test sequence
-        if (targetNode.hasClass('TestSequence') && appStatus.concreteLayerPresent) {
-            let traceButton = document.createElement('button');
-            traceButton.id = 'trace-sequence-button';
-            traceButton.classList.add('skip');
-            traceButton.appendChild(document.createTextNode('Trace Sequence'));
-            traceButton.addEventListener('click', () => {
-                // first, get all the nodes and edges in the sequence
-                let sequenceElements = targetNode.successors('.SequenceNode, .SequenceStep, .FirstNode');
-                // add the targetnode itself and the parents
-                sequenceElements = sequenceElements.union(targetNode);
+        //if (targetNode.hasClass('TestSequence') && appStatus.concreteLayerPresent) {
+        //    let traceButton = document.createElement('button');
+        //    traceButton.id = 'trace-sequence-button';
+        //    traceButton.classList.add('skip');
+        //    traceButton.appendChild(document.createTextNode('Trace Sequence'));
+        //    traceButton.addEventListener('click', () => {
+        //        // first, get all the nodes and edges in the sequence
+        //        let sequenceElements = targetNode.successors('.SequenceNode, .SequenceStep, .FirstNode');
+        //        // add the targetnode itself and the parents
+        //        sequenceElements = sequenceElements.union(targetNode);
 
-                // now get all the corresponding elements on the concrete layer
-                let concreteStateNodes = sequenceElements.nodes('.SequenceNode').outgoers('.ConcreteState');
-                let accessedEdges = sequenceElements.nodes('.SequenceNode').outgoers('.Accessed');
-                let concreteActionNodes = concreteStateNodes.connectedEdges('.ConcreteAction');
+        //        // now get all the corresponding elements on the concrete layer
+        //        let concreteStateNodes = sequenceElements.nodes('.SequenceNode').outgoers('.ConcreteState');
+        //        let accessedEdges = sequenceElements.nodes('.SequenceNode').outgoers('.Accessed');
+        //        let concreteActionNodes = concreteStateNodes.connectedEdges('.ConcreteAction');
 
-                // for each sequence step, fetch the corresponding concrete action
-                let selectedConcreteActionNodes = [];
-                sequenceElements.edges('.SequenceStep').forEach(
-                    (edge) => concreteActionNodes.forEach(
-                        (concreteActionNode) => {
-                            if (concreteActionNode.data('uid') == edge.data('concreteActionUid')) {
-                                selectedConcreteActionNodes.push(concreteActionNode);
-                            }
-                        }
-                    )
-                );
+        //        // for each sequence step, fetch the corresponding concrete action
+        //        let selectedConcreteActionNodes = [];
+        //        sequenceElements.edges('.SequenceStep').forEach(
+        //            (edge) => concreteActionNodes.forEach(
+        //                (concreteActionNode) => {
+        //                    if (concreteActionNode.data('uid') == edge.data('concreteActionUid')) {
+        //                        selectedConcreteActionNodes.push(concreteActionNode);
+        //                    }
+        //                }
+        //            )
+        //        );
 
-                sequenceElements = sequenceElements.union(concreteStateNodes).union(accessedEdges).union(selectedConcreteActionNodes);
+        //        sequenceElements = sequenceElements.union(concreteStateNodes).union(accessedEdges).union(selectedConcreteActionNodes);
 
-                // get all the corresponding elements on the abstract layer
-                let abstractStateNodes = sequenceElements.nodes('.ConcreteState').outgoers('.AbstractState');
-                let abstractionEdges = sequenceElements.nodes('.ConcreteState').outgoers('.isAbstractedBy');
-                let abstractActionNodes = abstractStateNodes.connectedEdges('.AbstractAction');
+        //        // get all the corresponding elements on the abstract layer
+        //        let abstractStateNodes = sequenceElements.nodes('.ConcreteState').outgoers('.AbstractState');
+        //        let abstractionEdges = sequenceElements.nodes('.ConcreteState').outgoers('.isAbstractedBy');
+        //        let abstractActionNodes = abstractStateNodes.connectedEdges('.AbstractAction');
 
-                // next, for each concrete action in the neighborhoor, attempt to fetch the corresponding abstract action
-                let selectedAbstractActionNodes = [];
-                sequenceElements.edges('.ConcreteAction').forEach(
-                    (edge) => abstractActionNodes.forEach((abstractActionNode) => {
-                        if (abstractActionNode.data('concreteActionIds').indexOf(edge.data('actionId')) != -1) {
-                            selectedAbstractActionNodes.push(abstractActionNode);
-                        }
-                    })
-                );
+        //        // next, for each concrete action in the neighborhoor, attempt to fetch the corresponding abstract action
+        //        let selectedAbstractActionNodes = [];
+        //        sequenceElements.edges('.ConcreteAction').forEach(
+        //            (edge) => abstractActionNodes.forEach((abstractActionNode) => {
+        //                if (abstractActionNode.data('concreteActionIds').indexOf(edge.data('actionId')) != -1) {
+        //                    selectedAbstractActionNodes.push(abstractActionNode);
+        //                }
+        //            })
+        //        );
 
-                // now join the nodes
-                sequenceElements = sequenceElements.union(abstractStateNodes).union(selectedAbstractActionNodes).union(abstractionEdges);
+        //        // now join the nodes
+        //        sequenceElements = sequenceElements.union(abstractStateNodes).union(selectedAbstractActionNodes).union(abstractionEdges);
 
-                // add the parents
-                sequenceElements = sequenceElements.union(sequenceElements.parent());
-                cy.$("*").difference(sequenceElements).addClass("invisible");
-            });
+        //        // add the parents
+        //        sequenceElements = sequenceElements.union(sequenceElements.parent());
+        //        cy.$("*").difference(sequenceElements).addClass("invisible");
+        //    });
 
-            contentPanelHeader.appendChild(traceButton);
-        }
+        //    contentPanelHeader.appendChild(traceButton);
+        //}
 
         //////////////// end add button section //////////////////
 
         /////////// screenshot segment //////////
 
         // add the screenshot image if the node is a concrete state
-        if (targetNode.hasClass("ConcreteState")) {
-            // create a popup anchor
-            let popupAnchor = document.createElement("a");
-            popupAnchor.href = "data:image/png;base64," + targetNode.data('screenshot');
-            $(popupAnchor).magnificPopup(
-                { type: "image" }
-            );
+        //if (targetNode.hasClass("ConcreteState")) {
+        //    // create a popup anchor
+        //    let popupAnchor = document.createElement("a");
+        //    popupAnchor.href = "data:image/png;base64," + targetNode.data('screenshot');
+        //    $(popupAnchor).magnificPopup(
+        //        { type: "image" }
+        //    );
 
-            // add the screenshot full image
-            let nodeImage = document.createElement("img");
-            nodeImage.alt = "Image for node " + targetNode.id();
-            nodeImage.src = "data:image/png;base64," + targetNode.data('screenshot');
-            nodeImage.classList.add("node-img-full");
-            popupAnchor.appendChild(nodeImage);
-            contentPanel.appendChild(popupAnchor);
-        }
+        //    // add the screenshot full image
+        //    let nodeImage = document.createElement("img");
+        //    nodeImage.alt = "Image for node " + targetNode.id();
+        //    nodeImage.src = "data:image/png;base64," + targetNode.data('screenshot');
+        //    nodeImage.classList.add("node-img-full");
+        //    popupAnchor.appendChild(nodeImage);
+        //    contentPanel.appendChild(popupAnchor);
+        //}
 
         // add a series of screenshots if the node is an abstract state
-        if (targetNode.hasClass("AbstractState")) {
-            // first retrieve all the concrete states that are abstracted by this abstract state
-            let concreteNodes = targetNode.incomers(".ConcreteState");
-            if (concreteNodes.size() > 0) {
-                let div = document.createElement('div');
-                div.classList.add('popup-gallery');
-                concreteNodes.forEach(
-                    (element) => {
-                        // create an anchor element for each screenshot
-                        let popupAnchor = document.createElement("a");
-                        popupAnchor.href = "data:image/png;base64," + element.data('screenshot');
+        //if (targetNode.hasClass("AbstractState")) {
+        //    // first retrieve all the concrete states that are abstracted by this abstract state
+        //    let concreteNodes = targetNode.incomers(".ConcreteState");
+        //    if (concreteNodes.size() > 0) {
+        //        let div = document.createElement('div');
+        //        div.classList.add('popup-gallery');
+        //        concreteNodes.forEach(
+        //            (element) => {
+        //                // create an anchor element for each screenshot
+        //                let popupAnchor = document.createElement("a");
+        //                popupAnchor.href = "data:image/png;base64," + element.data('screenshot');
 
-                        // add the image thumbnail
-                        // add the screenshot full image
-                        let nodeImage = document.createElement("img");
-                        nodeImage.alt = "Image for node " + element.id();
-                        nodeImage.src = "data:image/png;base64," + element.data('screenshot');
-                        nodeImage.classList.add("node-img-thumb");
-                        popupAnchor.appendChild(nodeImage);
-                        div.appendChild(popupAnchor);
-                    }
-                );
+        //                // add the image thumbnail
+        //                // add the screenshot full image
+        //                let nodeImage = document.createElement("img");
+        //                nodeImage.alt = "Image for node " + element.id();
+        //                nodeImage.src = "data:image/png;base64," + element.data('screenshot');
+        //                nodeImage.classList.add("node-img-thumb");
+        //                popupAnchor.appendChild(nodeImage);
+        //                div.appendChild(popupAnchor);
+        //            }
+        //        );
 
-                // now add the popup code
-                $(div).magnificPopup({
-                    delegate: 'a',
-                    type: 'image',
-                    mainClass: 'mfp-img-mobile',
-                    gallery: {
-                        enabled: true,
-                        navigateByImgClick: true,
-                        preload: [0, 1] // Will preload 0 - before current, and 1 after the current image
-                    }
-                });
+        //        // now add the popup code
+        //        $(div).magnificPopup({
+        //            delegate: 'a',
+        //            type: 'image',
+        //            mainClass: 'mfp-img-mobile',
+        //            gallery: {
+        //                enabled: true,
+        //                navigateByImgClick: true,
+        //                preload: [0, 1] // Will preload 0 - before current, and 1 after the current image
+        //            }
+        //        });
 
-                contentPanel.appendChild(div);
-            }
-        }
+        //        contentPanel.appendChild(div);
+        //    }
+        //}
 
         /////////// end screenshot segment /////////////
 
         ////////// data segment   //////////////
-        let paragraph = document.createElement("p");
-        paragraph.classList.add("paragraph-data");
-        let h3 = document.createElement("h3");
-        h3.appendChild(document.createTextNode("Element data:"));
-        paragraph.appendChild(h3);
+        //let paragraph = document.createElement("p");
+        //paragraph.classList.add("paragraph-data");
+        //let h3 = document.createElement("h3");
+        //h3.appendChild(document.createTextNode("Element data:"));
+        //paragraph.appendChild(h3);
 
-        let filterBox = document.createElement("input");
-        filterBox.type = "text";
-        filterBox.id = "attribute-filter-box";
-        filterBox.classList.add("attribute-filter");
-        filterBox.placeholder = "Filter atribute values";
-        filterBox.addEventListener("keyup", function (event) {
-            filterDataFields(event.target.value);
-        });
-        paragraph.appendChild(filterBox);
+        //let filterBox = document.createElement("input");
+        //filterBox.type = "text";
+        //filterBox.id = "attribute-filter-box";
+        //filterBox.classList.add("attribute-filter");
+        //filterBox.placeholder = "Filter atribute values";
+        //filterBox.addEventListener("keyup", function (event) {
+        //    filterDataFields(event.target.value);
+        //});
+        //paragraph.appendChild(filterBox);
 
         // add the data into a table
-        let dataTable = document.createElement("table");
-        dataTable.classList.add("table-data");
-        dataTable.id = "attribute-data-table";
-        let tableHeaderRow = document.createElement("tr");
-        let th1 = document.createElement("th");
-        th1.appendChild(document.createTextNode("Attribute name"));
-        let th2 = document.createElement("th");
-        th2.appendChild(document.createTextNode("Attribute value"));
-        tableHeaderRow.appendChild(th1);
-        tableHeaderRow.appendChild(th2);
-        let thead = document.createElement("thead");
-        thead.appendChild(tableHeaderRow);
-        dataTable.appendChild(thead);
-        let tbody = document.createElement("tbody");
+        //let dataTable = document.createElement("table");
+        //dataTable.classList.add("table-data");
+        //dataTable.id = "attribute-data-table";
+        //let tableHeaderRow = document.createElement("tr");
+        //let th1 = document.createElement("th");
+        //th1.appendChild(document.createTextNode("Attribute name"));
+        //let th2 = document.createElement("th");
+        //th2.appendChild(document.createTextNode("Attribute value"));
+        //tableHeaderRow.appendChild(th1);
+        //tableHeaderRow.appendChild(th2);
+        //let thead = document.createElement("thead");
+        //thead.appendChild(tableHeaderRow);
+        //dataTable.appendChild(thead);
+        //let tbody = document.createElement("tbody");
 
-        let data = targetNode.data();
-        // we want to sort the data first
-        const orderedData = {};
-        Object.keys(data).sort().forEach(function (key) {
-            orderedData[key] = data[key];
-        });
+        //let data = targetNode.data();
+        //// we want to sort the data first
+        //const orderedData = {};
+        //Object.keys(data).sort().forEach(function (key) {
+        //    orderedData[key] = data[key];
+        //});
 
-        for (let item in orderedData) {
-            if (data.hasOwnProperty(item)) {
-                let tr = document.createElement("tr");
-                let td1 = document.createElement("td");
-                td1.appendChild(document.createTextNode(item));
-                let td2 = document.createElement("td");
-                td2.appendChild(document.createTextNode(data[item]));
-                tr.appendChild(td1);
-                tr.appendChild(td2);
-                tbody.appendChild(tr);
-            }
-        }
-        dataTable.appendChild(tbody);
-        paragraph.appendChild(dataTable);
-        contentPanel.appendChild(paragraph);
-        ////////// end data segment //////////
-
-        sidePanel.classList.add("cd-panel--is-visible");
+        //for (let item in orderedData) {
+        //    if (data.hasOwnProperty(item)) {
+        //        let tr = document.createElement("tr");
+        //        let td1 = document.createElement("td");
+        //        td1.appendChild(document.createTextNode(item));
+        //        let td2 = document.createElement("td");
+        //        td2.appendChild(document.createTextNode(data[item]));
+        //        tr.appendChild(td1);
+        //        tr.appendChild(td2);
+        //        tbody.appendChild(tr);
+        //    }
+        //}
+        //dataTable.appendChild(tbody);
+        //paragraph.appendChild(dataTable);
+        //contentPanel.appendChild(paragraph);
+        //////////// end data segment //////////
     });
 
     // when edges get selected, we also open the side panel, but show just the close button and the data
     cy.on('tap', 'edge.ConcreteAction,edge.AbstractAction,edge.SequenceStep', function (evt) {
         let targetEdge = evt.target;
         let sidePanel = document.getElementsByClassName("cd-panel")[0];
-        let contentPanel = document.getElementById("cd-content-panel");
-        let contentPanelHeader = document.getElementById("content-panel-header");
         appStatus.graph.selectedEdge = targetEdge;
+
+        dotNetHelper.invokeMethodAsync('UpdateSelectedElement', targetEdge.data('id'));
+        sidePanel.classList.add("cd-panel--is-visible");
 
         // highlight the selected node
         cy.$('edge.selected-edge').removeClass('selected-edge');
         cy.$('node.selected-node').union(cy.$('node.isInitial')).removeClass('selected-node').removeClass('selected-initial-node');
         cy.$('node.connected-concrete-state-node').removeClass('connected-concrete-state-node');
         targetEdge.addClass('selected-edge');
+
         // if it's a sequence step, also highlight the corresponding concrete action
         if (targetEdge.hasClass('SequenceStep')) {
             targetEdge.source().outgoers('.ConcreteState').connectedEdges('.ConcreteAction').filter((element) =>
                 element.data('uid') == targetEdge.data('concreteActionUid')).addClass('selected-edge');
         }
 
-        // remove all the current child elements for both panel and panel header
-        let child = contentPanel.lastChild;
-        while (child) {
-            contentPanel.removeChild(child);
-            child = contentPanel.lastChild;
-        }
-
-        child = contentPanelHeader.lastChild;
-        while (child) {
-            contentPanelHeader.removeChild(child);
-            child = contentPanelHeader.lastChild;
-        }
-
-        ///////////// add button section ///////////////////////////
-        let closeButton = document.createElement("button");
-        closeButton.id = "close-panel";
-        closeButton.classList.add("skip");
-        closeButton.appendChild(document.createTextNode("Close"));
+        let closeButton = document.getElementById("close-panel");
         closeButton.addEventListener("click", function () {
             let cdPanel = document.getElementsByClassName("cd-panel")[0];
             cdPanel.classList.remove("cd-panel--is-visible");
+
             // remove the highlight from the selected node
             cy.$('edge.selected-edge').removeClass('selected-edge');
+
             // remove the edge selection
             appStatus.graph.selectedEdge = null;
-        });
-        contentPanelHeader.appendChild(closeButton);
 
-        if (targetEdge.hasClass('ConcreteAction')) {
-            // if it is a concrete action edge, we add a popup
-            // first the content
-            let popupContent = document.createElement("div");
-            popupContent.id = 'popup-content';
-            popupContent.classList.add('edge-popup', 'mfp-hide');
-            // create divs for the source and target screenshots
-            let sourceDiv = document.createElement("div");
-            let sourceImg = document.createElement("img");
-            sourceImg.src = "data:image/png;base64," + targetEdge.source().data('screenshot');
-            sourceDiv.classList.add('screenshot');
-            sourceDiv.appendChild(sourceImg);
-
-            let targetDiv = document.createElement("div");
-            let targetImg = document.createElement("img");
-            targetImg.src = "data:image/png;base64," + targetEdge.target().data('screenshot');
-            targetDiv.classList.add('screenshot');
-            targetDiv.appendChild(targetImg);
-
-            // add the edge text
-            let descDiv = document.createElement("div");
-            descDiv.appendChild(document.createTextNode(targetEdge.data('Desc')));
-            descDiv.classList.add('action');
-
-            // add the divs in order
-            popupContent.appendChild(sourceDiv);
-            popupContent.appendChild(descDiv);
-            popupContent.appendChild(targetDiv);
-            contentPanelHeader.appendChild(popupContent);
-
-            // then a button to initialize it
-            let popupButton = document.createElement("button");
-            popupButton.id = "popup-edge";
-            popupButton.classList.add("skip");
-            popupButton.appendChild(document.createTextNode("Show"));
-            contentPanelHeader.appendChild(popupButton);
-            $('#popup-edge').magnificPopup({
-                items: {
-                    src: '#popup-content',
-                    type: 'inline'
-                }
-            });
-        }
-
-        //////////// end button section ///////////////////////////
-
-        ////////// data segment   //////////////
-        let paragraph = document.createElement("p");
-        paragraph.classList.add("paragraph-data");
-        let h3 = document.createElement("h3");
-        h3.appendChild(document.createTextNode("Element data:"));
-        paragraph.appendChild(h3);
-
-        let filterBox = document.createElement("input");
-        filterBox.type = "text";
-        filterBox.id = "attribute-filter-box";
-        filterBox.classList.add("attribute-filter");
-        filterBox.placeholder = "Filter atribute values";
-        filterBox.addEventListener("keyup", function (event) {
-            filterDataFields(event.target.value);
-        });
-        paragraph.appendChild(filterBox);
-
-        // add the data into a table
-        let dataTable = document.createElement("table");
-        dataTable.classList.add("table-data");
-        dataTable.id = "attribute-data-table";
-        let tableHeaderRow = document.createElement("tr");
-        let th1 = document.createElement("th");
-        th1.appendChild(document.createTextNode("Attribute name"));
-        let th2 = document.createElement("th");
-        th2.appendChild(document.createTextNode("Attribute value"));
-        tableHeaderRow.appendChild(th1);
-        tableHeaderRow.appendChild(th2);
-        let thead = document.createElement("thead");
-        thead.appendChild(tableHeaderRow);
-        dataTable.appendChild(thead);
-        let tbody = document.createElement("tbody");
-
-        let data = targetEdge.data();
-        // we want to sort the data first
-        const orderedData = {};
-        Object.keys(data).sort().forEach(function (key) {
-            orderedData[key] = data[key];
+            closeButton.removeEventListener("click");
         });
 
-        for (let item in orderedData) {
-            if (data.hasOwnProperty(item)) {
-                let tr = document.createElement("tr");
-                let td1 = document.createElement("td");
-                td1.appendChild(document.createTextNode(item));
-                let td2 = document.createElement("td");
-                td2.appendChild(document.createTextNode(data[item]));
-                tr.appendChild(td1);
-                tr.appendChild(td2);
-                tbody.appendChild(tr);
-            }
-        }
-        dataTable.appendChild(tbody);
-        paragraph.appendChild(dataTable);
-        contentPanel.appendChild(paragraph);
-        ////////// end data segment //////////
+        //// remove all the current child elements for both panel and panel header
+        //let child = contentPanel.lastChild;
+        //while (child) {
+        //    contentPanel.removeChild(child);
+        //    child = contentPanel.lastChild;
+        //}
 
-        sidePanel.classList.add("cd-panel--is-visible");
+        //child = contentPanelHeader.lastChild;
+        //while (child) {
+        //    contentPanelHeader.removeChild(child);
+        //    child = contentPanelHeader.lastChild;
+        //}
+
+        //contentPanelHeader.appendChild(closeButton);
+
+        //if (targetEdge.hasClass('ConcreteAction')) {
+        //    // if it is a concrete action edge, we add a popup
+        //    // first the content
+        //    let popupContent = document.createElement("div");
+        //    popupContent.id = 'popup-content';
+        //    popupContent.classList.add('edge-popup', 'mfp-hide');
+        //    // create divs for the source and target screenshots
+        //    let sourceDiv = document.createElement("div");
+        //    let sourceImg = document.createElement("img");
+        //    sourceImg.src = "data:image/png;base64," + targetEdge.source().data('screenshot');
+        //    sourceDiv.classList.add('screenshot');
+        //    sourceDiv.appendChild(sourceImg);
+
+        //    let targetDiv = document.createElement("div");
+        //    let targetImg = document.createElement("img");
+        //    targetImg.src = "data:image/png;base64," + targetEdge.target().data('screenshot');
+        //    targetDiv.classList.add('screenshot');
+        //    targetDiv.appendChild(targetImg);
+
+        //    // add the edge text
+        //    let descDiv = document.createElement("div");
+        //    descDiv.appendChild(document.createTextNode(targetEdge.data('Desc')));
+        //    descDiv.classList.add('action');
+
+        //    // add the divs in order
+        //    popupContent.appendChild(sourceDiv);
+        //    popupContent.appendChild(descDiv);
+        //    popupContent.appendChild(targetDiv);
+        //    contentPanelHeader.appendChild(popupContent);
+
+        //    // then a button to initialize it
+        //    let popupButton = document.createElement("button");
+        //    popupButton.id = "popup-edge";
+        //    popupButton.classList.add("skip");
+        //    popupButton.appendChild(document.createTextNode("Show"));
+        //    contentPanelHeader.appendChild(popupButton);
+        //    $('#popup-edge').magnificPopup({
+        //        items: {
+        //            src: '#popup-content',
+        //            type: 'inline'
+        //        }
+        //    });
+        //}
+
+        ////////////// end button section ///////////////////////////
+
+        //////////// data segment   //////////////
+        //let paragraph = document.createElement("p");
+        //paragraph.classList.add("paragraph-data");
+        //let h3 = document.createElement("h3");
+        //h3.appendChild(document.createTextNode("Element data:"));
+        //paragraph.appendChild(h3);
+
+        //let filterBox = document.createElement("input");
+        //filterBox.type = "text";
+        //filterBox.id = "attribute-filter-box";
+        //filterBox.classList.add("attribute-filter");
+        //filterBox.placeholder = "Filter atribute values";
+        //filterBox.addEventListener("keyup", function (event) {
+        //    filterDataFields(event.target.value);
+        //});
+        //paragraph.appendChild(filterBox);
+
+        //// add the data into a table
+        //let dataTable = document.createElement("table");
+        //dataTable.classList.add("table-data");
+        //dataTable.id = "attribute-data-table";
+        //let tableHeaderRow = document.createElement("tr");
+        //let th1 = document.createElement("th");
+        //th1.appendChild(document.createTextNode("Attribute name"));
+        //let th2 = document.createElement("th");
+        //th2.appendChild(document.createTextNode("Attribute value"));
+        //tableHeaderRow.appendChild(th1);
+        //tableHeaderRow.appendChild(th2);
+        //let thead = document.createElement("thead");
+        //thead.appendChild(tableHeaderRow);
+        //dataTable.appendChild(thead);
+        //let tbody = document.createElement("tbody");
+
+        //let data = targetEdge.data();
+        //// we want to sort the data first
+        //const orderedData = {};
+        //Object.keys(data).sort().forEach(function (key) {
+        //    orderedData[key] = data[key];
+        //});
+
+        //for (let item in orderedData) {
+        //    if (data.hasOwnProperty(item)) {
+        //        let tr = document.createElement("tr");
+        //        let td1 = document.createElement("td");
+        //        td1.appendChild(document.createTextNode(item));
+        //        let td2 = document.createElement("td");
+        //        td2.appendChild(document.createTextNode(data[item]));
+        //        tr.appendChild(td1);
+        //        tr.appendChild(td2);
+        //        tbody.appendChild(tr);
+        //    }
+        //}
+        //dataTable.appendChild(tbody);
+        //paragraph.appendChild(dataTable);
+        //contentPanel.appendChild(paragraph);
+        //////////// end data segment //////////
+
+        //sidePanel.classList.add("cd-panel--is-visible");
     });
 
     let showAllButton = document.getElementById("show-all");
@@ -973,31 +960,31 @@
         }
     }
 
-    function filterDataFields(filterValue) {
-        let dataTable = document.getElementById("attribute-data-table");
-        let dataTableBody = dataTable.getElementsByTagName("tbody")[0];
-        let tableRows = dataTableBody.getElementsByTagName("tr");
-        filterValue = filterValue.toLowerCase();
-        for (let row of tableRows) {
-            if (filterValue == '') {
-                row.style.display = "";
-            }
-            else {
-                // check if the attribute name matches
-                let tableCell = row.getElementsByTagName("td")[0];
-                if (tableCell) {
-                    let cellContent = tableCell.textContent || tableCell.innerText;
-                    cellContent = cellContent.toLowerCase();
-                    if (cellContent.indexOf(filterValue) > -1) {
-                        row.style.display = "";
-                    }
-                    else {
-                        row.style.display = "none";
-                    }
-                }
-            }
-        }
-    }
+    //function filterDataFields(filterValue) {
+    //    let dataTable = document.getElementById("attribute-data-table");
+    //    let dataTableBody = dataTable.getElementsByTagName("tbody")[0];
+    //    let tableRows = dataTableBody.getElementsByTagName("tr");
+    //    filterValue = filterValue.toLowerCase();
+    //    for (let row of tableRows) {
+    //        if (filterValue == '') {
+    //            row.style.display = "";
+    //        }
+    //        else {
+    //            // check if the attribute name matches
+    //            let tableCell = row.getElementsByTagName("td")[0];
+    //            if (tableCell) {
+    //                let cellContent = tableCell.textContent || tableCell.innerText;
+    //                cellContent = cellContent.toLowerCase();
+    //                if (cellContent.indexOf(filterValue) > -1) {
+    //                    row.style.display = "";
+    //                }
+    //                else {
+    //                    row.style.display = "none";
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 
     cy.ready(function (event) {
         initLayers();
@@ -1016,6 +1003,10 @@
                     w.addClass('errorState');
                 }
             }
+        );
+
+        cy.$('node').forEach(
+            (w) => w.attr('data-bs-toggle', 'offcanvas').attr('data-bs-target', '#detailsPanel')
         );
 
         // add a mouseover event to the concrete actions

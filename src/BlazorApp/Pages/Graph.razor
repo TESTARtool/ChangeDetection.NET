@@ -114,16 +114,15 @@
 {
     <div class="viewpane" id="cy">
     </div>
-
-  
+    
    <div class="cd-panel cd-panel--from-right js-cd-panel-main">
-        <div class="cd-panel__container">
-            <div class="panel-header" id="content-panel-header">
-            </div>
-            <div class="cd-panel__content" id="cd-content-panel">
-            </div> <!-- cd-panel__content -->
-            <GraphElementViewer @ref="graphElementViewer"/>
 
+        <div class="cd-panel__container">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasLabel">Offcanvas</h5>
+                <button id="close-panel" type="button" class="btn-close text-reset" ></button>
+            </div>
+            <GraphElementViewer @ref="graphElementViewer"/>
         </div> <!-- cd-panel__container -->
     </div>
 }
@@ -137,6 +136,9 @@ else
     </div>
 } 
 
+
+
+
 @code {
     public bool IsGraphAvailable { get; set; } = false;
     public string ProgressStatus { get; set; } = "Loading graph data...";
@@ -144,18 +146,25 @@ else
     public string? GraphInJson { get; set; }
     private DotNetObjectReference<Graph>? dotNetHelper;
     public GraphElementViewer graphElementViewer;
-    public GraphElement? SelectedElement { get; set; }
+    public bool OpenOffcanvas { get; set; }
+    private AppGraph applicationGraph { get; set; }
 
     [JSInvokable]
-    public void UpdateSelectedElement(string rId)
+    public void UpdateSelectedElement(string id)
     {
-        Console.WriteLine($"Value received from js is {rId}");
-        graphElementViewer.ShowGraphElement(rId);
+        var selectedElement = applicationGraph.Elements
+            .FirstOrDefault(x => x.Document.Id == id);
+
+        if (selectedElement is not null)
+        {
+            //graphElementViewer.ShowGraphElement(selectedElement);
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
         var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), showCompoundLayer.Value);
+        applicationGraph = new AppGraph(elements);
 
         foreach (var element in elements)
         {
@@ -184,7 +193,7 @@ else
         if (IsGraphAvailable)
         {
             dotNetHelper = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy", dotNetHelper);
+            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy", "#detailsPanel", dotNetHelper);
         }
     }
 

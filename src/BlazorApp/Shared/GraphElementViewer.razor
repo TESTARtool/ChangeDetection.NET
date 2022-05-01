@@ -5,9 +5,9 @@
 @code {
     public string Id { get; set; }
 
-    public void ShowGraphElement(string id)
+    public void ShowGraphElement(GraphElement element)
     {
-        Id = id;
+        Id = element.Document.Id;
         StateHasChanged();
     }
 }
