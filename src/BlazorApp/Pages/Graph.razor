@@ -115,15 +115,10 @@
     <div class="viewpane" id="cy">
     </div>
     
-   <div class="cd-panel cd-panel--from-right js-cd-panel-main">
-
+    <div class="cd-panel cd-panel--from-right js-cd-panel-main">
         <div class="cd-panel__container">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="offcanvasLabel">Offcanvas</h5>
-                <button id="close-panel" type="button" class="btn-close text-reset" ></button>
-            </div>
             <GraphElementViewer @ref="graphElementViewer"/>
-        </div> <!-- cd-panel__container -->
+        </div>
     </div>
 }
 else
@@ -134,10 +129,7 @@ else
             <span class="visually-hidden">loading</span>
         </div>
     </div>
-} 
-
-
-
+}
 
 @code {
     public bool IsGraphAvailable { get; set; } = false;

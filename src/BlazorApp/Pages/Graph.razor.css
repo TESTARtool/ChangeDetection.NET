@@ -176,8 +176,6 @@ div.is-child-of {
     border-left: #9E9E9E;
     border-left-width: 2px;
     border-left-style: solid;
-    padding-left: 10px;
-    padding-top: 20px;
     overflow: scroll;
 }
 

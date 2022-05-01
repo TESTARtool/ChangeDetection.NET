@@ -1,13 +1,37 @@
-﻿<h3>GraphElement Viewer</h3>
+﻿
+    <nav class="navbar navbar-dark bg-dark" style="padding: 8px">
+        <div class="container-fluid">
+            <a class="navbar-brand text-warning" href="#">@SelectedElement?.TypeName - Details</a>
+            <button id="close-panel" type="button" class="btn-close btn-close-white text-reset" aria-label="Close" ></button>
+        </div>
+    </nav>
 
-<p>Selected Id: @Id</p>
+@if (SelectedElement is not null)
+{
+
+    <div class="p-3">
+
+    </div>
+    <div class="container-fluid p-3">
+        <div class="btn-group" role="group" aria-label="Show amount of nodes">
+            <button type="button" class="btn btn-secondary" disabled>
+                Abstract States <span class="badge bg-light text-dark rounded-pill"></span>
+            </button>
+        </div>
+    </div>
+
+    <h3>GraphElement Viewer</h3>
+
+    <p>Selected Id: @SelectedElement.Document.Id</p>
+}
+
 
 @code {
-    public string Id { get; set; }
+    public GraphElement? SelectedElement { get; set; }
 
     public void ShowGraphElement(GraphElement element)
     {
-        Id = element.Document.Id;
+        SelectedElement = element;
         StateHasChanged();
     }
 }

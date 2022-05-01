@@ -6,17 +6,12 @@ public class GraphElement
 
     public const string GroupEdges = "edges";
 
-    public GraphElement(string group, Document document)
+    public GraphElement(string group, Document document, string typeName)
     {
         this.Group = group;
         this.Document = document;
-    }
-
-    public GraphElement(string group, Document document, string className)
-    {
-        this.Group = group;
-        this.Document = document;
-        Classes.Add(className);
+        this.TypeName = typeName;
+        Classes.Add(typeName);
     }
 
     [JsonIgnore]
@@ -33,6 +28,9 @@ public class GraphElement
     [JsonInclude]
     [JsonPropertyName("classes")]
     public List<string> Classes { get; set; } = new();
+
+    [JsonIgnore]
+    public string TypeName { get; set; }
 
     [JsonIgnore]
     public Vertex DocumentAsVertex => (Vertex)Document;
