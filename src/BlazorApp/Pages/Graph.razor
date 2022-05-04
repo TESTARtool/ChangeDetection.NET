@@ -117,8 +117,8 @@
 {
     <div class="viewpane" id="cy">
     </div>
-    
-    <div class="cd-panel cd-panel--from-right js-cd-panel-main" >
+
+    <div class="cd-panel cd-panel--from-right js-cd-panel-main @(SelectedElement is null ? "cd-panel--is-hiden" : "cd-panel--is-visible")" >
         <div class="cd-panel__container">
             <GraphElementViewer @ref="graphElementViewer"/>
         </div>
@@ -145,6 +145,7 @@ else
     public GraphElementViewer graphElementViewer;
     public bool OpenOffcanvas { get; set; }
     private AppGraph applicationGraph { get; set; }
+    private GraphElement? SelectedElement { get; set; }
 
     [JSInvokable]
     public async Task UpdateSelectedElement(string id)
@@ -162,16 +163,26 @@ else
 
     protected override void OnParametersSet()
     {
-        if (SelectedElementId is not null)
+        if (SelectedElementId is not null && applicationGraph is not null)
         {
             var selectedElement = applicationGraph.Elements
                 .FirstOrDefault(x => x.Document.Id == SelectedElementId 
                     || x["@rid"].AsOrientDbId().FormatId() == SelectedElementId);
 
-            if (selectedElement is not null && graphElementViewer is not null)
+            if (selectedElement is not null)
             {
-                graphElementViewer.ShowGraphElementAsync(ModelIdentifier, selectedElement);
+                SelectedElement = selectedElement;
+                StateHasChanged();
+                if (graphElementViewer is not null)
+                {
+                    graphElementViewer.ShowGraphElementAsync(ModelIdentifier, selectedElement);
+                }
             }
+        }
+
+        if (SelectedElementId is null && SelectedElement is not null)
+        {
+            SelectedElement = null;
         }
     }
 
@@ -201,6 +212,8 @@ else
 
         ProgressStatus = "Loading graph done";
         IsGraphAvailable = true;
+
+        OnParametersSet();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -1,19 +1,4 @@
-﻿function addElementData(data) {
-
-    $('#data-table').bootstrapTable({
-        search: true,
-        columns: [{
-            field: 'name',
-            title: 'Element Name'
-        },{
-            field: 'value',
-            title: 'Element Value'
-        }],
-        data: JSON.parse(data)
-    })
-}
-
-function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
+﻿function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
     // global object that will hold some config values
     let savedLayout = 'cose-bilkent';
     if (localStorage.graphLayout) {
@@ -372,40 +357,40 @@ function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
     // when nodes get clicked, we need to open the side bar
     cy.on('tap', 'node', function (evt) {
         let targetNode = evt.target;
-        let sidePanel = document.getElementsByClassName("cd-panel")[0];
-        appStatus.graph.selectedNode = targetNode;
+        /*  let sidePanel = document.getElementsByClassName("cd-panel")[0];*/
+    //    appStatus.graph.selectedNode = targetNode;
 
-        // highlight the selected node
-        cy.$('edge.selected-edge').removeClass('selected-edge');
-        cy.$('node.selected-node').union(cy.$('node.isInitial')).removeClass('selected-node').removeClass('selected-initial-node');
-        cy.$('node.connected-concrete-state-node').removeClass('connected-concrete-state-node');
-        targetNode.addClass(targetNode.hasClass('isInitial') ? 'selected-initial-node' : 'selected-node');
+        //// highlight the selected node
+        //cy.$('edge.selected-edge').removeClass('selected-edge');
+        //cy.$('node.selected-node').union(cy.$('node.isInitial')).removeClass('selected-node').removeClass('selected-initial-node');
+        //cy.$('node.connected-concrete-state-node').removeClass('connected-concrete-state-node');
+        //targetNode.addClass(targetNode.hasClass('isInitial') ? 'selected-initial-node' : 'selected-node');
 
-        // if the selected node is a sequence node, we also highlight the concrete state it accessed
-        if (targetNode.hasClass('SequenceNode')) {
-            targetNode.outgoers('.Accessed').target('.ConcreteState').addClass('connected-concrete-state-node');
-        }
+        //// if the selected node is a sequence node, we also highlight the concrete state it accessed
+        //if (targetNode.hasClass('SequenceNode')) {
+        //    targetNode.outgoers('.Accessed').target('.ConcreteState').addClass('connected-concrete-state-node');
+        //}
 
-        dotNetHelper.invokeMethodAsync('UpdateSelectedElement', targetNode.data('id'));
-        sidePanel.classList.add("cd-panel--is-visible");
+        dotNetHelper.invokeMethodAsync('UpdateSelectedElement', evt.target.data('id'));
+        /*sidePanel.classList.add("cd-panel--is-visible");*/
 
-        /////////////// add button section ///////////////////////////
-        let closeButton = document.getElementById("close-panel");
-        closeButton.addEventListener("click", function () {
-            let cdPanel = document.getElementsByClassName("cd-panel")[0];
-            cdPanel.classList.remove("cd-panel--is-visible");
+        ///////////////// add button section ///////////////////////////
+        //let closeButton = document.getElementById("close-panel");
+        //closeButton.addEventListener("click", function () {
+        //    let cdPanel = document.getElementsByClassName("cd-panel")[0];
+        //    cdPanel.classList.remove("cd-panel--is-visible");
 
-            // remove the highlight from the selected node
-            cy.$('node.selected-node').union(cy.$('node.isInitial')).removeClass('selected-node').removeClass('selected-initial-node');
-            if (targetNode.hasClass('SequenceNode')) {
-                targetNode.outgoers('.Accessed').target('.ConcreteState').removeClass('connected-concrete-state-node');
-            }
+        //    // remove the highlight from the selected node
+        //    cy.$('node.selected-node').union(cy.$('node.isInitial')).removeClass('selected-node').removeClass('selected-initial-node');
+        //    if (targetNode.hasClass('SequenceNode')) {
+        //        targetNode.outgoers('.Accessed').target('.ConcreteState').removeClass('connected-concrete-state-node');
+        //    }
 
-            // remove the node selection
-            appStatus.graph.selectedNode = null;
+        //    // remove the node selection
+        //    appStatus.graph.selectedNode = null;
 
-            closeButton.removeEventListener("click");
-        });
+        //    closeButton.removeEventListener("click");
+        //});
         //contentPanelHeader.appendChild(closeButton);
 
         //// for concrete states we provide a button to retrieve the widget tree
@@ -690,38 +675,37 @@ function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
     // when edges get selected, we also open the side panel, but show just the close button and the data
     cy.on('tap', 'edge.ConcreteAction,edge.AbstractAction,edge.SequenceStep', function (evt) {
         let targetEdge = evt.target;
-        let sidePanel = document.getElementsByClassName("cd-panel")[0];
-        appStatus.graph.selectedEdge = targetEdge;
+        /*let sidePanel = document.getElementsByClassName("cd-panel")[0];*/
+       // appStatus.graph.selectedEdge = targetEdge;
 
+        dotNetHelper.invokeMethodAsync('UpdateSelectedElement', evt.target.data('id'));
+        /*sidePanel.classList.add("cd-panel--is-visible");*/
 
-        dotNetHelper.invokeMethodAsync('UpdateSelectedElement', targetEdge.data('id'));
-        sidePanel.classList.add("cd-panel--is-visible");
+        //// highlight the selected node
+        //cy.$('edge.selected-edge').removeClass('selected-edge');
+        //cy.$('node.selected-node').union(cy.$('node.isInitial')).removeClass('selected-node').removeClass('selected-initial-node');
+        //cy.$('node.connected-concrete-state-node').removeClass('connected-concrete-state-node');
+        //targetEdge.addClass('selected-edge');
 
-        // highlight the selected node
-        cy.$('edge.selected-edge').removeClass('selected-edge');
-        cy.$('node.selected-node').union(cy.$('node.isInitial')).removeClass('selected-node').removeClass('selected-initial-node');
-        cy.$('node.connected-concrete-state-node').removeClass('connected-concrete-state-node');
-        targetEdge.addClass('selected-edge');
+        //// if it's a sequence step, also highlight the corresponding concrete action
+        //if (targetEdge.hasClass('SequenceStep')) {
+        //    targetEdge.source().outgoers('.ConcreteState').connectedEdges('.ConcreteAction').filter((element) =>
+        //        element.data('uid') == targetEdge.data('concreteActionUid')).addClass('selected-edge');
+        //}
 
-        // if it's a sequence step, also highlight the corresponding concrete action
-        if (targetEdge.hasClass('SequenceStep')) {
-            targetEdge.source().outgoers('.ConcreteState').connectedEdges('.ConcreteAction').filter((element) =>
-                element.data('uid') == targetEdge.data('concreteActionUid')).addClass('selected-edge');
-        }
+        //let closeButton = document.getElementById("close-panel");
+        //closeButton.addEventListener("click", function () {
+        //    let cdPanel = document.getElementsByClassName("cd-panel")[0];
+        //    cdPanel.classList.remove("cd-panel--is-visible");
 
-        let closeButton = document.getElementById("close-panel");
-        closeButton.addEventListener("click", function () {
-            let cdPanel = document.getElementsByClassName("cd-panel")[0];
-            cdPanel.classList.remove("cd-panel--is-visible");
+        //    // remove the highlight from the selected node
+        //    cy.$('edge.selected-edge').removeClass('selected-edge');
 
-            // remove the highlight from the selected node
-            cy.$('edge.selected-edge').removeClass('selected-edge');
+        //    // remove the edge selection
+        //    appStatus.graph.selectedEdge = null;
 
-            // remove the edge selection
-            appStatus.graph.selectedEdge = null;
-
-            closeButton.removeEventListener("click");
-        });
+        //    closeButton.removeEventListener("click");
+        //});
 
         //// remove all the current child elements for both panel and panel header
         //let child = contentPanel.lastChild;
@@ -1036,8 +1020,8 @@ function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
         // add a highlight when mousing over nodes
         cy.$('node').on('mouseover', (nodeMouseOverEvent) => {
             // if there is currently a selected node or edge, we don't highlight, as there will already be a highlight in place
-            if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
-            if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
+            //if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
+            //if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
             if (nodeMouseOverEvent.target.is(':parent')) return;
             nodeMouseOverEvent.target.addClass(nodeMouseOverEvent.target.hasClass('isInitial') ? 'selected-initial-node' : 'selected-node');
 
@@ -1048,8 +1032,8 @@ function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
         });
         cy.$('node').on('mouseout', (nodeMouseOutEvent) => {
             // no action taken if there is a selected node or edge
-            if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
-            if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
+            //if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
+            //if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
             if (nodeMouseOutEvent.target.is(':parent')) return;
 
             if (nodeMouseOutEvent.target.hasClass('selected-node')) {
@@ -1066,8 +1050,8 @@ function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
 
         cy.$('edge').on('mouseover', (edgeMouseoverEvent) => {
             // if there is currently a selected node or edge, we don't highlight, as there will already be a highlight in place
-            if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
-            if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
+            //if ("selectedNode" in appStatus.graph && appStatus.graph.selectedNode != null) return;
+            //if ("selectedEdge" in appStatus.graph && appStatus.graph.selectedEdge != null) return;
 
             if (edgeMouseoverEvent.target.hasClass('isAbstractedBy') || edgeMouseoverEvent.target.hasClass('Accessed')) return;
             edgeMouseoverEvent.target.addClass('selected-edge');
