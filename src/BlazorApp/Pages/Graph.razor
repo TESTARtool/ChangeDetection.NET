@@ -1,8 +1,10 @@
 ﻿@page "/Graph/{ModelIdentifier}"
+@page "/Graph/{ModelIdentifier}/{SelectedElementId}"
 @inject IJSRuntime JS
 @inject IGraphService graphService;
 @inject ILocalStorageService localStorage;
 @inject ShowCompoundLayerSetting showCompoundLayer
+@inject NavigationManager navigationManager;
 
 
     <div class="container-fluid p-3">
@@ -110,12 +112,13 @@
             </div>
         </div>
     </footer>
+    
 @if (IsGraphAvailable)
 {
     <div class="viewpane" id="cy">
     </div>
     
-    <div class="cd-panel cd-panel--from-right js-cd-panel-main">
+    <div class="cd-panel cd-panel--from-right js-cd-panel-main" >
         <div class="cd-panel__container">
             <GraphElementViewer @ref="graphElementViewer"/>
         </div>
@@ -133,8 +136,10 @@ else
 
 @code {
     public bool IsGraphAvailable { get; set; } = false;
+    public bool IsGraphVisible { get; set; } = false;
     public string ProgressStatus { get; set; } = "Loading graph data...";
     [Parameter] public string ModelIdentifier { get; set; }
+    [Parameter] public string? SelectedElementId { get; set; }
     public string? GraphInJson { get; set; }
     private DotNetObjectReference<Graph>? dotNetHelper;
     public GraphElementViewer graphElementViewer;
@@ -142,16 +147,34 @@ else
     private AppGraph applicationGraph { get; set; }
 
     [JSInvokable]
-    public void UpdateSelectedElement(string id)
+    public async Task UpdateSelectedElement(string id)
     {
+        await Task.Delay(0);
+
         var selectedElement = applicationGraph.Elements
             .FirstOrDefault(x => x.Document.Id == id);
 
         if (selectedElement is not null)
         {
-            //graphElementViewer.ShowGraphElement(selectedElement);
+            navigationManager.NavigateTo($"{navigationManager.BaseUri}graph/{ModelIdentifier}/{id}");
         }
     }
+
+    protected override void OnParametersSet()
+    {
+        if (SelectedElementId is not null)
+        {
+            var selectedElement = applicationGraph.Elements
+                .FirstOrDefault(x => x.Document.Id == SelectedElementId 
+                    || x["@rid"].AsOrientDbId().FormatId() == SelectedElementId);
+
+            if (selectedElement is not null && graphElementViewer is not null)
+            {
+                graphElementViewer.ShowGraphElementAsync(ModelIdentifier, selectedElement);
+            }
+        }
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -175,16 +198,17 @@ else
         StateHasChanged();
 
         GraphInJson = JsonSerializer.Serialize(elements);
-         
+
         ProgressStatus = "Loading graph done";
         IsGraphAvailable = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (IsGraphAvailable)
+        if (IsGraphAvailable && !IsGraphVisible)
         {
             dotNetHelper = DotNetObjectReference.Create(this);
+            IsGraphVisible = true;
             await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy", "#detailsPanel", dotNetHelper);
         }
     }

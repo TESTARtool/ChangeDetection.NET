@@ -49,6 +49,7 @@ builder.Services
     .AddScoped<SequenceNodeLabelSetting>()
     .AddScoped<ConcreteStateLabelSetting>()
     .AddScoped<EnableCompareExperimentalFeature>()
+    .AddScoped<ShowOrientDbElementData>()
     ;
 
 builder.Services

@@ -41,3 +41,10 @@ public class EnableCompareExperimentalFeature : SettingBase<bool>
        base(storage, nameof(EnableCompareExperimentalFeature), false)
     { }
 }
+
+public class ShowOrientDbElementData : SettingBase<bool>
+{
+    public ShowOrientDbElementData(ISaveLoadSettings storage) :
+       base(storage, nameof(ShowOrientDbElementData), false)
+    { }
+}

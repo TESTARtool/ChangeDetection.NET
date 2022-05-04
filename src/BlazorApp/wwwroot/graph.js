@@ -1,4 +1,19 @@
-﻿function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
+﻿function addElementData(data) {
+
+    $('#data-table').bootstrapTable({
+        search: true,
+        columns: [{
+            field: 'name',
+            title: 'Element Name'
+        },{
+            field: 'value',
+            title: 'Element Value'
+        }],
+        data: JSON.parse(data)
+    })
+}
+
+function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
     // global object that will hold some config values
     let savedLayout = 'cose-bilkent';
     if (localStorage.graphLayout) {
@@ -677,6 +692,7 @@
         let targetEdge = evt.target;
         let sidePanel = document.getElementsByClassName("cd-panel")[0];
         appStatus.graph.selectedEdge = targetEdge;
+
 
         dotNetHelper.invokeMethodAsync('UpdateSelectedElement', targetEdge.data('id'));
         sidePanel.classList.add("cd-panel--is-visible");

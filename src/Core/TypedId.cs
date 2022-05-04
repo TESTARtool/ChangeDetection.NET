@@ -7,7 +7,7 @@ public record struct ConcreteActionId(string Value);
 public record struct ConcreteIDCustom(string Value);
 public record struct OrientDbId(string Id)
 {
-    public string FormatId() => Id.Replace("#", "").Trim();
+    public string FormatId() => Id?.Replace("#", "")?.Trim() ?? String.Empty;
 }
 
 public record struct AbstractStateId(string Value);

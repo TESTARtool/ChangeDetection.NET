@@ -333,10 +333,7 @@ public class GraphService : IGraphService
 
         foreach (var property in jsonElement.EnumerateObject())
         {
-            if (!property.Name.StartsWith("in_") && !property.Name.StartsWith("out_") && !property.Name.StartsWith("@"))
-            {
-                jsonEdge.AddProperty(property.Name, property.Value.ToString().Replace("\"", ""));
-            }
+            jsonEdge.AddProperty(property.Name, property.Value.ToString().Replace("\"", ""));
         }
 
         var element = new GraphElement(GraphElement.GroupEdges, jsonEdge, typeName);
@@ -367,7 +364,6 @@ public class GraphService : IGraphService
         var jsonVertex = new Vertex("n" + FormatId(id));
 
         var elementToParse = jsonElement.EnumerateObject()
-            .Where(x => !x.Name.StartsWith("in_") || !x.Name.StartsWith("out_") || !x.Name.StartsWith("@"))
             .ToList();
 
         foreach (var property in elementToParse)

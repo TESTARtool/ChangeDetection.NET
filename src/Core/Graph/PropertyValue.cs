@@ -13,4 +13,9 @@ public record struct PropertyValue(string Value)
     {
         return bool.TryParse(Value, out var value) && value;
     }
+
+    public OrientDbId AsOrientDbId()
+    {
+        return new OrientDbId(Value);
+    }
 }
