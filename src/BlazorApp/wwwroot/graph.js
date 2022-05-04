@@ -1,4 +1,4 @@
-﻿function loadGraphCanvas(graph, elementId, panelId, dotNetHelper) {
+﻿function loadGraphCanvas(graph, elementId, dotNetHelper) {
     // global object that will hold some config values
     let savedLayout = 'cose-bilkent';
     if (localStorage.graphLayout) {
@@ -358,7 +358,7 @@
     cy.on('tap', 'node', function (evt) {
         let targetNode = evt.target;
         /*  let sidePanel = document.getElementsByClassName("cd-panel")[0];*/
-    //    appStatus.graph.selectedNode = targetNode;
+        //    appStatus.graph.selectedNode = targetNode;
 
         //// highlight the selected node
         //cy.$('edge.selected-edge').removeClass('selected-edge');
@@ -373,25 +373,6 @@
 
         dotNetHelper.invokeMethodAsync('UpdateSelectedElement', evt.target.data('id'));
         /*sidePanel.classList.add("cd-panel--is-visible");*/
-
-        ///////////////// add button section ///////////////////////////
-        //let closeButton = document.getElementById("close-panel");
-        //closeButton.addEventListener("click", function () {
-        //    let cdPanel = document.getElementsByClassName("cd-panel")[0];
-        //    cdPanel.classList.remove("cd-panel--is-visible");
-
-        //    // remove the highlight from the selected node
-        //    cy.$('node.selected-node').union(cy.$('node.isInitial')).removeClass('selected-node').removeClass('selected-initial-node');
-        //    if (targetNode.hasClass('SequenceNode')) {
-        //        targetNode.outgoers('.Accessed').target('.ConcreteState').removeClass('connected-concrete-state-node');
-        //    }
-
-        //    // remove the node selection
-        //    appStatus.graph.selectedNode = null;
-
-        //    closeButton.removeEventListener("click");
-        //});
-        //contentPanelHeader.appendChild(closeButton);
 
         //// for concrete states we provide a button to retrieve the widget tree
         //if (targetNode.hasClass("ConcreteState")) {
@@ -676,7 +657,7 @@
     cy.on('tap', 'edge.ConcreteAction,edge.AbstractAction,edge.SequenceStep', function (evt) {
         let targetEdge = evt.target;
         /*let sidePanel = document.getElementsByClassName("cd-panel")[0];*/
-       // appStatus.graph.selectedEdge = targetEdge;
+        // appStatus.graph.selectedEdge = targetEdge;
 
         dotNetHelper.invokeMethodAsync('UpdateSelectedElement', evt.target.data('id'));
         /*sidePanel.classList.add("cd-panel--is-visible");*/

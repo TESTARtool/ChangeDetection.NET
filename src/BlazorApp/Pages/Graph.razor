@@ -143,7 +143,6 @@ else
     public string? GraphInJson { get; set; }
     private DotNetObjectReference<Graph>? dotNetHelper;
     public GraphElementViewer graphElementViewer;
-    public bool OpenOffcanvas { get; set; }
     private AppGraph applicationGraph { get; set; }
     private GraphElement? SelectedElement { get; set; }
 
@@ -175,7 +174,7 @@ else
                 StateHasChanged();
                 if (graphElementViewer is not null)
                 {
-                    graphElementViewer.ShowGraphElementAsync(ModelIdentifier, selectedElement);
+                    graphElementViewer.ShowGraphElementAsync($"graph/{ModelIdentifier}", selectedElement);
                 }
             }
         }
@@ -222,7 +221,7 @@ else
         {
             dotNetHelper = DotNetObjectReference.Create(this);
             IsGraphVisible = true;
-            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy", "#detailsPanel", dotNetHelper);
+            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy", dotNetHelper);
         }
     }
 

@@ -5,7 +5,7 @@
     <nav class="navbar navbar-dark bg-dark">
         <div class="container-fluid">
             <div class="navbar-brand text-warning">@SelectedElement?.TypeName - Details</div>
-            <a href="/graph/@ModelIdentifier" class="btn btn-close btn-close-white text-reset" aria-label="Close" ></a>
+            <a href="/@BaseUrl" class="btn btn-close btn-close-white text-reset" aria-label="Close" ></a>
         </div>
     </nav>
 
@@ -56,14 +56,14 @@
                                     <td>
                                     @foreach (var propertyValue in GetArrayOfIds(element))
                                     {
-                                        <p><a href="graph/@ModelIdentifier/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
+                                        <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
                                     }
                                     </td>
                                 }
                                 else if (IsId(element))
                                 {
                                     <td>
-                                        <p><a href="graph/@ModelIdentifier/@GetId(element).FormatId()">@element.Value.ToString()</a></p>
+                                        <p><a href="BaseUrl/@GetId(element).FormatId()">@element.Value.ToString()</a></p>
                                     </td>
                                 }
                                 else
@@ -81,7 +81,7 @@
 
 
 @code {
-    public string ModelIdentifier { get; set; }
+    public string BaseUrl { get; set; }
     public List<KeyValuePair<string, object>> Properties = new();
     public GraphElement? SelectedElement { get; set; }
     private string Filter { get; set; }
@@ -141,9 +141,9 @@
     }
 
 
-    public void ShowGraphElementAsync(string modelIdentifier, GraphElement element)
+    public void ShowGraphElementAsync(string baseUrl, GraphElement element)
     {
-        ModelIdentifier = modelIdentifier;
+        BaseUrl = baseUrl;
         SelectedElement = element;
         Properties = element.Document.Properties
             .OrderBy(x => x.Key)
