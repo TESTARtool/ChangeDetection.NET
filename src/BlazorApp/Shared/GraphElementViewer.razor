@@ -15,9 +15,10 @@
     <div class="pt-3">
         <div class="container-fluid">
             <div class="btn-group" role="group" aria-label="Show amount of nodes">
-                <button type="button" class="btn btn-secondary" disabled>
-                    Abstract States <span class="badge bg-light text-dark rounded-pill"></span>
-                </button>
+                <button type="button" class="btn btn-secondary" disabled>Button1</button>
+                <button type="button" class="btn btn-secondary" disabled>Button2</button>
+                <button type="button" class="btn btn-secondary" disabled>Button3</button>
+                <button type="button" class="btn btn-secondary" disabled>Button4</button>
             </div>
         </div>
     </div>
@@ -76,6 +77,55 @@
                 </tbody>
             </table>
         </div>
+
+        @if(ChangeDetectionProperties.Any()){
+            <h3>Change Detection data</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover w-100" >
+
+                    <thead>
+                        <tr>
+                            <th data-field="name">Element Name</th>
+                            <th data-field="value">Element Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var element in ChangeDetectionProperties)
+                        {
+                            <tr>
+                            <td>@element.Key.Substring(3)</td>
+                            @if (IsImage(element))
+                            { 
+                                <td>
+                                    <img alt="@element.Key" src="data:image/png;base64,@element.Value">
+                                </td>
+
+                            }
+                            else if (IsArrayOfIds(element))
+                            {
+                                <td>
+                                @foreach (var propertyValue in GetArrayOfIds(element))
+                                {
+                                    <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
+                                }
+                                </td>
+                            }
+                            else if (IsId(element))
+                            {
+                                <td>
+                                    <p><a href="@BaseUrl/@GetId(element).FormatId()">@element.Value.ToString()</a></p>
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="text-break">@element.Value.ToString()</td>
+                            }
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
 }
 
@@ -83,6 +133,8 @@
 @code {
     public string BaseUrl { get; set; }
     public List<KeyValuePair<string, object>> Properties = new();
+    public List<KeyValuePair<string, object>> ChangeDetectionProperties = new();
+
     public GraphElement? SelectedElement { get; set; }
     private string Filter { get; set; }
 
@@ -99,6 +151,11 @@
         }
 
         return property.Key.Contains(Filter, StringComparison.CurrentCultureIgnoreCase);
+    }
+
+    public bool ContainsCompareDetails()
+    {
+        return ChangeDetectionProperties.Any();
     }
 
     public bool IsImage(KeyValuePair<string, object> property)
@@ -146,6 +203,12 @@
         BaseUrl = baseUrl;
         SelectedElement = element;
         Properties = element.Document.Properties
+            .Where(x => !x.Key.StartsWith("CD_"))
+            .OrderBy(x => x.Key)
+            .ToList();
+
+        ChangeDetectionProperties = element.Document.Properties
+            .Where(x => x.Key.StartsWith("CD_"))
             .OrderBy(x => x.Key)
             .ToList();
 
