@@ -45,10 +45,15 @@ public class GraphElement
     public bool IsConcreteState => Classes.Any(x => x == "ConcreteState" && Document is Vertex);
 
     [JsonIgnore]
+    public bool IsTestSequence => Classes.Any(x => x == "TestSequence" && Document is Vertex);
+
+    [JsonIgnore]
     public bool IsAbstractAction => Classes.Any(x => x == "AbstractAction" && Document is Edge);
 
     [JsonIgnore]
     public bool IsConcreteAction => Classes.Any(x => x == "ConcreteAction" && Document is Edge);
+
+
 
     [JsonIgnore]
     public bool IsHandeld
