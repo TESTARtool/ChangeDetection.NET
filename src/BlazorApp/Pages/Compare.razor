@@ -112,7 +112,7 @@
 
     <div class="cd-panel cd-panel--from-right js-cd-panel-main @(SelectedElement is null ? "cd-panel--is-hiden" : "cd-panel--is-visible")" >
         <div class="cd-panel__container">
-            <GraphElementViewer @ref="graphElementViewer"/>
+            <GraphElementViewer @ref="graphElementViewer" ShowButtons="false" />
         </div>
     </div>
     
@@ -255,5 +255,10 @@ else
             await JS.InvokeVoidAsync("loadGraphCanvas", App1GraphInJson, "cyApp1", dotNetHelper);
             await JS.InvokeVoidAsync("loadGraphCanvas", App2GraphInJson, "cyApp2", dotNetHelper);
         }
+    }
+
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
     }
 }

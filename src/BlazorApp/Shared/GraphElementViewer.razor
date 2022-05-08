@@ -14,24 +14,27 @@
 {
     @if (SelectedElement.Document is Vertex)
     {
-        <div class="pt-3">
-            <div class="container-fluid">
-                @if (SelectedElement.IsConcreteState)
-                {
-                    <a href="#" class="btn btn-secondary me-1" >Inspect Widget tree</a>
-                }
-                <button type="button" class="btn btn-secondary" onclick="hideElement('cy', '#@SelectedElement.Document.Id')" >Hide Node</button>
-                <button type="button" class="btn btn-secondary" onclick="highlightElement('cy', '#@SelectedElement.Document.Id')" >Highlight</button>
-                @if (SelectedElement.IsConcreteState)
-                {
-                    <button type="button" class="btn btn-secondary ms-1" onclick="tracePath('cy', '#@SelectedElement.Document.Id')" >Trace Path</button>
-                }
-                @if (SelectedElement.IsTestSequence)
-                {
-                    <button type="button" class="btn btn-secondary" onclick="traceSequence('cy', '#@SelectedElement.Document.Id')" >Trace Test Sequence</button>
-                }
-            </div>
+        @if (ShowButtons)
+        {
+            <div class="pt-3">
+                <div class="container-fluid">
+                    @if (SelectedElement.IsConcreteState)
+                    {
+                        <a href="#" class="btn btn-secondary me-1" >Inspect Widget tree</a>
+                    }
+                    <button type="button" class="btn btn-secondary" onclick="hideElement('cy', '#@SelectedElement.Document.Id')" >Hide Node</button>
+                    <button type="button" class="btn btn-secondary" onclick="highlightElement('cy', '#@SelectedElement.Document.Id')" >Highlight</button>
+                    @if (SelectedElement.IsConcreteState)
+                    {
+                        <button type="button" class="btn btn-secondary ms-1" onclick="tracePath('cy', '#@SelectedElement.Document.Id')" >Trace Path</button>
+                    }
+                    @if (SelectedElement.IsTestSequence)
+                    {
+                        <button type="button" class="btn btn-secondary" onclick="traceSequence('cy', '#@SelectedElement.Document.Id')" >Trace Test Sequence</button>
+                    }
+                </div>
         </div>
+        }
     }
     <div class="p-3">
         @if (SelectedElement.IsConcreteState)
@@ -150,9 +153,11 @@
     public string BaseUrl { get; set; }
     public List<KeyValuePair<string, object>> Properties = new();
     public List<KeyValuePair<string, object>> ChangeDetectionProperties = new();
-    [CascadingParameter] public IModalService Modal { get; set; }
     public GraphElement? SelectedElement { get; set; }
     private string Filter { get; set; }
+
+    [Parameter]
+    public bool ShowButtons { get; set; }
 
     public bool IsVisible(KeyValuePair<string, object> property)
     {
