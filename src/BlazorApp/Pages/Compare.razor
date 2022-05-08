@@ -12,7 +12,7 @@
             <div class="input-group me-2" >
                 <span class="input-group-text" id="Layout-text">Layout</span>
                 <select id="layout-control" class="form-control text-secondary" aria-label="Default select example"
-                    aria-describedby="Layout-text" >
+                    aria-describedby="Layout-text" onchange="changeLayout('cyApp1', this.value); changeLayout('cyApp2', this.value)" >
                     <option value="grid">Grid</option>
                     <option value="random">Random</option>
                     <option value="circle">Circle</option>
@@ -28,19 +28,19 @@
             </div>
 
             <div class="btn-group me-2" role="group">
-                <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off">
+                <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off"
+                onchange="showLabel('cyApp1', this.value); showLabel('cyApp2', this.value)">
                 <label class="btn btn-outline-secondary" for="show-labels">Show Labels</label>
             </div>
 
-
-            <div class="btn-group" role="group" aria-label="Show amount of nodes">
+         @*   <div class="btn-group" role="group" aria-label="Show amount of nodes">
                 <button type="button" class="btn btn-secondary" disabled>
                   Abstract States <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-states"></span>
                 </button>
                 <button type="button" class="btn btn-secondary" disabled>
                   Abstract Actions <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-actions"></span>
                 </button>
-            </div>
+            </div>*@
         </div>
     </div>
 

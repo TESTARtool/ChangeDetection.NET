@@ -330,22 +330,6 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
         },
     });
 
-    let layoutControl = document.getElementById("layout-control");
-    if (layoutControl != null) {
-        layoutControl.value = savedLayout;
-
-        layoutControl.addEventListener("change", function () {
-            let selectedLayout = layoutControl.value;
-            localStorage.setItem("graphLayout", selectedLayout);
-            cy.layout({
-                name: selectedLayout,
-                animate: 'end',
-                animationEasing: 'ease-out',
-                animationDuration: 1000
-            }).run();
-        });
-    }
-
     let showLabels = document.getElementById("show-labels");
     if (showLabels != null) {
         showLabels.addEventListener("change", function () {
@@ -358,6 +342,7 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
             }
         });
     }
+   
 
     // when nodes get clicked, we need to open the side bar
     cy.on('tap', function (evt) {
@@ -598,6 +583,20 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
     });
 
     cyMap.set(elementId, cy);
+}
+
+function changeLayout(cyId, newLayout) {
+    if (cyMap.has(cyId)) {
+        let cy = cyMap.get(cyId);
+
+        localStorage.setItem("graphLayout", newLayout);
+        cy.layout({
+            name: newLayout,
+            animate: 'end',
+            animationEasing: 'ease-out',
+            animationDuration: 1000
+        }).run();
+    }
 }
 
 function showAllElements(cyId) {

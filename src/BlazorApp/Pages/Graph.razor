@@ -13,7 +13,7 @@
             <div class="input-group me-2" >
                 <span class="input-group-text" id="Layout-text">Layout</span>
                 <select id="layout-control" class="form-control text-secondary" aria-label="Default select example"
-                    aria-describedby="Layout-text">
+                    aria-describedby="Layout-text" onchange="changeLayout('cy', this.value)">
                     <option value="grid" selected>Grid</option>
                     <option value="random">Random</option>
                     <option value="circle">Circle</option>
@@ -30,7 +30,7 @@
 
             <div class="btn-group me-2" role="group" >
                 <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="show-labels">Show Labels</label>
+                <label class="btn btn-outline-secondary" for="show-labels" >Show Labels</label>
             </div>
 
 
