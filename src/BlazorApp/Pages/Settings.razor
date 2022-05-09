@@ -26,12 +26,12 @@
       </label>
     </div>
 
-    <div class="card w-50">
+    <div class="card w-50 my-3">
         <div class="card-header">
             Expiremental features
         </div>
         <div class="card-body">
-            <h5 class="card-title">Expiremental features could generated issues. use with caution.</h5>
+            <h5 class="card-title">Expiremental features could generated issues, use with caution.</h5>
              <div class="form-check">
               <input class="form-check-input" type="checkbox" @bind="enableCompareExperimentalFeature.Value" id="showEnableCompareExperimentalFeature">
               <label class="form-check-label" for="showEnableCompareExperimentalFeature">
@@ -46,21 +46,21 @@
         Graph element labels
       </div>
       <div class="card-body">
-        <h5 class="card-title">Please specify which what the label of the element should show</h5>
+        <h5 class="card-title">Specify which what the label of the element should show</h5>
         <div class="input-group mb-3">
-            <span class="input-group-text" id="inputGroup-sizing-default">Abstract State</span>
+            <span class="input-group-text" id="inputGroup-sizing-default" style="width:150px">Abstract State</span>
             <input type="text" class="form-control" @bind-value="abstractStateLabelSetting.Value" >
         </div>
         <div class="input-group mb-3">
-            <span class="input-group-text" id="inputGroup-sizing-default">Concrete State</span>
+            <span class="input-group-text" id="inputGroup-sizing-default" style="width:150px">Concrete State</span>
             <input type="text" class="form-control" @bind-value="concreteStateLabelSetting.Value" >
         </div>
         <div class="input-group mb-3">
-            <span class="input-group-text" id="inputGroup-sizing-default">Test Sequence</span>
+            <span class="input-group-text" id="inputGroup-sizing-default" style="width:150px">Test Sequence</span>
             <input type="text" class="form-control" @bind-value="testSequenceLabelSetting.Value" >
         </div>
         <div class="input-group mb-3">
-            <span class="input-group-text" id="inputGroup-sizing-default">Sequence Node</span>
+            <span class="input-group-text" id="inputGroup-sizing-default" style="width:150px">Sequence Node</span>
             <input type="text" class="form-control" @bind-value="sequenceNodeLabelSetting.Value" >
         </div>
         <div class="form-check">
