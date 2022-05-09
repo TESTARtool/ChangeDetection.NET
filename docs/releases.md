@@ -11,10 +11,12 @@ Two changes in this version. The first is a setting screen in which some changes
 ### Setting screen
 
 ![Settings](images/settings-140.png)
+
 It is now possible to specify which label to show in the graph viewer and to enable a compound layer in the viewer.
 
 ### Comparison
 This version introduced a expiremental feature, compare. Before it is possible to use this feature, its need to be enabled in the settings screen. When enabled a new option appears on the selected model view. 
+
 ![compare viewer](images/compare-option.png)
 
 This is open a side by side graph viewer window where two graphs can be compared. More features to come.
