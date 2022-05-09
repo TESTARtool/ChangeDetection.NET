@@ -342,7 +342,6 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
             }
         });
     }
-   
 
     // when nodes get clicked, we need to open the side bar
     cy.on('tap', function (evt) {
@@ -472,7 +471,7 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
     }
 
     cy.ready(function (event) {
-        initLayers(elementId);
+        initLayers();
         initStats();
 
         // highlight the leaves, which in this case will be the root of the widget tree
@@ -489,10 +488,6 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
                 }
             }
         );
-
-        //cy.$('node').forEach(
-        //    (w) => w.attr('data-bs-toggle', 'offcanvas').attr('data-bs-target', '#detailsPanel')
-        //);
 
         // add a mouseover event to the concrete actions
         cy.$(".ConcreteAction").on('mouseover', function (mouseoverEvent) {
