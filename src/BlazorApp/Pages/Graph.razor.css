@@ -9,58 +9,6 @@
     padding-top: 10px;
 }
 
-/*div.layout {
-    display: inline-block;
-    vertical-align: top;
-    float: left;
-}
-
-    div.layout > div.column {
-        float: left;
-        padding-top: 10px;
-        padding-right: 10px;
-        margin-right: 20px;
-    }
-
-        div.layout > div.column > div {
-            margin-bottom: 10px;
-        }*/
-/*
-div.extra-margin-left {
-    margin-left: 30px;
-}*/
-/*
-span.legend {
-    font-size: 1.5em;
-    color: #5d574d;
-    font-weight: bold;
-}*/
-
-/*div.layout > div.column > div.legend-box {
-    width: 40px;
-    height: 30px;
-    margin-bottom: 10px;
-    border: black;
-    border-width: 1px;
-    border-style: solid;
-}
-
-div.layout > div.column > div.legend-text {
-    height: 30px;
-    margin-bottom: 12px;
-    font-size: 1.2em;
-    line-height: 30px;
-    margin-left: -20px;
-}*/
-
-/*div.layout > div.column div.stats-text {
-    height: 25px;
-    margin-bottom: 12px;
-    font-size: 1.2em;
-    line-height: 30px;
-    margin-left: -20px;
-}*/
-
 div.abstract-state {
     background-color: #1c9099;
 }
@@ -128,17 +76,6 @@ div.is-child-of {
         transition: visibility 0s 0s;
     }
 
-/*.cd-panel__header {*/
-/*...*/
-/*position: fixed;
-    top: 0;
-    width: 90%;
-    height: 50px;
-    transition: transform 0.3s 0s;
-    transform: translateY(-50px);
-    z-index: 1001;
-}*/
-
 .cd-panel__content {
     margin-top: 50px;
 }
@@ -176,11 +113,6 @@ div.is-child-of {
     transform: translate3d(100%, 0, 0);
 }
 
-/*.cd-panel--from-left .cd-panel__container {
-    left: 0;
-    transform: translate3d(-100%, 0, 0);
-}*/
-
 .cd-panel--is-visible .cd-panel__container {
     transform: translate3d(0, 0, 0);
     transition-delay: 0s;
@@ -191,28 +123,6 @@ div.is-child-of {
     transition: visibility 0s 0s;
 }
 
-/*#close-panel, #toggle-visible, #highlight, #widget-tree-button, #trace-path-button, #popup-edge, #trace-sequence-button {
-    float: right;
-    margin-right: 10px;
-}
-*/
-/*#cd-content-panel h3 {
-    float: left;
-    font-size: 24px;
-    margin-bottom: 5px;
-}*/
-
-/*img.node-img-full {
-    width: 750px;
-    height: inherit;
-    margin-bottom: 20px;
-    margin-top: 20px;
-}
-*/
-/*p.paragraph-data {
-    margin-right: 10px;
-}
-*/
 button.skip {
     background-color: #8c9cbf;
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #8c9cbf), color-stop(50%, #546a9e), color-stop(50%, #36518f), color-stop(100%, #3d5691));
