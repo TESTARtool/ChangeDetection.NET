@@ -4,9 +4,9 @@ namespace Testar.ChangeDetection.Core.Differences;
 
 public class AppGraph
 {
-    public AppGraph(List<GraphElement> elements)
+    public AppGraph(IEnumerable<GraphElement> elements)
     {
-        Elements = elements;
+        Elements = elements.ToList();
     }
 
     public List<GraphElement> Elements { get; }

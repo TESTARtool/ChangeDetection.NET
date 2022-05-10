@@ -280,7 +280,7 @@ public class GraphService : IGraphService
 
         if (showCompoundGraph)
         {
-            elements.Add(new GraphElement(GraphElement.GroupNodes, new Vertex("SequenceLayer"), "Parent"));
+            elements.Add(new GraphElement(GraphElement.GroupNodes, new Vertex("SequenceLayer"), "Compound"));
         }
 
         var result1 = new OrientDbCommand("SELECT FROM TestSequence WHERE modelIdentifier = :identifier")
@@ -324,7 +324,7 @@ public class GraphService : IGraphService
             .ToArrayAsync();
     }
 
-    private static GraphElement AsEdge(JsonElement jsonElement, string className, params string[] extraClasses)
+    private static GraphElement AsEdge(JsonElement jsonElement, string typeName, params string[] extraClasses)
     {
         var id = new OrientDbId(jsonElement.GetProperty("@rid").ToString());
         var sourceId = new OrientDbId(jsonElement.GetProperty("out").ToString());
@@ -333,13 +333,10 @@ public class GraphService : IGraphService
 
         foreach (var property in jsonElement.EnumerateObject())
         {
-            if (!property.Name.StartsWith("in_") && !property.Name.StartsWith("out_") && !property.Name.StartsWith("@"))
-            {
-                jsonEdge.AddProperty(property.Name, property.Value.ToString().Replace("\"", ""));
-            }
+            jsonEdge.AddProperty(property.Name, property.Value.ToString().Replace("\"", ""));
         }
 
-        var element = new GraphElement(GraphElement.GroupEdges, jsonEdge, className);
+        var element = new GraphElement(GraphElement.GroupEdges, jsonEdge, typeName);
 
         foreach (var extraClass in extraClasses)
         {
@@ -360,14 +357,13 @@ public class GraphService : IGraphService
             .Replace(":", "_");
     }
 
-    private GraphElement AsVertex(JsonElement jsonElement, string className, string? parent, params string[] extraClasses)
+    private GraphElement AsVertex(JsonElement jsonElement, string typeName, string? parent, params string[] extraClasses)
     {
         var id = new OrientDbId(jsonElement.GetProperty("@rid").ToString());
 
         var jsonVertex = new Vertex("n" + FormatId(id));
 
         var elementToParse = jsonElement.EnumerateObject()
-            .Where(x => !x.Name.StartsWith("in_") || !x.Name.StartsWith("out_") || !x.Name.StartsWith("@"))
             .ToList();
 
         foreach (var property in elementToParse)
@@ -390,7 +386,7 @@ public class GraphService : IGraphService
             jsonVertex.AddProperty("parent", parent);
         }
 
-        var element = new GraphElement(GraphElement.GroupNodes, jsonVertex, className);
+        var element = new GraphElement(GraphElement.GroupNodes, jsonVertex, typeName);
         if (jsonElement.TryGetProperty("isInitial", out var isInitialElement) && isInitialElement.GetBoolean())
         {
             element.AddClass("isInitial");
@@ -401,19 +397,19 @@ public class GraphService : IGraphService
             element.AddClass(extraClass);
         }
 
-        if (className == "AbstractState")
+        if (typeName == "AbstractState")
         {
             jsonVertex["customLabel"] = element[abstractStateLabelSetting.Value];
         }
-        else if (className == "ConcreteState")
+        else if (typeName == "ConcreteState")
         {
             jsonVertex["customLabel"] = element[concreteStateLabelSetting.Value];
         }
-        else if (className == "SequenceNode")
+        else if (typeName == "SequenceNode")
         {
             jsonVertex["customLabel"] = element[sequenceNodeLabelSetting.Value];
         }
-        else if (className == "TestSequence")
+        else if (typeName == "TestSequence")
         {
             jsonVertex["customLabel"] = element[testSequenceLabelSetting.Value];
         }
@@ -424,19 +420,19 @@ public class GraphService : IGraphService
 
         if (showPrefixLabelSetting.Value)
         {
-            if (className == "AbstractState")
+            if (typeName == "AbstractState")
             {
                 jsonVertex["customLabel"] = new PropertyValue($"AS-{jsonVertex["customLabel"].Value}");
             }
-            else if (className == "ConcreteState")
+            else if (typeName == "ConcreteState")
             {
                 jsonVertex["customLabel"] = new PropertyValue($"CS-{jsonVertex["customLabel"].Value}");
             }
-            else if (className == "SequenceNode")
+            else if (typeName == "SequenceNode")
             {
                 jsonVertex["customLabel"] = new PropertyValue($"SN-{jsonVertex["customLabel"].Value}");
             }
-            else if (className == "TestSequence")
+            else if (typeName == "TestSequence")
             {
                 jsonVertex["customLabel"] = new PropertyValue($"TS-{jsonVertex["customLabel"].Value}");
             }

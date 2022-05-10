@@ -10,7 +10,11 @@ Application can run on:
 - Windows x86 en x64
 - MacOS (Minimum OS version is macOS 10.12 Sierra) [! Untested]
 
+[Release notes can be viewed here](docs/releases.md)
+
 ## Docs
 - [Development](docs/development.md)
 - [Getting-Started](docs/getting-started.md)
 - [Running server in docker](src/ChangeDetection.Server/readme.md)
+
+

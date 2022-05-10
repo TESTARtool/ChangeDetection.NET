@@ -1,8 +1,10 @@
 ﻿@page "/Graph/{ModelIdentifier}"
+@page "/Graph/{ModelIdentifier}/{SelectedElementId}"
 @inject IJSRuntime JS
 @inject IGraphService graphService;
 @inject ILocalStorageService localStorage;
 @inject ShowCompoundLayerSetting showCompoundLayer
+@inject NavigationManager navigationManager;
 
 
     <div class="container-fluid p-3">
@@ -11,7 +13,7 @@
             <div class="input-group me-2" >
                 <span class="input-group-text" id="Layout-text">Layout</span>
                 <select id="layout-control" class="form-control text-secondary" aria-label="Default select example"
-                    aria-describedby="Layout-text">
+                    aria-describedby="Layout-text" onchange="changeLayout('cy', this.value)">
                     <option value="grid" selected>Grid</option>
                     <option value="random">Random</option>
                     <option value="circle">Circle</option>
@@ -26,14 +28,14 @@
                 </select>
             </div>
 
-            <div class="btn-group me-2" role="group">
+            <div class="btn-group me-2" role="group" >
                 <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="show-labels">Show Labels</label>
+                <label class="btn btn-outline-secondary" for="show-labels" >Show Labels</label>
             </div>
 
 
             <div class="btn-group me-2" role="group" aria-label="Show layers for the graph group">
-                <button id="show-all" class="btn btn-warning" type="submit">Show all nodes</button>
+                <button id="show-all" class="btn btn-warning" type="submit" onclick="showAllElements('cy')">Show all nodes</button>
 
                 <input type="checkbox" class="btn-check" id="toggle-abstract-layer" checked autocomplete="off">
                 <label class="btn btn-outline-secondary" for="toggle-abstract-layer">Abstract layer</label>
@@ -110,18 +112,16 @@
             </div>
         </div>
     </footer>
+    
 @if (IsGraphAvailable)
 {
     <div class="viewpane" id="cy">
     </div>
 
-    <div class="cd-panel cd-panel--from-right js-cd-panel-main">
+    <div class="cd-panel cd-panel--from-right js-cd-panel-main @(SelectedElement is null ? "cd-panel--is-hiden" : "cd-panel--is-visible")" >
         <div class="cd-panel__container">
-            <div class="panel-header" id="content-panel-header">
-            </div>
-            <div class="cd-panel__content" id="cd-content-panel">
-            </div> <!-- cd-panel__content -->
-        </div> <!-- cd-panel__container -->
+            <GraphElementViewer @ref="graphElementViewer" ShowButtons="true"/>
+        </div>
     </div>
 }
 else
@@ -132,17 +132,64 @@ else
             <span class="visually-hidden">loading</span>
         </div>
     </div>
-} 
+}
 
 @code {
     public bool IsGraphAvailable { get; set; } = false;
+    public bool IsGraphVisible { get; set; } = false;
     public string ProgressStatus { get; set; } = "Loading graph data...";
     [Parameter] public string ModelIdentifier { get; set; }
+    [Parameter] public string? SelectedElementId { get; set; }
     public string? GraphInJson { get; set; }
+    private DotNetObjectReference<Graph>? dotNetHelper;
+    public GraphElementViewer graphElementViewer;
+    private AppGraph applicationGraph { get; set; }
+    private GraphElement? SelectedElement { get; set; }
+
+    [JSInvokable]
+    public async Task UpdateSelectedElement(string id)
+    {
+        await Task.Delay(0);
+
+        var selectedElement = applicationGraph.Elements
+            .FirstOrDefault(x => x.Document.Id == id);
+
+        if (selectedElement is not null)
+        {
+            navigationManager.NavigateTo($"{navigationManager.BaseUri}graph/{ModelIdentifier}/{id}");
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (SelectedElementId is not null && applicationGraph is not null)
+        {
+            var selectedElement = applicationGraph.Elements
+                .FirstOrDefault(x => x.Document.Id == SelectedElementId 
+                    || x["@rid"].AsOrientDbId().FormatId() == SelectedElementId);
+
+            if (selectedElement is not null)
+            {
+                SelectedElement = selectedElement;
+                StateHasChanged();
+                if (graphElementViewer is not null)
+                {
+                    graphElementViewer.ShowGraphElementAsync($"graph/{ModelIdentifier}", selectedElement);
+                }
+            }
+        }
+
+        if (SelectedElementId is null && SelectedElement is not null)
+        {
+            SelectedElement = null;
+        }
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
         var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), showCompoundLayer.Value);
+        applicationGraph = new AppGraph(elements);
 
         foreach (var element in elements)
         {
@@ -161,16 +208,25 @@ else
         StateHasChanged();
 
         GraphInJson = JsonSerializer.Serialize(elements);
-         
+
         ProgressStatus = "Loading graph done";
         IsGraphAvailable = true;
+
+        OnParametersSet();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (IsGraphAvailable)
+        if (IsGraphAvailable && !IsGraphVisible)
         {
-            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy");
+            dotNetHelper = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy", dotNetHelper);
+            IsGraphVisible = true;
         }
+    }
+
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
     }
 }

@@ -4,8 +4,8 @@ namespace Testar.ChangeDetection.Core.Differences;
 
 public class CompareResults
 {
-    public List<GraphElement> GraphApp1 { get; set; }
-    public List<GraphElement> GraphApp2 { get; set; }
+    public AppGraph GraphApp1 { get; set; }
+    public AppGraph GraphApp2 { get; set; }
 }
 
 public interface IGraphComparer
@@ -41,8 +41,8 @@ public class GraphComparer : IGraphComparer
         // report the results
         return new CompareResults
         {
-            GraphApp1 = graphApp1.Elements,
-            GraphApp2 = graphApp2.Elements,
+            GraphApp1 = graphApp1,
+            GraphApp2 = graphApp2,
         };
     }
 

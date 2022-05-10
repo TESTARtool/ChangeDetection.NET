@@ -6,17 +6,12 @@ public class GraphElement
 
     public const string GroupEdges = "edges";
 
-    public GraphElement(string group, Document document)
+    public GraphElement(string group, Document document, string typeName)
     {
         this.Group = group;
         this.Document = document;
-    }
-
-    public GraphElement(string group, Document document, string className)
-    {
-        this.Group = group;
-        this.Document = document;
-        Classes.Add(className);
+        this.TypeName = typeName;
+        Classes.Add(typeName);
     }
 
     [JsonIgnore]
@@ -35,6 +30,9 @@ public class GraphElement
     public List<string> Classes { get; set; } = new();
 
     [JsonIgnore]
+    public string TypeName { get; set; }
+
+    [JsonIgnore]
     public Vertex DocumentAsVertex => (Vertex)Document;
 
     [JsonIgnore]
@@ -47,14 +45,22 @@ public class GraphElement
     public bool IsConcreteState => Classes.Any(x => x == "ConcreteState" && Document is Vertex);
 
     [JsonIgnore]
+    public bool IsTestSequence => Classes.Any(x => x == "TestSequence" && Document is Vertex);
+
+    [JsonIgnore]
     public bool IsAbstractAction => Classes.Any(x => x == "AbstractAction" && Document is Edge);
 
     [JsonIgnore]
     public bool IsConcreteAction => Classes.Any(x => x == "ConcreteAction" && Document is Edge);
 
+
+
     [JsonIgnore]
     public bool IsHandeld
-    { get { return Document.IsHandeld; } set { Document.IsHandeld = value; } }
+    {
+        get => Document.IsHandeld;
+        set => Document.IsHandeld = value;
+    }
 
     public PropertyValue this[string name]
     {
