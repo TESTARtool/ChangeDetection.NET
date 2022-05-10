@@ -1,0 +1,242 @@
+﻿@using System.Text.RegularExpressions
+@inject IJSRuntime JS
+@inject ShowOrientDbElementData showOrientDbElementData
+
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <div class="navbar-brand text-warning">@SelectedElement?.TypeName - Details</div>
+            <a href="/@BaseUrl" class="btn btn-close btn-close-white text-reset" aria-label="Close" ></a>
+        </div>
+    </nav>
+
+
+@if (SelectedElement is not null)
+{
+
+
+    @if (SelectedElement.Document is Vertex)
+    {
+        @if (ShowButtons)
+        {
+            <div class="pt-3">
+                <div class="container-fluid">
+                    @if (SelectedElement.IsConcreteState)
+                    {
+                        <a href="#" class="btn btn-secondary me-1" >Inspect Widget tree</a>
+                    }
+                    <button type="button" class="btn btn-secondary" onclick="hideElement('cy', '#@SelectedElement.Document.Id')" >Hide Node</button>
+                    <button type="button" class="btn btn-secondary" onclick="highlightElement('cy', '#@SelectedElement.Document.Id')" >Highlight</button>
+                    @if (SelectedElement.IsConcreteState)
+                    {
+                        <button type="button" class="btn btn-secondary ms-1" onclick="tracePath('cy', '#@SelectedElement.Document.Id')" >Trace Path</button>
+                    }
+                    @if (SelectedElement.IsTestSequence)
+                    {
+                        <button type="button" class="btn btn-secondary" onclick="traceSequence('cy', '#@SelectedElement.Document.Id')" >Trace Test Sequence</button>
+                    }
+                </div>
+        </div>
+        }
+    }
+    <div class="p-3">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="compare-tab" data-bs-toggle="tab" data-bs-target="#compareTab" type="button" role="tab" aria-controls="compare-tab" aria-selected="true">Compare data</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="detail-tab" data-bs-toggle="tab" data-bs-target="#detailTab" type="button" role="tab" aria-controls="detail-tab" aria-selected="false">Element Data</button>
+          </li>
+        </ul>
+        <div class="tab-content p-1" id="myTabContent">
+          <div class="tab-pane fade show active" id="compareTab" role="tabpanel" aria-labelledby="compare-tab">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover w-100" >
+                    <thead>
+                        <tr>
+                            <th data-field="name">Element Name</th>
+                            <th data-field="value">Element Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var element in ChangeDetectionProperties)
+                        {
+                            <tr>
+                            <td>@element.Key.Substring(3)</td>
+                            @if (IsImage(element))
+                            { 
+                                <td>
+                                    <img alt="@element.Key" src="data:image/png;base64,@element.Value">
+                                </td>
+
+                            }
+                            else if (IsArrayOfIds(element))
+                            {
+                                <td>
+                                @foreach (var propertyValue in GetArrayOfIds(element))
+                                {
+                                    <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
+                                }
+                                </td>
+                            }
+                            else if (IsId(element))
+                            {
+                                <td>
+                                    <p><a href="@BaseUrl/@GetId(element).FormatId()">@element.Value.ToString()</a></p>
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="text-break">@element.Value.ToString()</td>
+                            }
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="detailTab" role="tabpanel" aria-labelledby="detail-tab">
+            <div class="form-group">
+                <input class="form-control  w-50" type="text" placeholder="Filter..."
+                       @bind="Filter"
+                       @bind:event="oninput">
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover w-100" >
+                    <thead>
+                        <tr>
+                            <th data-field="name">Element Name</th>
+                            <th data-field="value">Element Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var element in Properties)
+                        {
+                            if (IsVisible(element))
+                            {
+                                  <tr>
+                                    <td>@element.Key</td>
+                                    @if (IsImage(element))
+                                    { 
+                                        <td>
+                                            <img alt="@element.Key" src="data:image/png;base64,@element.Value">
+                                        </td>
+
+                                    }
+                                    else if (IsArrayOfIds(element))
+                                    {
+                                        <td>
+                                        @foreach (var propertyValue in GetArrayOfIds(element))
+                                        {
+                                            <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
+                                        }
+                                        </td>
+                                    }
+                                    else if (IsId(element))
+                                    {
+                                        <td>
+                                            <p><a href="@BaseUrl/@GetId(element).FormatId()">@element.Value.ToString()</a></p>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-break">@element.Value.ToString()</td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+          </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    public string BaseUrl { get; set; }
+    public List<KeyValuePair<string, object>> Properties = new();
+    public List<KeyValuePair<string, object>> ChangeDetectionProperties = new();
+    public GraphElement? SelectedElement { get; set; }
+    private string Filter { get; set; }
+
+    [Parameter]
+    public bool ShowButtons { get; set; }
+
+    public bool IsVisible(KeyValuePair<string, object> property)
+    {
+        if (!showOrientDbElementData.Value && property.Key.StartsWith("@"))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(Filter))
+        {
+            return true;
+        }
+
+        return property.Key.Contains(Filter, StringComparison.CurrentCultureIgnoreCase);
+    }
+
+    public bool ContainsCompareDetails()
+    {
+        return ChangeDetectionProperties.Any();
+    }
+
+    public bool IsImage(KeyValuePair<string, object> property)
+    {
+        return property.Key == "screenshot";
+    }
+
+    public bool IsArrayOfIds(KeyValuePair<string, object> property)
+    {
+        var value = property.Value?.ToString() ?? "";
+
+        return Regex.IsMatch(value, @"^\[(#\d+:\d+,?)*\]$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    }
+
+    public PropertyValue[] GetArrayOfIds(KeyValuePair<string, object> property)
+    {
+        if (SelectedElement is null)
+        {
+            return Array.Empty<PropertyValue>();
+        }
+
+        return SelectedElement[property.Key].AsArray();
+    }
+
+    public bool IsId(KeyValuePair<string, object> property)
+    {
+        var value = property.Value?.ToString() ?? "";
+
+        return Regex.IsMatch(value, @"^#\d+:\d+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    }
+
+    public OrientDbId GetId(KeyValuePair<string, object> property)
+    {
+        if (SelectedElement is null)
+        {
+            return new OrientDbId();
+        }
+
+        return SelectedElement[property.Key].AsOrientDbId();
+    }
+
+
+    public void ShowGraphElementAsync(string baseUrl, GraphElement element)
+    {
+        BaseUrl = baseUrl;
+        SelectedElement = element;
+        Properties = element.Document.Properties
+            .Where(x => !x.Key.StartsWith("CD_"))
+            .OrderBy(x => x.Key)
+            .ToList();
+
+        ChangeDetectionProperties = element.Document.Properties
+            .Where(x => x.Key.StartsWith("CD_"))
+            .OrderBy(x => x.Key)
+            .ToList();
+
+        StateHasChanged();
+    }
+}

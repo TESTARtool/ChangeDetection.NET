@@ -112,7 +112,7 @@
 
     <div class="cd-panel cd-panel--from-right js-cd-panel-main @(SelectedElement is null ? "cd-panel--is-hiden" : "cd-panel--is-visible")" >
         <div class="cd-panel__container">
-            <GraphElementViewer @ref="graphElementViewer" ShowButtons="false" />
+            <CompareElementViewer @ref="graphElementViewer" ShowButtons="false" />
         </div>
     </div>
     
@@ -136,7 +136,7 @@ else
     [Parameter] public string App2ModelIdentifier { get; set; }
     [Parameter] public string? SelectedElementId { get; set; }
     private DotNetObjectReference<Compare>? dotNetHelper;
-    public GraphElementViewer graphElementViewer;
+    public CompareElementViewer graphElementViewer;
 
     public string? App1GraphInJson { get; set; }
     public string? App2GraphInJson { get; set; }
