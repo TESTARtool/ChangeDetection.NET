@@ -122,7 +122,7 @@ public class GraphComparer : IGraphComparer
                 correspondingTargetState.IsHandeld = true;
 
                 // check the differnces.
-                CheckStateDifferences(graphApp1, graphApp2, targetState, correspondingTargetState);
+                CheckStateDifferences(graphApp1, graphApp2, correspondingTargetState, targetState);
             }
         }
     }

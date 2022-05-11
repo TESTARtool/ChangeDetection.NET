@@ -18,8 +18,8 @@ public class CompareVertices : ICompareVertices
 {
     public void CompareProperties(Vertex state1, Vertex state2)
     {
-        var state1Properties = state1.Properties.ToList();
-        var state2Properties = state2.Properties.ToList();
+        var state1Properties = state1.Properties.Where(x => !x.Key.StartsWith("CD_")).ToList();
+        var state2Properties = state2.Properties.Where(x => !x.Key.StartsWith("CD_")).ToList();
 
         foreach (var property in state2Properties)
         {
