@@ -102,44 +102,7 @@
                         {
                             <tr>
                                 <td>@element.Key</td>
-                            @if (IsImage(element.NewValue))
-                            { 
-                                <td>
-                                    <img alt="@element.Key" src="data:image/png;base64,@element.New">
-                                </td>
-                                <td>
-                                    <img alt="@element.Key" src="data:image/png;base64,@element.Old">
-                                </td>
-                            }
-                            else if (IsArrayOfIds(element.NewValue))
-                            {
-                                <td>
-                                @foreach (var propertyValue in GetArrayOfIds(element.NewValue))
-                                {
-                                    <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
-                                }
-                                </td>
-                                 <td>
-                                @foreach (var propertyValue in GetArrayOfIds(element.OldValue))
-                                {
-                                    <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
-                                }
-                                </td>
-                            }
-                            else if (IsId(element.NewValue))
-                            {
-                                <td>
-                                    <p><a href="@BaseUrl/@GetId(element.NewValue).FormatId()">@element.New.ToString()</a></p>
-                                </td>
-                                 <td>
-                                    <p><a href="@BaseUrl/@GetId(element.OldValue).FormatId()">@element.Old.ToString()</a></p>
-                                </td>
-                            }
-                            else
-                            {
-                                <td class="text-break">@element.New.ToString()</td>
-                                <td class="text-break">@element.Old.ToString()</td>
-                            }
+                                 <ElementData Key="@element.Key" Value="@element.New" OldValue="@element.Old" BaseUrl="@BaseUrl" />
                             </tr>
                         }
                     </tbody>
@@ -205,46 +168,6 @@
 
         return property.Key.Contains(Filter, StringComparison.CurrentCultureIgnoreCase);
     }
-
-    public bool IsImage(KeyValuePair<string, object> property)
-    {
-        return property.Key == "screenshot";
-    }
-
-    public bool IsArrayOfIds(KeyValuePair<string, object> property)
-    {
-        var value = property.Value?.ToString() ?? "";
-
-        return Regex.IsMatch(value, @"^\[(#\d+:\d+,?)*\]$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
-    }
-
-    public PropertyValue[] GetArrayOfIds(KeyValuePair<string, object> property)
-    {
-        if (SelectedElement is null)
-        {
-            return Array.Empty<PropertyValue>();
-        }
-
-        return SelectedElement[property.Key].AsArray();
-    }
-
-    public bool IsId(KeyValuePair<string, object> property)
-    {
-        var value = property.Value?.ToString() ?? "";
-
-        return Regex.IsMatch(value, @"^#\d+:\d+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
-    }
-
-    public OrientDbId GetId(KeyValuePair<string, object> property)
-    {
-        if (SelectedElement is null)
-        {
-            return new OrientDbId();
-        }
-
-        return SelectedElement[property.Key].AsOrientDbId();
-    }
-
 
     public void ShowGraphElementAsync(string baseUrl, GraphElement element)
     {
