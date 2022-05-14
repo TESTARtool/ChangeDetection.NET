@@ -37,7 +37,9 @@ builder.Services
     .AddScoped<IGraphService, GraphService>()
     .AddScoped<IGraphComparer, GraphComparer>()
     .AddScoped<ICompareVertices, CompareVertices>()
-    .AddScoped<IStartingAbstractState, InitialStartingAbstractState>();
+    .AddScoped<IStartingAbstractState, InitialStartingAbstractState>()
+    .AddScoped<IScreenshotService, ScreenshotService>()
+    ;
 
 builder.Services
     .AddScoped<ISaveLoadSettings, BlazorSaveLoadSettings>()

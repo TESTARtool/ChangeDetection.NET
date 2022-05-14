@@ -3,6 +3,32 @@ using Testar.ChangeDetection.Core.Settings;
 
 namespace Testar.ChangeDetection.Core.Graph;
 
+public interface IScreenshotService
+{
+    Task<Base64> DownloadScreenshotAsync(string id);
+}
+
+public class ScreenshotService : IScreenshotService
+{
+    private readonly IChangeDetectionHttpClient httpClient;
+
+    public ScreenshotService(IChangeDetectionHttpClient httpClient)
+    {
+        this.httpClient = httpClient;
+    }
+
+    public async Task<Base64> DownloadScreenshotAsync(string id)
+    {
+        var screenshot = await httpClient.DocumentAsBase64Async(new OrientDbId(id.Replace('_', ':')));
+
+        return new Base64(screenshot ?? string.Empty);
+    }
+}
+
+public record Base64(string Value)
+{
+}
+
 public interface IGraphService
 {
     Task<GraphElement[]> FetchGraph(ModelIdentifier modelIdentifier, bool showCompoundGraph);
@@ -18,8 +44,6 @@ public interface IGraphService
     Task<GraphElement[]> FetchDiffGraph(ModelIdentifier modelIdentifier1, ModelIdentifier modelIdentifier2);
 
     Task<GraphElement[]> FetchConcreteSequenceConnectors(ModelIdentifier modelIdentifier);
-
-    Task<string> DownloadScreenshotAsync(string id);
 
     string GenerateJsonString(GraphElement[] elements);
 }
@@ -57,13 +81,6 @@ public class GraphService : IGraphService
         };
 
         return JsonSerializer.Serialize(elements, options);
-    }
-
-    public async Task<string> DownloadScreenshotAsync(string id)
-    {
-        var screenshot = await httpClient.DocumentAsBase64Async(new OrientDbId(id.Replace('_', ':')));
-
-        return screenshot ?? string.Empty;
     }
 
     public async Task<GraphElement[]> FetchAbstractConcreteConnectors(ModelIdentifier modelIdentifier)

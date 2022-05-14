@@ -3,6 +3,7 @@
 @inject IJSRuntime JS
 @inject IGraphService graphService;
 @inject ILocalStorageService localStorage;
+@inject IScreenshotService screenshotService;
 @inject ShowCompoundLayerSetting showCompoundLayer
 @inject NavigationManager navigationManager;
 
@@ -120,7 +121,7 @@
 
     <div class="cd-panel cd-panel--from-right js-cd-panel-main @(SelectedElement is null ? "cd-panel--is-hiden" : "cd-panel--is-visible")" >
         <div class="cd-panel__container">
-            <GraphElementViewer @ref="graphElementViewer" ShowButtons="true"/>
+            <GraphElementViewer @ref="graphElementViewer" />
         </div>
     </div>
 }
@@ -174,7 +175,7 @@ else
                 StateHasChanged();
                 if (graphElementViewer is not null)
                 {
-                    graphElementViewer.ShowGraphElementAsync($"graph/{ModelIdentifier}", selectedElement);
+                    graphElementViewer.ShowGraphElementAsync($"graph/{ModelIdentifier}", applicationGraph, selectedElement);
                 }
             }
         }
@@ -198,11 +199,12 @@ else
                 ProgressStatus = $"Download image {screenshotId.ToString()}.png";
                 StateHasChanged();
 
-                var base64screenshot = await graphService.DownloadScreenshotAsync(screenshotId.ToString()!);
+                var base64screenshot = await screenshotService.DownloadScreenshotAsync(screenshotId.ToString()!);
 
-                element.Document.Properties["screenshot"] = base64screenshot;
+                element.Document.Properties["screenshot"] = base64screenshot.Value;
             }
         }
+
 
         ProgressStatus = "Transforming graph data";
         StateHasChanged();

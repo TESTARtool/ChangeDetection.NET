@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -32,7 +33,10 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         var httpClient = await CreateHttpClientAsync();
         var url = $"/api/Document/{id.FormatId()}";
 
-        var response = await httpClient.GetAsync(url);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.SetBrowserRequestCache(BrowserRequestCache.ForceCache);
+
+        var response = await httpClient.SendAsync(request);
 
         await EnsureSuccessStatusCodeAsync(response);
 

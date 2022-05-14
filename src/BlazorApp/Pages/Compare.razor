@@ -4,6 +4,7 @@
 @inject IGraphComparer graphCompareService;
 @inject IModelService modelService;
 @inject IGraphService graphService;
+@inject IScreenshotService screenshotService;
 @inject NavigationManager navigationManager;
 
     <div class="container-fluid p-3">
@@ -206,7 +207,7 @@ else
         var model1 = await modelService.ByIdentifier(new ModelIdentifier(App1ModelIdentifier));
         var model2 = await modelService.ByIdentifier(new ModelIdentifier(App2ModelIdentifier));
 
-        var results = await graphCompareService.Compare(model1, model2);
+        var results = await graphCompareService.Compare(model2, model1);
 
         await DownloadScreenshotAsync(results.GraphApp1.Elements);
         await DownloadScreenshotAsync(results.GraphApp2.Elements);
@@ -238,9 +239,9 @@ else
                 ProgressStatus = $"Download image {screenshotId.ToString()}.png";
                 StateHasChanged();
 
-                var base64screenshot = await graphService.DownloadScreenshotAsync(screenshotId.ToString()!);
+                var base64screenshot = await screenshotService.DownloadScreenshotAsync(screenshotId.ToString()!);
 
-                element.Document.Properties["screenshot"] = base64screenshot;
+                element.Document.Properties["screenshot"] = base64screenshot.Value;
             }
         }
     }
