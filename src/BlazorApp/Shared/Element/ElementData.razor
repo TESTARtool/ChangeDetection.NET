@@ -1,0 +1,91 @@
+﻿@using System.Text.RegularExpressions
+ 
+@if (IsImage())
+{ 
+    <td>
+        <img alt="@Key" src="data:image/png;base64,@PropertyValue.Value">
+    </td>
+    if (HasOldValue())
+    {
+        <td>
+            <img alt="@Key" src="data:image/png;base64,@OldPropertyValue.Value">
+        </td>
+    }
+} 
+else if (IsArrayOfIds())
+{
+    <td>
+    @foreach (var propertyValue in PropertyValue.AsArray())
+    {
+        <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
+    }
+    </td>
+    if (HasOldValue())
+    {
+        <td>
+            @foreach (var propertyValue in OldPropertyValue.AsArray())
+            {
+                <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
+            }
+        </td>
+    }
+} 
+else if (IsId())
+{
+    <td><a href="@BaseUrl/@PropertyValue.AsOrientDbId().FormatId()">@PropertyValue.Value</a></td>
+    if (HasOldValue())
+    {
+        <td><a href="@BaseUrl/@OldPropertyValue!.AsOrientDbId().FormatId()">@OldPropertyValue.Value</a></td>
+    }
+}
+else
+{
+    <td class="text-break">@PropertyValue.Value</td>
+    if (HasOldValue())
+    {
+        <td class="text-break">@OldPropertyValue.Value</td>
+    }
+}
+
+@code {
+    [Parameter] public string Key { get; set; }
+    [Parameter] public object? Value { get; set; }
+    [Parameter] public string BaseUrl { get; set; }
+    [Parameter] public object? OldValue { get; set; }
+
+    public PropertyValue PropertyValue { get; set; }
+    public PropertyValue OldPropertyValue { get; set; }
+
+    public bool HasOldValue()
+    {
+        return OldValue is not null;   
+    }
+
+    public bool IsImage()
+    {
+        return Key == "screenshot";
+    }
+
+    public bool IsId()
+    {
+        return Regex.IsMatch(PropertyValue.Value, @"^#\d+:\d+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    }
+
+    public bool IsArrayOfIds()
+    {
+        return Regex.IsMatch(PropertyValue.Value, @"^\[(#\d+:\d+,?)*\]$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    }
+
+    protected override void OnParametersSet()
+    {
+        PropertyValue = new PropertyValue(Value?.ToString() ?? string.Empty);
+        if (HasOldValue())
+        {
+            OldPropertyValue = new PropertyValue(OldValue?.ToString() ?? string.Empty);
+        }
+        else
+        {
+            OldPropertyValue = new PropertyValue();
+        }
+    }
+}

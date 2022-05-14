@@ -61,32 +61,7 @@
                         {
                             <tr>
                                 <td>@element.Key.Substring(3)</td>
-                            @if (IsImage(element))
-                            { 
-                                <td>
-                                    <img alt="@element.Key" src="data:image/png;base64,@element.Value">
-                                </td>
-
-                            }
-                            else if (IsArrayOfIds(element))
-                            {
-                                <td>
-                                @foreach (var propertyValue in GetArrayOfIds(element))
-                                {
-                                    <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
-                                }
-                                </td>
-                            }
-                            else if (IsId(element))
-                            {
-                                <td>
-                                    <p><a href="@BaseUrl/@GetId(element).FormatId()">@element.Value.ToString()</a></p>
-                                </td>
-                            }
-                            else
-                            {
-                                <td class="text-break">@element.Value.ToString()</td>
-                            }
+                                <ElementData Key="@element.Key" Value="@element.Value" BaseUrl="@BaseUrl" />
                             </tr>
                         }
                     </tbody>
@@ -106,32 +81,7 @@
                         {
                             <tr>
                                 <td>@element.Key.Substring(3)</td>
-                            @if (IsImage(element))
-                            { 
-                                <td>
-                                    <img alt="@element.Key" src="data:image/png;base64,@element.Value">
-                                </td>
-
-                            }
-                            else if (IsArrayOfIds(element))
-                            {
-                                <td>
-                                @foreach (var propertyValue in GetArrayOfIds(element))
-                                {
-                                    <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
-                                }
-                                </td>
-                            }
-                            else if (IsId(element))
-                            {
-                                <td>
-                                    <p><a href="@BaseUrl/@GetId(element).FormatId()">@element.Value.ToString()</a></p>
-                                </td>
-                            }
-                            else
-                            {
-                                <td class="text-break">@element.Value.ToString()</td>
-                            }
+                                <ElementData Key="@element.Key" Value="@element.Value" BaseUrl="@BaseUrl" />
                             </tr>
                         }
                     </tbody>
@@ -217,32 +167,7 @@
                             {
                                   <tr>
                                     <td>@element.Key</td>
-                                    @if (IsImage(element))
-                                    { 
-                                        <td>
-                                            <img alt="@element.Key" src="data:image/png;base64,@element.Value">
-                                        </td>
-
-                                    }
-                                    else if (IsArrayOfIds(element))
-                                    {
-                                        <td>
-                                        @foreach (var propertyValue in GetArrayOfIds(element))
-                                        {
-                                            <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
-                                        }
-                                        </td>
-                                    }
-                                    else if (IsId(element))
-                                    {
-                                        <td>
-                                            <p><a href="@BaseUrl/@GetId(element).FormatId()">@element.Value.ToString()</a></p>
-                                        </td>
-                                    }
-                                    else
-                                    {
-                                        <td class="text-break">@element.Value.ToString()</td>
-                                    }
+                                    <ElementData Key="@element.Key" Value="@element.Value" BaseUrl="@BaseUrl" />
                                 </tr>
                             }
                         }
