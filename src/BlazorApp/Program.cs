@@ -1,8 +1,10 @@
 global using Microsoft.AspNetCore.Components.Authorization;
 
 using BlazorApp;
+using BlazorApp.Authentication;
 using Blazored.LocalStorage;
 using Blazored.Modal;
+using Blazored.Toast;
 using MediatR;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -24,7 +26,8 @@ builder.Services
     .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
     .AddHttpClient();
 
-builder.Services.AddScoped<IChangeDetectionHttpClient, ChangeDetectionHttpClient>();
+builder.Services
+    .AddScoped<IChangeDetectionHttpClient, ChangeDetectionHttpClient>();
 
 builder.Services
     .AddScoped<IModelService, ModelService>()
@@ -63,5 +66,6 @@ builder.Services
 builder.Services.AddMediatR(typeof(AbstractState).Assembly);
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddBlazoredModal();
+builder.Services.AddBlazoredToast();
 
 await builder.Build().RunAsync();

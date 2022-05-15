@@ -1,7 +1,12 @@
-﻿
+﻿@using Blazored.Toast.Configuration
+
 @inherits LayoutComponentBase
 
 <div class="page">
+    <BlazoredToasts Position="ToastPosition.BottomRight"
+                    Timeout="10"
+               />
+
     <main>
         <nav class="navbar navbar-light bg-dark text-white">
             <div class="container-fluid">

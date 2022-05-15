@@ -1,7 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using System.Security.Claims;
 
-namespace BlazorApp;
+namespace BlazorApp.Authentication;
 
 public class User
 {

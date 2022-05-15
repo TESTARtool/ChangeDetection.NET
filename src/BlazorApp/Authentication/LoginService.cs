@@ -1,7 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using Testar.ChangeDetection.Core;
 
-namespace BlazorApp;
+namespace BlazorApp.Authentication;
 
 public interface IAuthService
 {
@@ -51,7 +51,7 @@ public class AuthService : IAuthService
                 }
 
                 await localStorage.SetItemAsStringAsync("authToken", token);
-                await localStorage.SetItemAsync<Uri>("serverLocation", new Uri(user.ServerUrl));
+                await localStorage.SetItemAsync("serverLocation", new Uri(user.ServerUrl));
 
                 ((ApiAuthenticationStateProvider)authenticationStateProvider).MarkUserAsAuthenticated(new JwToken(token));
 

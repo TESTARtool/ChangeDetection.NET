@@ -1,5 +1,4 @@
-﻿@using System.Text.RegularExpressions
-@inject IJSRuntime JS
+﻿@inject IJSRuntime JS
 @inject ShowOrientDbElementData showOrientDbElementData
 
     <nav class="navbar navbar-dark bg-dark">
@@ -12,30 +11,6 @@
 
 @if (SelectedElement is not null)
 {
-    @if (SelectedElement.Document is Vertex)
-    {
-        @if (ShowButtons)
-        {
-            <div class="pt-3">
-                <div class="container-fluid">
-                    @if (SelectedElement.IsConcreteState)
-                    {
-                        <a href="#" class="btn btn-secondary me-1" >Inspect Widget tree</a>
-                    }
-                    <button type="button" class="btn btn-secondary" onclick="hideElement('cy', '#@SelectedElement.Document.Id')" >Hide Node</button>
-                    <button type="button" class="btn btn-secondary" onclick="highlightElement('cy', '#@SelectedElement.Document.Id')" >Highlight</button>
-                    @if (SelectedElement.IsConcreteState)
-                    {
-                        <button type="button" class="btn btn-secondary ms-1" onclick="tracePath('cy', '#@SelectedElement.Document.Id')" >Trace Path</button>
-                    }
-                    @if (SelectedElement.IsTestSequence)
-                    {
-                        <button type="button" class="btn btn-secondary" onclick="traceSequence('cy', '#@SelectedElement.Document.Id')" >Trace Test Sequence</button>
-                    }
-                </div>
-        </div>
-        }
-    }
     <div class="p-3">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">

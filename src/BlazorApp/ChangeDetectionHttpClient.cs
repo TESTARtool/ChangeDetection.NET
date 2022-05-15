@@ -1,4 +1,5 @@
 ﻿using Blazored.LocalStorage;
+using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using System.Net;
@@ -14,10 +15,13 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
     private readonly IHttpClientFactory httpClientFactory;
     private readonly ILocalStorageService localStorageService;
     private readonly NavigationManager navigationManager;
+    private readonly IToastService toastService;
 
     public ChangeDetectionHttpClient(IHttpClientFactory httpClientFactory,
         ILocalStorageService localStorageService,
-        NavigationManager navigationManager)
+        NavigationManager navigationManager,
+        Blazored.Toast.Services.IToastService toastService
+        )
     {
         this.jsonOptions = new JsonSerializerOptions
         {
@@ -26,6 +30,7 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         this.httpClientFactory = httpClientFactory;
         this.localStorageService = localStorageService;
         this.navigationManager = navigationManager;
+        this.toastService = toastService;
     }
 
     public async Task<string?> DocumentAsBase64Async(OrientDbId id)
@@ -74,9 +79,10 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
 
     public async Task<T[]> QueryAsync<T>(OrientDbCommand command)
     {
+        var httpClient = await CreateHttpClientAsync();
+
         try
         {
-            var httpClient = await CreateHttpClientAsync();
             var url = $"/api/query";
 
             var json = JsonSerializer.Serialize(command);
@@ -96,6 +102,11 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
 
             return orientDbResult;
         }
+        catch (HttpRequestException)
+        {
+            toastService.ShowError("The TESTAR .NET Server cannot be reached.", "404 - TESTAR .NET Server");
+            return Array.Empty<T>();
+        }
         catch (Exception)
         {
             Console.WriteLine("Something went wrong here: " + command.Command);
@@ -106,9 +117,10 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
 
     public async Task<string> QueryRaw(OrientDbCommand command)
     {
+        var httpClient = await CreateHttpClientAsync();
+
         try
         {
-            var httpClient = await CreateHttpClientAsync();
             var url = $"/api/query";
 
             var json = JsonSerializer.Serialize(command);
@@ -123,6 +135,11 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
 
             return await response.Content.ReadAsStringAsync();
         }
+        catch (HttpRequestException)
+        {
+            toastService.ShowError("The TESTAR .NET Server cannot be reached.", "404 - TESTAR .NET Server");
+            return String.Empty;
+        }
         catch (Exception ex)
         {
             return ex.Message;
@@ -135,10 +152,15 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         {
             response.EnsureSuccessStatusCode();
         }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            toastService.ShowError("The TESTAR .NET Server cannot be reached.", "404 - TESTAR .NET Server");
+        }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
         {
             await localStorageService.RemoveItemAsync("authToken");
-            navigationManager.NavigateTo("/login", forceLoad: true, replace: true);
+
+            navigationManager.NavigateTo($"/login?returnUrl={navigationManager.Uri}", forceLoad: false, replace: true);
         }
     }
 
@@ -151,6 +173,12 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         if (location is not null)
         {
             httpClient.BaseAddress = location;
+        }
+        else
+        {
+            navigationManager.NavigateTo($"/login?returnUrl={navigationManager.Uri}", forceLoad: true, replace: true);
+
+            throw new InvalidOperationException("Sign in required");
         }
 
         var authToken = await localStorageService.GetItemAsStringAsync("authToken");

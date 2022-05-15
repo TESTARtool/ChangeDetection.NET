@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
 
-namespace BlazorApp;
+namespace BlazorApp.Authentication;
 
 public class JwToken
 {
