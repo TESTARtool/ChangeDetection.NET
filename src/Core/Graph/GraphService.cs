@@ -45,6 +45,8 @@ public interface IGraphService
 
     Task<GraphElement[]> FetchConcreteSequenceConnectors(ModelIdentifier modelIdentifier);
 
+    Task<GraphElement[]> FetchWidgetTreeGraph(OrientDbId rid);
+
     string GenerateJsonString(GraphElement[] elements);
 }
 
@@ -81,6 +83,28 @@ public class GraphService : IGraphService
         };
 
         return JsonSerializer.Serialize(elements, options);
+    }
+
+    public async Task<GraphElement[]> FetchWidgetTreeGraph(OrientDbId rid)
+    {
+        List<GraphElement> elements = new();
+
+        var widgets = new OrientDbCommand("SELECT FROM(TRAVERSE IN('isChildOf') FROM(SELECT FROM Widget WHERE @RID = :rid))")
+            .AddParameter("rid", rid.Id)
+            .ExecuteOn<JsonElement>(httpClient)
+            .Select(x => AsVertex(x, "Widget", null, rid.Id))
+            .ToArrayAsync();
+
+        var edges = new OrientDbCommand("SELECT FROM isChildOf WHERE in IN(SELECT @RID FROM (TRAVERSE in('isChildOf') FROM (SELECT FROM Widget WHERE @RID = :rid)))")
+            .AddParameter("rid", rid.Id)
+            .ExecuteOn<JsonElement>(httpClient)
+            .Select(x => AsEdge(x, "isChildOf"))
+            .ToArrayAsync();
+
+        elements.AddRange(await widgets);
+        elements.AddRange(await edges);
+
+        return elements.ToArray();
     }
 
     public async Task<GraphElement[]> FetchAbstractConcreteConnectors(ModelIdentifier modelIdentifier)

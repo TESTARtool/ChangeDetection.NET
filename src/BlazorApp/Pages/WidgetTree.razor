@@ -1,11 +1,9 @@
-﻿@page "/Graph/{ModelIdentifier}"
-@page "/Graph/{ModelIdentifier}/{SelectedElementId}"
+﻿@page "/WidgetTree/{ConcreteStateRid}"
+@page "/WidgetTree/{ConcreteStateRid}/{SelectedElementId}"
 @inject IJSRuntime JS
 @inject IGraphService graphService;
-@inject ILocalStorageService localStorage;
-@inject IScreenshotService screenshotService;
-@inject ShowCompoundLayerSetting showCompoundLayer
 @inject NavigationManager navigationManager;
+@inject IScreenshotService screenshotService;
 
     <div class="container-fluid p-3">
         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
@@ -112,7 +110,7 @@
             </div>
         </div>
     </footer>
-    
+
 @if (IsGraphAvailable)
 {
     <div class="viewpane" id="cy">
@@ -138,13 +136,13 @@ else
     public bool IsGraphAvailable { get; set; } = false;
     public bool IsGraphVisible { get; set; } = false;
     public string ProgressStatus { get; set; } = "Loading graph data...";
-    [Parameter] public string ModelIdentifier { get; set; }
+    [Parameter] public string ConcreteStateRid { get; set; }
     [Parameter] public string? SelectedElementId { get; set; }
     public string? GraphInJson { get; set; }
-    private DotNetObjectReference<Graph>? dotNetHelper;
+    private DotNetObjectReference<WidgetTree>? dotNetHelper;
     public GraphElementViewer graphElementViewer;
-    private AppGraph applicationGraph { get; set; }
     private GraphElement? SelectedElement { get; set; }
+    private AppGraph applicationGraph { get; set; }
 
     [JSInvokable]
     public async Task UpdateSelectedElement(string id)
@@ -156,7 +154,7 @@ else
 
         if (selectedElement is not null)
         {
-            navigationManager.NavigateTo($"{navigationManager.BaseUri}graph/{ModelIdentifier}/{id}");
+            navigationManager.NavigateTo($"{navigationManager.BaseUri}WidgetTree/{ConcreteStateRid}/{id}");
         }
     }
 
@@ -174,7 +172,7 @@ else
                 StateHasChanged();
                 if (graphElementViewer is not null)
                 {
-                    graphElementViewer.ShowGraphElementAsync($"graph/{ModelIdentifier}", applicationGraph, selectedElement);
+                    graphElementViewer.ShowGraphElementAsync($"WidgetTree/{ConcreteStateRid}", applicationGraph, selectedElement);
                 }
             }
         }
@@ -185,10 +183,9 @@ else
         }
     }
 
-
     protected override async Task OnInitializedAsync()
     {
-        var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), showCompoundLayer.Value);
+        var elements = await graphService.FetchWidgetTreeGraph(new OrientDbId(ConcreteStateRid));
         applicationGraph = new AppGraph(elements);
 
         foreach (var element in elements)
