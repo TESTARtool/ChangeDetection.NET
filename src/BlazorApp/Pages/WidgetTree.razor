@@ -185,7 +185,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var elements = await graphService.FetchWidgetTreeGraph(new OrientDbId(ConcreteStateRid));
+        var id = ConcreteStateRid.Replace("n", "#").Replace("_", ":");
+        var elements = await graphService.FetchWidgetTreeGraph(new OrientDbId(id));
         applicationGraph = new AppGraph(elements);
 
         foreach (var element in elements)

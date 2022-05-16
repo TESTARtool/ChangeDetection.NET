@@ -16,7 +16,7 @@
             <div class="container-fluid">
                 @if (SelectedElement.IsConcreteState)
                 {
-                    <a href="/WidgetTree/@SelectedElement["@rid"].Value" class="btn btn-secondary me-1" >Inspect Widget tree</a>
+                    <a href="/WidgetTree/@SelectedElement.Document.Id" class="btn btn-secondary me-1" >Inspect Widget tree</a>
                 }
                 <button type="button" class="btn btn-secondary" onclick="hideElement('cy', '#@SelectedElement.Document.Id')" >Hide Node</button>
                 <button type="button" class="btn btn-secondary" onclick="highlightElement('cy', '#@SelectedElement.Document.Id')" >Highlight</button>
