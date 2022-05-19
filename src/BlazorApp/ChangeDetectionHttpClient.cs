@@ -107,7 +107,7 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
             toastService.ShowError("The TESTAR .NET Server cannot be reached.", "404 - TESTAR .NET Server");
             return Array.Empty<T>();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             Console.WriteLine("Something went wrong here: " + command.Command);
 
@@ -160,7 +160,7 @@ public sealed class ChangeDetectionHttpClient : IChangeDetectionHttpClient
         {
             await localStorageService.RemoveItemAsync("authToken");
 
-            navigationManager.NavigateTo($"/login?returnUrl={navigationManager.Uri}", forceLoad: false, replace: true);
+            navigationManager.NavigateTo($"/login?returnUrl={navigationManager.Uri}", forceLoad: true, replace: true);
         }
     }
 

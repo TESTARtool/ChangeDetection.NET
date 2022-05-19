@@ -7,133 +7,143 @@
 @inject ShowCompoundLayerSetting showCompoundLayer
 @inject NavigationManager navigationManager;
 
-    <div class="container-fluid p-3">
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+<AuthorizeView>
+    <NotAuthorized>
+        <div class="p-3">
+            <h1>Welcome to TESTAR .NET</h1>
+            Please sign in to view your graph.
+        </div>
+    </NotAuthorized>
+    <Authorized>
+        <div class="container-fluid p-3">
+            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
             
-            <div class="input-group me-2" >
-                <span class="input-group-text" id="Layout-text">Layout</span>
-                <select id="layout-control" class="form-control text-secondary" aria-label="Default select example"
-                    aria-describedby="Layout-text" onchange="changeLayout('cy', this.value)">
-                    <option value="grid" selected>Grid</option>
-                    <option value="random">Random</option>
-                    <option value="circle">Circle</option>
-                    <option value="concentric">Concentric</option>
-                    <option value="breadthfirst">Breadthfirst</option>
-                    <option value="cose">Cose</option>
-                    <option value="cose-bilkent">Cose-bilkent</option>
-                    <option value="cola">Cola</option>
-                    <option value="euler">Euler</option>
-                    <option value="dagre">Dagre</option>
-                    <option value="klay">Klay</option>
-                </select>
-            </div>
-
-            <div class="btn-group me-2" role="group" >
-                <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="show-labels" >Show Labels</label>
-            </div>
-
-
-            <div class="btn-group me-2" role="group" aria-label="Show layers for the graph group">
-                <button id="show-all" class="btn btn-warning" type="submit" onclick="showAllElements('cy')">Show all nodes</button>
-
-                <input type="checkbox" class="btn-check" id="toggle-abstract-layer" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="toggle-abstract-layer">Abstract layer</label>
-
-                <input type="checkbox" class="btn-check" id="toggle-concrete-layer" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="toggle-concrete-layer">Concrete layer</label>
-
-                <input type="checkbox" class="btn-check" id="toggle-sequence-layer" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="toggle-sequence-layer">Sequence layer</label>
-
-                <input type="checkbox" class="btn-check" id="toggle-layer-transitions" checked autocomplete="off">
-                <label class="btn btn-outline-secondary" for="toggle-layer-transitions">Inter-layer edges</label>
-            </div>
-
-            <div class="btn-group" role="group" aria-label="Show amount of nodes">
-                <button type="button" class="btn btn-secondary" disabled>
-                  Abstract States <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-states"></span>
-                </button>
-                <button type="button" class="btn btn-secondary" disabled>
-                  Abstract Actions <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-actions"></span>
-                </button>
-                <button type="button" class="btn btn-secondary" disabled>
-                  Concrete States <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-states"></span>
-                </button>
-                <button type="button" class="btn btn-secondary" disabled>
-                  Concrete Actions <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-actions"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <footer class="footer mt-auto py-3">
-        <div class="container-fluid">
-            <div class="text-end">
-                <div class="btn-group dropup">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
-                  Open legend
-                </button>
-                <div class="dropdown-menu pt-0 mx-0 rounded-3 shadow overflow-hidden" style="width: 280px;">
-                  <ul class="list-unstyled mb-0">
-                    <li>
-                      <div class="dropdown-item d-flex align-items-center gap-2 py-2" id="legend-abstract-state">
-                        <span class="border border-dark px-4 py-3" style="background-color: #1C909A;"></span>Abstract state
-                      </div>
-                    </li>
-                    <li>
-                      <div class="dropdown-item d-flex align-items-center gap-2 py-2" id="legend-concrete-state">
-                        <span class="border border-dark px-4 py-3" style="background-color: #67A9CF;"></span>Concrete State
-                      </div>
-                    </li>
-                    <li>
-                      <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
-                        <span class="border border-dark px-4 py-3" style="background-color: #016450;"></span>Sequence Node
-                      </div>
-                    </li>
-                    <li>
-                      <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
-                        <span class="border border-dark px-4 py-3" style="background-color: #014636;"></span>First Sequence Node
-                      </div>
-                    </li>
-                    <li>
-                      <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
-                        <span class="border border-dark px-4 py-3" style="background-color: #e7298a;"></span>Widget
-                      </div>
-                    </li>
-                    <li>
-                      <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
-                        <span class="border border-dark px-4 py-3" style="background-image: url('../img/blackhole-bg.jpg'); background-size:contain"></span>Black hole
-                      </div>
-                    </li>
-                  </ul>
+                <div class="input-group me-2" >
+                    <span class="input-group-text" id="Layout-text">Layout</span>
+                    <select id="layout-control" class="form-control text-secondary" aria-label="Default select example"
+                        aria-describedby="Layout-text" onchange="changeLayout('cy', this.value)">
+                        <option value="grid" selected>Grid</option>
+                        <option value="random">Random</option>
+                        <option value="circle">Circle</option>
+                        <option value="concentric">Concentric</option>
+                        <option value="breadthfirst">Breadthfirst</option>
+                        <option value="cose">Cose</option>
+                        <option value="cose-bilkent">Cose-bilkent</option>
+                        <option value="cola">Cola</option>
+                        <option value="euler">Euler</option>
+                        <option value="dagre">Dagre</option>
+                        <option value="klay">Klay</option>
+                    </select>
                 </div>
-              </div>
+
+                <div class="btn-group me-2" role="group" >
+                    <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="show-labels" >Show Labels</label>
+                </div>
+
+
+                <div class="btn-group me-2" role="group" aria-label="Show layers for the graph group">
+                    <button id="show-all" class="btn btn-warning" type="submit" onclick="showAllElements('cy')">Show all nodes</button>
+
+                    <input type="checkbox" class="btn-check" id="toggle-abstract-layer" checked autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="toggle-abstract-layer">Abstract layer</label>
+
+                    <input type="checkbox" class="btn-check" id="toggle-concrete-layer" checked autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="toggle-concrete-layer">Concrete layer</label>
+
+                    <input type="checkbox" class="btn-check" id="toggle-sequence-layer" checked autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="toggle-sequence-layer">Sequence layer</label>
+
+                    <input type="checkbox" class="btn-check" id="toggle-layer-transitions" checked autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="toggle-layer-transitions">Inter-layer edges</label>
+                </div>
+
+                <div class="btn-group" role="group" aria-label="Show amount of nodes">
+                    <button type="button" class="btn btn-secondary" disabled>
+                      Abstract States <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-states"></span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" disabled>
+                      Abstract Actions <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-actions"></span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" disabled>
+                      Concrete States <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-states"></span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" disabled>
+                      Concrete Actions <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-actions"></span>
+                    </button>
+                </div>
             </div>
         </div>
-    </footer>
+
+        <footer class="footer mt-auto py-3">
+            <div class="container-fluid">
+                <div class="text-end">
+                    <div class="btn-group dropup">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false">
+                      Open legend
+                    </button>
+                    <div class="dropdown-menu pt-0 mx-0 rounded-3 shadow overflow-hidden" style="width: 280px;">
+                      <ul class="list-unstyled mb-0">
+                        <li>
+                          <div class="dropdown-item d-flex align-items-center gap-2 py-2" id="legend-abstract-state">
+                            <span class="border border-dark px-4 py-3" style="background-color: #1C909A;"></span>Abstract state
+                          </div>
+                        </li>
+                        <li>
+                          <div class="dropdown-item d-flex align-items-center gap-2 py-2" id="legend-concrete-state">
+                            <span class="border border-dark px-4 py-3" style="background-color: #67A9CF;"></span>Concrete State
+                          </div>
+                        </li>
+                        <li>
+                          <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
+                            <span class="border border-dark px-4 py-3" style="background-color: #016450;"></span>Sequence Node
+                          </div>
+                        </li>
+                        <li>
+                          <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
+                            <span class="border border-dark px-4 py-3" style="background-color: #014636;"></span>First Sequence Node
+                          </div>
+                        </li>
+                        <li>
+                          <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
+                            <span class="border border-dark px-4 py-3" style="background-color: #e7298a;"></span>Widget
+                          </div>
+                        </li>
+                        <li>
+                          <div class="dropdown-item-text d-flex align-items-center gap-2 py-2">
+                            <span class="border border-dark px-4 py-3" style="background-image: url('../img/blackhole-bg.jpg'); background-size:contain"></span>Black hole
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </footer>
+
     
-@if (IsGraphAvailable)
-{
-    <div class="viewpane" id="cy">
-    </div>
-
-    <div class="cd-panel cd-panel--from-right js-cd-panel-main @(SelectedElement is null ? "cd-panel--is-hiden" : "cd-panel--is-visible")" >
-        <div class="cd-panel__container">
-            <GraphElementViewer @ref="graphElementViewer" />
+    @if (IsGraphAvailable)
+    {
+        <div class="viewpane" id="cy">
         </div>
-    </div>
-}
-else
-{
-    <div class="text-center">
-        <h1>@ProgressStatus</h1>
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">loading</span>
-        </div>
-    </div>
-}
 
+        <div class="cd-panel cd-panel--from-right js-cd-panel-main @(SelectedElement is null ? "cd-panel--is-hiden" : "cd-panel--is-visible")" >
+            <div class="cd-panel__container">
+                <GraphElementViewer @ref="graphElementViewer" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <h1>@ProgressStatus</h1>
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">loading</span>
+            </div>
+        </div>
+    }
+    </Authorized>
+</AuthorizeView>
 @code {
     public bool IsGraphAvailable { get; set; } = false;
     public bool IsGraphVisible { get; set; } = false;

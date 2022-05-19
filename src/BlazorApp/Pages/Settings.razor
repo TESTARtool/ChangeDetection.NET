@@ -8,7 +8,14 @@
 @inject ShowPrefixLabelSettings showPrefixLabelSettings
 @inject EnableCompareExperimentalFeature enableCompareExperimentalFeature
 @inject ShowOrientDbElementData showOrientDbElementData
-
+<AuthorizeView>
+    <NotAuthorized>
+        <div class="p-3">
+            <h1>Welcome to TESTAR .NET</h1>
+            Please sign in to view your settings.
+        </div>
+    </NotAuthorized>
+    <Authorized>
 <div class="p-3">
     <h3>Settings</h3>
 
@@ -74,9 +81,9 @@
       </div>
     </div>
 
-
-
 </div>
+</Authorized>
+</AuthorizeView>
 
 @code {
     private void SetDefaults()

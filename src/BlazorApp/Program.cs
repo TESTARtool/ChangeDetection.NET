@@ -41,6 +41,7 @@ builder.Services
     .AddScoped<ICompareGraph, GraphCompareEngine>()
     .AddScoped<ICompareVertices, CompareVertices>()
     .AddScoped<IStartingAbstractState, InitialStartingAbstractState>()
+    .AddScoped<IRetrieveGraphForComparison, GraphForCompareRetriever>()
     .AddScoped<IScreenshotService, ScreenshotService>()
     ;
 
@@ -63,6 +64,7 @@ builder.Services
     .AddScoped<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
     .AddScoped<IHtmlOutputter, HtmlOutputter>();
 
+builder.Services.AddLogging();
 builder.Services.AddMediatR(typeof(AbstractState).Assembly);
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddBlazoredModal();
