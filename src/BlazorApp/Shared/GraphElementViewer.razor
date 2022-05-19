@@ -1,12 +1,12 @@
 ﻿@inject IJSRuntime JS
 @inject ShowOrientDbElementData showOrientDbElementData
 
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-            <div class="navbar-brand text-warning">@SelectedElement?.TypeName - Details</div>
-            <a href="/@BaseUrl" class="btn btn-close btn-close-white text-reset" aria-label="Close" ></a>
-        </div>
-    </nav>
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <div class="navbar-brand text-warning">@SelectedElement?.TypeName - Details</div>
+        <a href="/@BaseUrl" class="btn btn-close btn-close-white text-reset" aria-label="Close" ></a>
+    </div>
+</nav>
 
 @if (SelectedElement is not null)
 {
@@ -48,9 +48,7 @@
 
         <h3>Element Data</h3>
         <div class="form-group">
-            <input class="form-control w-50" type="text" placeholder="Filter..."
-                   @bind="Filter"
-                   @bind:event="oninput">
+            <input class="form-control w-50" type="text" placeholder="Filter..." @bind="Filter" @bind:event="oninput">
         </div>
         <div class="table-responsive">
             <table class="table table-striped table-hover w-100" >

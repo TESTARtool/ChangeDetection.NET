@@ -1,4 +1,4 @@
-﻿namespace Testar.ChangeDetection.Core.Differences;
+﻿namespace Testar.ChangeDetection.Core.Algorithm;
 
 public class ApplicationContainsBlackHoleException : ComparisonException
 {

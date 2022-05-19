@@ -1,6 +1,6 @@
 ﻿using Testar.ChangeDetection.Core.Graph;
 
-namespace Testar.ChangeDetection.Core.Differences;
+namespace Testar.ChangeDetection.Core.Algorithm;
 
 public interface ICompareVertices
 {

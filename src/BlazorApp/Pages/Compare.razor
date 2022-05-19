@@ -1,7 +1,7 @@
 ﻿@page "/Compare/{App1ModelIdentifier}/To/{App2ModelIdentifier}"
 @page "/Compare/{App1ModelIdentifier}/To/{App2ModelIdentifier}/{SelectedElementId}"
 @inject IJSRuntime JS
-@inject IGraphComparer graphCompareService;
+@inject ICompareGraph graphCompareService;
 @inject IModelService modelService;
 @inject IGraphService graphService;
 @inject IScreenshotService screenshotService;
@@ -207,7 +207,7 @@ else
         var model1 = await modelService.ByIdentifier(new ModelIdentifier(App1ModelIdentifier));
         var model2 = await modelService.ByIdentifier(new ModelIdentifier(App2ModelIdentifier));
 
-        var results = await graphCompareService.Compare(model2, model1);
+        var results = await graphCompareService.CompareAsync(model2, model1);
 
         await DownloadScreenshotAsync(results.GraphApp1.Elements);
         await DownloadScreenshotAsync(results.GraphApp2.Elements);
