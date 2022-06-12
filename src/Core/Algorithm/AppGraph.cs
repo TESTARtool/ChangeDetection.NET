@@ -16,11 +16,12 @@ public class AppGraph
     public IEnumerable<GraphElement> ConcreteStates => Elements.Where(x => x.IsConcreteState);
     public bool ContainsUnhandledAbstractStates => AbstractStates.Any(x => !x.IsHandeld);
 
-    public Vertex? InitialAbstractState => AbstractStates.FirstOrDefault(x => x.IsInitial)?.DocumentAsVertex;
+    public Vertex? InitialAbstractState => AbstractStates.FirstOrDefault(x => x.IsInitial)?.DocumentAsVertex();
 
     public IEnumerable<Edge> FindAbstractActionsFor(Vertex state)
     {
-        return AbstractActions.Where(x => x.Document.SourceId == state.Id)
-            .Select(x => x.DocumentAsEdge);
+        return AbstractActions
+            .Where(x => x.Document.SourceId == state.Id)
+            .Select(x => x.DocumentAsEdge());
     }
 }

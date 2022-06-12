@@ -27,7 +27,8 @@ public class GraphCompareEngine : ICompareGraph
         var graphApp2 = await graphRetriever.RetrieveAsync(model2);
 
         // determine the starting vertices
-        var (abstractState1, abstractState2) = startingAbstractStates.DetemineStartingStates(graphApp1, graphApp2);
+        var abstractState1 = startingAbstractStates.Find(graphApp1);
+        var abstractState2 = startingAbstractStates.Find(graphApp2);
 
         // Start checking the states
         CompareAbstractStates(abstractState1, abstractState2, graphApp1, graphApp2);
@@ -84,11 +85,11 @@ public class GraphCompareEngine : ICompareGraph
 
             var targetState = graphApp2.AbstractStates
                 .First(x => x.Document.Id == action.TargetId)
-                .DocumentAsVertex;
+                .DocumentAsVertex();
 
             var correspondingTargetState = graphApp1.AbstractStates
                 .First(x => x.Document.Id == correspondingAction.TargetId)
-                .DocumentAsVertex;
+                .DocumentAsVertex();
 
             // first check it handling is needed
             if (!(targetState.IsHandeld || correspondingTargetState.IsHandeld))

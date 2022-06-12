@@ -7,5 +7,5 @@ namespace Testar.ChangeDetection.Core.Algorithm;
 /// </summary>
 public interface IStartingAbstractState
 {
-    (Vertex abstractState1, Vertex abstractState2) DetemineStartingStates(AppGraph graphApp1, AppGraph graphApp2);
+    Vertex Find(AppGraph graphApp);
 }
