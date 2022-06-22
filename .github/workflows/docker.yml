@@ -27,7 +27,7 @@ jobs:
           context: .
           file: ./src/BlazorApp/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:1.5.0, ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:1.6.0, ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:latest
 
       - name: Build and push testar-net-server
         uses: docker/build-push-action@v2
