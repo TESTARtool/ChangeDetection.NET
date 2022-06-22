@@ -4,7 +4,7 @@ namespace Testar.ChangeDetection.Core.Algorithm;
 
 public interface ICompareVertices
 {
-    void CompareProperties(Vertex state1, Vertex state2);
+    void CompareProperties(Vertex oldState, Vertex newState);
 }
 
 /// <summary>
@@ -16,34 +16,34 @@ public interface ICompareVertices
 /// </summary>
 public class CompareVertices : ICompareVertices
 {
-    public void CompareProperties(Vertex state1, Vertex state2)
+    public void CompareProperties(Vertex oldState, Vertex newState)
     {
-        var state1Properties = state1.Properties.Where(x => !x.Key.StartsWith("CD_")).ToList();
-        var state2Properties = state2.Properties.Where(x => !x.Key.StartsWith("CD_")).ToList();
+        var oldStateProperties = oldState.Properties.Where(x => !x.Key.StartsWith("CD_")).ToList();
+        var newStateProperties = newState.Properties.Where(x => !x.Key.StartsWith("CD_")).ToList();
 
-        foreach (var property in state2Properties)
+        foreach (var property in newStateProperties)
         {
-            if (state1.Properties.Any(x => x.Key == property.Key))
+            if (oldState.Properties.Any(x => x.Key == property.Key))
             {
-                var value1 = state1[property.Key].Value;
+                var value1 = oldState[property.Key].Value;
                 var value2 = property.Value ?? string.Empty;
                 if (!value2.Equals(value1))
                 {
-                    state2.AddProperty($"CD_CO_{property.Key}", value1.ToString() ?? string.Empty);
-                    state2.AddProperty($"CD_CN_{property.Key}", value2.ToString() ?? string.Empty);
+                    newState.AddProperty($"CD_CO_{property.Key}", value1.ToString() ?? string.Empty);
+                    newState.AddProperty($"CD_CN_{property.Key}", value2.ToString() ?? string.Empty);
                 }
             }
             else
             {
-                state2.AddProperty($"CD_A_{property.Key}", property.Value?.ToString() ?? string.Empty);
+                newState.AddProperty($"CD_A_{property.Key}", property.Value?.ToString() ?? string.Empty);
             }
         }
 
-        foreach (var property in state1Properties)
+        foreach (var property in oldStateProperties)
         {
-            if (!state2.Properties.Any(x => x.Key == property.Key))
+            if (!newState.Properties.Any(x => x.Key == property.Key))
             {
-                state1.AddProperty($"CD_R_{property.Key}", property.Value?.ToString() ?? string.Empty);
+                oldState.AddProperty($"CD_R_{property.Key}", property.Value?.ToString() ?? string.Empty);
             }
         }
     }

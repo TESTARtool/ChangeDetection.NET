@@ -38,7 +38,7 @@ builder.Services
 
 builder.Services
     .AddScoped<IGraphService, GraphService>()
-    .AddScoped<ICompareGraph, GraphCompareEngine>()
+    .AddScoped<ICompareGraph, AbstractGraphCompareEngine>()
     .AddScoped<ICompareVertices, CompareVertices>()
     .AddScoped<IStartingAbstractState, InitialStartingAbstractState>()
     .AddScoped<IRetrieveGraphForComparison, GraphForCompareRetriever>()

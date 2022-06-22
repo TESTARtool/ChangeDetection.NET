@@ -150,7 +150,7 @@
         BaseUrl = baseUrl;
         SelectedElement = element;
         Properties = element.Document.Properties
-            .Where(x => !x.Key.StartsWith("CD_"))
+            .Where(x => !x.Key.StartsWith("CD_A_") && !x.Key.StartsWith("CD_R_") && !x.Key.StartsWith("CD_CN_") && !x.Key.StartsWith("CD_CO_"))
             .OrderBy(x => x.Key)
             .ToList();
 
