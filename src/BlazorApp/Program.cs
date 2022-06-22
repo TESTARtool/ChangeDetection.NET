@@ -1,13 +1,15 @@
 global using Microsoft.AspNetCore.Components.Authorization;
 
 using BlazorApp;
+using BlazorApp.Authentication;
 using Blazored.LocalStorage;
 using Blazored.Modal;
+using Blazored.Toast;
 using MediatR;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Testar.ChangeDetection.Core;
-using Testar.ChangeDetection.Core.Differences;
+using Testar.ChangeDetection.Core.Algorithm;
 using Testar.ChangeDetection.Core.Graph;
 using Testar.ChangeDetection.Core.ImageComparison;
 using Testar.ChangeDetection.Core.Services;
@@ -24,7 +26,8 @@ builder.Services
     .AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
     .AddHttpClient();
 
-builder.Services.AddScoped<IChangeDetectionHttpClient, ChangeDetectionHttpClient>();
+builder.Services
+    .AddScoped<IChangeDetectionHttpClient, ChangeDetectionHttpClient>();
 
 builder.Services
     .AddScoped<IModelService, ModelService>()
@@ -35,9 +38,12 @@ builder.Services
 
 builder.Services
     .AddScoped<IGraphService, GraphService>()
-    .AddScoped<IGraphComparer, GraphComparer>()
+    .AddScoped<ICompareGraph, AbstractGraphCompareEngine>()
     .AddScoped<ICompareVertices, CompareVertices>()
-    .AddScoped<IStartingAbstractState, InitialStartingAbstractState>();
+    .AddScoped<IStartingAbstractState, InitialStartingAbstractState>()
+    .AddScoped<IRetrieveGraphForComparison, GraphForCompareRetriever>()
+    .AddScoped<IScreenshotService, ScreenshotService>()
+    ;
 
 builder.Services
     .AddScoped<ISaveLoadSettings, BlazorSaveLoadSettings>()
@@ -58,8 +64,10 @@ builder.Services
     .AddScoped<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
     .AddScoped<IHtmlOutputter, HtmlOutputter>();
 
+builder.Services.AddLogging();
 builder.Services.AddMediatR(typeof(AbstractState).Assembly);
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddBlazoredModal();
+builder.Services.AddBlazoredToast();
 
 await builder.Build().RunAsync();

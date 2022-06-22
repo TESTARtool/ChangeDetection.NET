@@ -1,0 +1,185 @@
+﻿@inject IJSRuntime JS
+@inject ShowOrientDbElementData showOrientDbElementData
+
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <div class="navbar-brand text-warning">@SelectedElement?.TypeName - Details</div>
+            <a href="/@BaseUrl" class="btn btn-close btn-close-white text-reset" aria-label="Close" ></a>
+        </div>
+    </nav>
+
+
+@if (SelectedElement is not null)
+{
+    <div class="p-3">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="compare-tab" data-bs-toggle="tab" data-bs-target="#compareTab" type="button" role="tab" aria-controls="compare-tab" aria-selected="true">Compare data</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="detail-tab" data-bs-toggle="tab" data-bs-target="#detailTab" type="button" role="tab" aria-controls="detail-tab" aria-selected="false">Element Data</button>
+          </li>
+        </ul>
+        <div class="tab-content p-1" id="myTabContent">
+          <div class="tab-pane fade show active" id="compareTab" role="tabpanel" aria-labelledby="compare-tab">
+            <h3>Added Properties</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover w-100" >
+                    <thead>
+                        <tr>
+                            <th data-field="name">Element Name</th>
+                            <th data-field="value">Element Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var element in AddedProperties)
+                        {
+                            <tr>
+                                <td>@element.Key.Substring(3)</td>
+                                <ElementData Key="@element.Key" Value="@element.Value" BaseUrl="@BaseUrl" />
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <h3>Removed Properties</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover w-100" >
+                    <thead>
+                        <tr>
+                            <th data-field="name">Element Name</th>
+                            <th data-field="value">Element Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var element in RemovedProperties)
+                        {
+                            <tr>
+                                <td>@element.Key.Substring(3)</td>
+                                <ElementData Key="@element.Key" Value="@element.Value" BaseUrl="@BaseUrl" />
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <h3>Changed Properties</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover w-100" >
+                    <thead>
+                        <tr>
+                            <th data-field="name">Element Name</th>
+                            <th data-field="value">New Value</th>
+                            <th data-field="value">Old Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var element in ChangeDetectionProperties)
+                        {
+                            <tr>
+                                <td>@element.Key</td>
+                                 <ElementData Key="@element.Key" Value="@element.New" OldValue="@element.Old" BaseUrl="@BaseUrl" />
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="detailTab" role="tabpanel" aria-labelledby="detail-tab">
+            <div class="form-group">
+                <input class="form-control  w-50" type="text" placeholder="Filter..."
+                       @bind="Filter"
+                       @bind:event="oninput">
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover w-100" >
+                    <thead>
+                        <tr>
+                            <th data-field="name">Element Name</th>
+                            <th data-field="value">Element Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var element in Properties)
+                        {
+                            if (IsVisible(element))
+                            {
+                                  <tr>
+                                    <td>@element.Key</td>
+                                    <ElementData Key="@element.Key" Value="@element.Value" BaseUrl="@BaseUrl" />
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+          </div>
+        </div>
+    </div>
+}
+
+@code {
+    public string BaseUrl { get; set; }
+    public List<KeyValuePair<string, object>> Properties = new();
+    public List<KeyValuePair<string, object>> AddedProperties = new();
+    public List<KeyValuePair<string, object>> RemovedProperties = new();
+    public List<ChangedProperty> ChangeDetectionProperties = new();
+    public GraphElement? SelectedElement { get; set; }
+    private string Filter { get; set; }
+
+    [Parameter]
+    public bool ShowButtons { get; set; }
+
+    public bool IsVisible(KeyValuePair<string, object> property)
+    {
+        if (!showOrientDbElementData.Value && property.Key.StartsWith("@"))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(Filter))
+        {
+            return true;
+        }
+
+        return property.Key.Contains(Filter, StringComparison.CurrentCultureIgnoreCase);
+    }
+
+    public void ShowGraphElementAsync(string baseUrl, GraphElement element)
+    {
+        ChangeDetectionProperties.Clear();
+        BaseUrl = baseUrl;
+        SelectedElement = element;
+        Properties = element.Document.Properties
+            .Where(x => !x.Key.StartsWith("CD_A_") && !x.Key.StartsWith("CD_R_") && !x.Key.StartsWith("CD_CN_") && !x.Key.StartsWith("CD_CO_"))
+            .OrderBy(x => x.Key)
+            .ToList();
+
+        AddedProperties = element.Document.Properties
+            .Where(x => x.Key.StartsWith("CD_A_"))
+            .OrderBy(x => x.Key)
+            .ToList();
+
+        RemovedProperties = element.Document.Properties
+            .Where(x => x.Key.StartsWith("CD_R_"))
+            .OrderBy(x => x.Key)
+            .ToList();
+
+        var changedNewProperties = element.Document.Properties
+            .Where(x => x.Key.StartsWith("CD_CN_"))
+            .OrderBy(x => x.Key)
+            .ToList();
+
+        foreach (var property in changedNewProperties)
+        {
+            var key = property.Key.Replace("CD_CN_", "");
+            ChangeDetectionProperties.Add(new ChangedProperty
+            {
+                Key = key,
+                New = property.Value.ToString() ?? string.Empty,
+                Old = element[$"CD_CO_{key}"].Value,
+            });
+        }
+
+        StateHasChanged();
+    }
+}

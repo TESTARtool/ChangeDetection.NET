@@ -1,7 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using System.Security.Claims;
 
-namespace BlazorApp;
+namespace BlazorApp.Authentication;
 
 public class User
 {
@@ -20,10 +20,12 @@ public class User
 
 public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 {
+    private readonly ILogger<ApiAuthenticationStateProvider> logger;
     private readonly ILocalStorageService localStorage;
 
-    public ApiAuthenticationStateProvider(ILocalStorageService localStorage)
+    public ApiAuthenticationStateProvider(ILogger<ApiAuthenticationStateProvider> logger, ILocalStorageService localStorage)
     {
+        this.logger = logger;
         this.localStorage = localStorage;
     }
 
@@ -37,8 +39,18 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
-        var jwt = new JwToken(savedToken);
-        return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(jwt.Claims(), "jwt")));
+        try
+        {
+            var jwt = new JwToken(savedToken);
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(jwt.Claims(), "jwt")));
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "JWT error - Assume unauthenticated user");
+            await localStorage.RemoveItemAsync("authToken");
+            var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
+            return new AuthenticationState(anonymousUser);
+        }
     }
 
     public void MarkUserAsAuthenticated(JwToken token)

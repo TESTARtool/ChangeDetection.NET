@@ -1,16 +1,16 @@
-﻿@page "/Compare/{App1ModelIdentifier}/To/{App2ModelIdentifier}"
-@page "/Compare/{App1ModelIdentifier}/To/{App2ModelIdentifier}/{SelectedElementId}"
+﻿@page "/WidgetTree/{ConcreteStateRid}"
+@page "/WidgetTree/{ConcreteStateRid}/{SelectedElementId}"
 @inject IJSRuntime JS
-@inject ICompareGraph graphCompareService;
-@inject IModelService modelService;
 @inject IGraphService graphService;
-@inject IScreenshotService screenshotService;
 @inject NavigationManager navigationManager;
+@inject IScreenshotService screenshotService;
+
+
 <AuthorizeView>
     <NotAuthorized>
         <div class="p-3">
             <h1>Welcome to TESTAR .NET</h1>
-            Please sign in to view your graph.
+            Please sign in to view your settings.
         </div>
     </NotAuthorized>
     <Authorized>
@@ -20,14 +20,14 @@
             <div class="input-group me-2" >
                 <span class="input-group-text" id="Layout-text">Layout</span>
                 <select id="layout-control" class="form-control text-secondary" aria-label="Default select example"
-                    aria-describedby="Layout-text" onchange="changeLayout('cyApp1', this.value); changeLayout('cyApp2', this.value)" >
-                    <option value="grid">Grid</option>
+                    aria-describedby="Layout-text" onchange="changeLayout('cy', this.value)">
+                    <option value="grid" selected>Grid</option>
                     <option value="random">Random</option>
                     <option value="circle">Circle</option>
                     <option value="concentric">Concentric</option>
                     <option value="breadthfirst">Breadthfirst</option>
                     <option value="cose">Cose</option>
-                    <option value="cose-bilkent" selected>Cose-bilkent</option>
+                    <option value="cose-bilkent">Cose-bilkent</option>
                     <option value="cola">Cola</option>
                     <option value="euler">Euler</option>
                     <option value="dagre">Dagre</option>
@@ -35,20 +35,42 @@
                 </select>
             </div>
 
-            <div class="btn-group me-2" role="group">
-                <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off"
-                onchange="showLabel('cyApp1', this.value); showLabel('cyApp2', this.value)">
-                <label class="btn btn-outline-secondary" for="show-labels">Show Labels</label>
+            <div class="btn-group me-2" role="group" >
+                <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off">
+                <label class="btn btn-outline-secondary" for="show-labels" >Show Labels</label>
             </div>
 
-         @*   <div class="btn-group" role="group" aria-label="Show amount of nodes">
+
+            <div class="btn-group me-2" role="group" aria-label="Show layers for the graph group">
+                <button id="show-all" class="btn btn-warning" type="submit" onclick="showAllElements('cy')">Show all nodes</button>
+
+                <input type="checkbox" class="btn-check" id="toggle-abstract-layer" checked autocomplete="off">
+                <label class="btn btn-outline-secondary" for="toggle-abstract-layer">Abstract layer</label>
+
+                <input type="checkbox" class="btn-check" id="toggle-concrete-layer" checked autocomplete="off">
+                <label class="btn btn-outline-secondary" for="toggle-concrete-layer">Concrete layer</label>
+
+                <input type="checkbox" class="btn-check" id="toggle-sequence-layer" checked autocomplete="off">
+                <label class="btn btn-outline-secondary" for="toggle-sequence-layer">Sequence layer</label>
+
+                <input type="checkbox" class="btn-check" id="toggle-layer-transitions" checked autocomplete="off">
+                <label class="btn btn-outline-secondary" for="toggle-layer-transitions">Inter-layer edges</label>
+            </div>
+
+            <div class="btn-group" role="group" aria-label="Show amount of nodes">
                 <button type="button" class="btn btn-secondary" disabled>
                   Abstract States <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-states"></span>
                 </button>
                 <button type="button" class="btn btn-secondary" disabled>
                   Abstract Actions <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-actions"></span>
                 </button>
-            </div>*@
+                <button type="button" class="btn btn-secondary" disabled>
+                  Concrete States <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-states"></span>
+                </button>
+                <button type="button" class="btn btn-secondary" disabled>
+                  Concrete Actions <span class="badge bg-light text-dark rounded-pill" id="stats-concrete-actions"></span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -98,32 +120,19 @@
         </div>
     </footer>
 
+</Authorized>
+</AuthorizeView>
+
 @if (IsGraphAvailable)
 {
-<div class="container-fluid" style="height: calc(100% - 70px); ">
-    <div class="row" style="height:100%" >
-        <div class="col-6 border-end" style="height:100%;">
-            <div id="cyApp1" style="height:100%;">
-            </div>
-        </div>
-        
-        <div class="col-6 border-end" style="height: 100%;">
-            <div id="cyApp2" style="height:100%;" >
-            </div>
-        </div>
-      @*  <div class="col">
-            <div class="viewpane" id="cy">
-            </div>
-        </div>*@
+    <div class="viewpane" id="cy">
     </div>
-</div>
 
     <div class="cd-panel cd-panel--from-right js-cd-panel-main @(SelectedElement is null ? "cd-panel--is-hiden" : "cd-panel--is-visible")" >
         <div class="cd-panel__container">
-            <CompareElementViewer @ref="graphElementViewer" ShowButtons="false" />
+            <GraphElementViewer @ref="graphElementViewer" />
         </div>
     </div>
-    
 }
 else
 {
@@ -133,66 +142,41 @@ else
             <span class="visually-hidden">loading</span>
         </div>
     </div>
-} 
-</Authorized>
-</AuthorizeView>
+}
 
 @code {
     public bool IsGraphAvailable { get; set; } = false;
     public bool IsGraphVisible { get; set; } = false;
-
     public string ProgressStatus { get; set; } = "Loading graph data...";
-    [Parameter] public string App1ModelIdentifier { get; set; }
-    [Parameter] public string App2ModelIdentifier { get; set; }
+    [Parameter] public string ConcreteStateRid { get; set; }
     [Parameter] public string? SelectedElementId { get; set; }
-    private DotNetObjectReference<Compare>? dotNetHelper;
-    public CompareElementViewer graphElementViewer;
-
-    public string? App1GraphInJson { get; set; }
-    public string? App2GraphInJson { get; set; }
-    public Model? App1Model { get; set; }
-    public Model? App2Model { get; set; }
-    public AppGraph? AppGraph1 { get; set; }
-    public AppGraph? AppGraph2 { get; set; }
+    public string? GraphInJson { get; set; }
+    private DotNetObjectReference<WidgetTree>? dotNetHelper;
+    public GraphElementViewer graphElementViewer;
     private GraphElement? SelectedElement { get; set; }
+    private AppGraph applicationGraph { get; set; }
 
     [JSInvokable]
     public async Task UpdateSelectedElement(string id)
     {
         await Task.Delay(0);
 
-        if (AppGraph1 is not null && AppGraph2 is not null)
+        var selectedElement = applicationGraph.Elements
+            .FirstOrDefault(x => x.Document.Id == id);
+
+        if (selectedElement is not null)
         {
-            var selectedElement = AppGraph1.Elements
-                .FirstOrDefault(x => x.Document.Id == id);
-
-            if (selectedElement is null)
-            {
-                selectedElement = AppGraph2.Elements
-                    .FirstOrDefault(x => x.Document.Id == id);
-            }
-
-            if (selectedElement is not null)
-            {
-                navigationManager.NavigateTo($"{navigationManager.BaseUri}Compare/{App1ModelIdentifier}/To/{App2ModelIdentifier}/{id}");
-            }
+            navigationManager.NavigateTo($"{navigationManager.BaseUri}WidgetTree/{ConcreteStateRid}/{id}");
         }
     }
 
     protected override void OnParametersSet()
     {
-        if (SelectedElementId is not null && AppGraph1 is not null && AppGraph2 is not null)
+        if (SelectedElementId is not null && applicationGraph is not null)
         {
-            var selectedElement = AppGraph1.Elements
+            var selectedElement = applicationGraph.Elements
                 .FirstOrDefault(x => x.Document.Id == SelectedElementId 
                     || x["@rid"].AsOrientDbId().FormatId() == SelectedElementId);
-
-            if (selectedElement is null)
-            {
-                selectedElement = AppGraph2.Elements
-                .FirstOrDefault(x => x.Document.Id == SelectedElementId 
-                    || x["@rid"].AsOrientDbId().FormatId() == SelectedElementId);
-            }
 
             if (selectedElement is not null)
             {
@@ -200,7 +184,7 @@ else
                 StateHasChanged();
                 if (graphElementViewer is not null)
                 {
-                    graphElementViewer.ShowGraphElementAsync($"Compare/{App1ModelIdentifier}/To/{App2ModelIdentifier}", selectedElement);
+                    graphElementViewer.ShowGraphElementAsync($"WidgetTree/{ConcreteStateRid}", applicationGraph, selectedElement);
                 }
             }
         }
@@ -213,34 +197,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var model1 = await modelService.ByIdentifier(new ModelIdentifier(App1ModelIdentifier));
-        var model2 = await modelService.ByIdentifier(new ModelIdentifier(App2ModelIdentifier));
+        var id = ConcreteStateRid.Replace("n", "#").Replace("_", ":");
+        var elements = await graphService.FetchWidgetTreeGraph(new OrientDbId(id));
+        applicationGraph = new AppGraph(elements);
 
-        var results = await graphCompareService.CompareAsync(model2, model1);
-
-        await DownloadScreenshotAsync(results.GraphApp1.Elements);
-        await DownloadScreenshotAsync(results.GraphApp2.Elements);
-
-        ProgressStatus = "Transforming graph data";
-        StateHasChanged();
-
-        App1GraphInJson = JsonSerializer.Serialize(results.GraphApp1.Elements);
-        App2GraphInJson = JsonSerializer.Serialize(results.GraphApp2.Elements);
-
-        App1Model = model1;
-        App2Model = model2;
-
-        AppGraph1 = results.GraphApp1;
-        AppGraph2 = results.GraphApp2;
-
-        ProgressStatus = "Loading graph done";
-        IsGraphAvailable = true;
-
-        OnParametersSet();
-    }
-
-    private async Task DownloadScreenshotAsync(List<GraphElement> elements)
-    {
         foreach (var element in elements)
         {
             if (element.Document.Properties.TryGetValue("screenshot", out var screenshotId))
@@ -253,17 +213,25 @@ else
                 element.Document.Properties["screenshot"] = base64screenshot.Value;
             }
         }
+
+        ProgressStatus = "Transforming graph data";
+        StateHasChanged();
+
+        GraphInJson = JsonSerializer.Serialize(elements);
+
+        ProgressStatus = "Loading graph done";
+        IsGraphAvailable = true;
+
+        OnParametersSet();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (IsGraphAvailable  && !IsGraphVisible)
+        if (IsGraphAvailable && !IsGraphVisible)
         {
             dotNetHelper = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("loadGraphCanvas", GraphInJson, "cy", dotNetHelper);
             IsGraphVisible = true;
-
-            await JS.InvokeVoidAsync("loadGraphCanvas", App1GraphInJson, "cyApp1", dotNetHelper);
-            await JS.InvokeVoidAsync("loadGraphCanvas", App2GraphInJson, "cyApp2", dotNetHelper);
         }
     }
 

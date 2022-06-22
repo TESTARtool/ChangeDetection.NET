@@ -2,9 +2,9 @@
 
 public class GraphElement
 {
-    public const string GroupNodes = "nodes";
+    public static readonly string GroupNodes = "nodes";
 
-    public const string GroupEdges = "edges";
+    public static readonly string GroupEdges = "edges";
 
     public GraphElement(string group, Document document, string typeName)
     {
@@ -13,9 +13,6 @@ public class GraphElement
         this.TypeName = typeName;
         Classes.Add(typeName);
     }
-
-    [JsonIgnore]
-    public Edge DocumentAsEdge => (Edge)Document;
 
     [JsonInclude]
     [JsonPropertyName("group")]
@@ -31,9 +28,6 @@ public class GraphElement
 
     [JsonIgnore]
     public string TypeName { get; set; }
-
-    [JsonIgnore]
-    public Vertex DocumentAsVertex => (Vertex)Document;
 
     [JsonIgnore]
     public bool IsInitial => Classes.Any(x => x == "isInitial");
@@ -53,8 +47,6 @@ public class GraphElement
     [JsonIgnore]
     public bool IsConcreteAction => Classes.Any(x => x == "ConcreteAction" && Document is Edge);
 
-
-
     [JsonIgnore]
     public bool IsHandeld
     {
@@ -72,6 +64,20 @@ public class GraphElement
         {
             Document.AddProperty(name, value.Value);
         }
+    }
+
+    public Edge DocumentAsEdge()
+    {
+        return (Document is Edge edge)
+            ? edge
+            : throw new InvalidOperationException("Document is not of type Edge");
+    }
+
+    public Vertex DocumentAsVertex()
+    {
+        return Document is Vertex vertex
+            ? vertex
+            : throw new InvalidOperationException("Document is not of type Vertex");
     }
 
     public void AddClass(string className)
