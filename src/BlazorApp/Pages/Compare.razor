@@ -218,20 +218,20 @@ else
 
         var results = await graphCompareService.CompareAsync(model2, model1);
 
-        await DownloadScreenshotAsync(results.GraphApp1.Elements);
-        await DownloadScreenshotAsync(results.GraphApp2.Elements);
+        await DownloadScreenshotAsync(results.OldGraphApp.Elements);
+        await DownloadScreenshotAsync(results.NewGraphApp.Elements);
 
         ProgressStatus = "Transforming graph data";
         StateHasChanged();
 
-        App1GraphInJson = JsonSerializer.Serialize(results.GraphApp1.Elements);
-        App2GraphInJson = JsonSerializer.Serialize(results.GraphApp2.Elements);
+        App1GraphInJson = JsonSerializer.Serialize(results.OldGraphApp.Elements);
+        App2GraphInJson = JsonSerializer.Serialize(results.NewGraphApp.Elements);
 
         App1Model = model1;
         App2Model = model2;
 
-        AppGraph1 = results.GraphApp1;
-        AppGraph2 = results.GraphApp2;
+        AppGraph1 = results.OldGraphApp;
+        AppGraph2 = results.NewGraphApp;
 
         ProgressStatus = "Loading graph done";
         IsGraphAvailable = true;

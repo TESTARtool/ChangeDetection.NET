@@ -35,10 +35,16 @@ public class AbstractGraphCompareEngine : ICompareGraph
         // Start checking the states
         CompareAbstractStates(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp);
 
+        //var unhandledOldAbstractStates = oldGraphApp.AbstractStates.Where(x => !x.IsHandeld);
+        //foreach (var state in unhandledOldAbstractStates)
+        //{
+        //    state
+        //}
+
         return new CompareResults
         {
-            GraphApp1 = oldGraphApp,
-            GraphApp2 = newGraphApp,
+            OldGraphApp = oldGraphApp,
+            NewGraphApp = newGraphApp,
         };
     }
 
