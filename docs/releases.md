@@ -1,6 +1,24 @@
 # TESTAR Analysis Release notes
 The page covers the release notes of the new TESTAR .NET Analysis website. 
 
+## Version 1.6.0
+Version 1.6.0 contains a couple of changes. 
+
+### Login when using a deep link
+When using a deep link, for example, loading a graph, the application is used to load the main page after sign-in. In the new version, the deep link is kept as a ReturnUrl and navigated automatically after login
+
+### Compare result
+*Note the compare features needs to be enabled on the settings page*
+
+When comparing two models, the details page shows the element data in three sections: Added, Removed and Changed. The Element data also features some additional data like corresponding elements.
+
+![Change Results](images/160-change-results.png)
+
+### Inspect widget tree
+One of the last features of the old analysis website was the widget tree. This feature is now included and can be found when viewing the data from a concrete state.
+
+![Widget tree](images/160-widget-tree.png)
+
 ## Version 1.5.0
 Version 1.5.0 includes changes in the graph element viewer. The graphics have been upgraded to adopt the style of the rest of the website. 
 
