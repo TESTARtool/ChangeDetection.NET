@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using Testar.ChangeDetection.Core.Algorithm;
 using Testar.ChangeDetection.Core.Graph;
 
@@ -23,14 +24,15 @@ public class MergeGraphFactory : IMergeGraphFactory
         var newIds = CreateNewIdsList(newGraph);
 
         // First all nodes and edges from Gn are added to Gm
-        var mergeGraph = newGraph.ToList();
-        foreach (var item in mergeGraph)
+        var mergeGraph = new List<GraphElement>();
+        foreach (var item in newGraph)
         {
             item.AddClass("NewVersion");
             if (item.IsAbstractState)
             {
                 if (item.Document.Properties.ContainsKey("CD_CorrespondingId"))
                 {
+                    item.AddClass("OldVersion");
                     item.AddClass("Match");
                 }
                 else
@@ -46,6 +48,7 @@ public class MergeGraphFactory : IMergeGraphFactory
             {
                 if (item.IsHandeld)
                 {
+                    item.AddClass("OldVersion");
                     item.AddClass("Match");
                 }
                 else
@@ -65,8 +68,8 @@ public class MergeGraphFactory : IMergeGraphFactory
         {
             if (node.Document.Properties.ContainsKey("CD_CorrespondingId"))
             {
-                // this is a matching node, skip but recorde Id
-                oldIds.Add(node.Document.Id, node.Document["StateId"].Value);
+                // this is a matching node, skip but recorde Id because we need to wire it later
+                oldIds.Add(node.Document.Id, node.Document["stateId"].Value);
             }
             else
             {
@@ -90,18 +93,26 @@ public class MergeGraphFactory : IMergeGraphFactory
             // we need to wired non exsiting target and sources to existing Gn Ids
             if (oldIds.TryGetValue(edge.Document.TargetId, out var stateId))
             {
+                if (!newIds.ContainsKey(stateId))
+                {
+                    Debugger.Break();
+                }
+
                 edge.Document.TargetId = newIds[stateId] ?? throw new InvalidOperationException($"Id is missing here: '{stateId}'");
             }
 
-            if (oldIds.TryGetValue(edge.Document.SourceId, out stateId))
+            if (oldIds.TryGetValue(edge.Document.SourceId, out var stateIdForSourceId))
             {
-                edge.Document.SourceId = newIds[stateId] ?? throw new InvalidOperationException($"Id is missing here: '{stateId}'");
+                if (!newIds.ContainsKey(stateIdForSourceId))
+                {
+                    Debugger.Break();
+                }
+
+                edge.Document.SourceId = newIds[stateIdForSourceId] ?? throw new InvalidOperationException($"Id is missing here: '{stateId}'");
             }
 
             mergeGraph.Add(edge);
         }
-
-        mergeGraph.AddRange(oldEdges);
 
         try
         {
@@ -114,11 +125,31 @@ public class MergeGraphFactory : IMergeGraphFactory
         return new AppGraph(mergeGraph);
     }
 
+    /// <summary>
+    /// Returns a list with old state id (from the correspondingId) with the new node id
+    /// </summary>
+    /// <param name="newGraph"></param>
+    /// <returns></returns>
     private static Dictionary<string, string> CreateNewIdsList(List<GraphElement> newGraph)
     {
-        return newGraph
-            .Where(x => x.IsAbstractState)
-            .ToDictionary(x => x.Document["StateId"].Value, x => x.Document.Id);
+        var dic = new Dictionary<string, string>();
+
+        var states = newGraph
+            .Where(x => x.IsAbstractState && x.Document.Properties.ContainsKey("CD_CorrespondingId"));
+
+        foreach (var item in states)
+        {
+            var oldStateId = item["CD_CorrespondingId"].Value;
+
+            if (dic.ContainsKey(oldStateId))
+            {
+                Debugger.Break();
+            }
+
+            dic.Add(oldStateId, item.Document.Id);
+        }
+
+        return dic;
     }
 
     private static void CleanUpData(List<GraphElement> mergeGraph)
