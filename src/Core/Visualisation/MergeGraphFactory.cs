@@ -37,6 +37,9 @@ public class MergeGraphFactory : IMergeGraphFactory
                 {
                     item.AddClass("New");
                 }
+
+                // for now only add the Abstract state and actions
+                mergeGraph.Add(item);
             }
 
             if (item.IsAbstractAction)
@@ -49,9 +52,10 @@ public class MergeGraphFactory : IMergeGraphFactory
                 {
                     item.AddClass("New");
                 }
-            }
 
-            mergeGraph.Add(item);
+                // for now only add the Abstract state and actions
+                mergeGraph.Add(item);
+            }
         }
 
         // Then all non-matching nodes from Go are added to Gm
