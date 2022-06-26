@@ -16,6 +16,7 @@ using Testar.ChangeDetection.Core.Services;
 using Testar.ChangeDetection.Core.Settings;
 using Testar.ChangeDetection.Core.Strategy;
 using Testar.ChangeDetection.Core.Strategy.AbstractStateComparison;
+using Testar.ChangeDetection.Core.Visualisation;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -62,7 +63,9 @@ builder.Services
     .AddScoped<IFindStateDifferences, FindStateDifferences>()
     .AddScoped<ICompareImages, SkipImageComparison>() // SkiaSharp isn't supporting BlazorApp at the moment; https://github.com/mono/SkiaSharp/issues/1219
     .AddScoped<IStateModelDifferenceJsonWidget, StateModelDifferenceJsonWidget>()
-    .AddScoped<IHtmlOutputter, HtmlOutputter>();
+    .AddScoped<IHtmlOutputter, HtmlOutputter>()
+    .AddScoped<IMergeGraphFactory, MergeGraphFactory>()
+    ;
 
 builder.Services.AddLogging();
 builder.Services.AddMediatR(typeof(AbstractState).Assembly);
