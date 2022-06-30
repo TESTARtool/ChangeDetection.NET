@@ -4,8 +4,9 @@
 @inject IGraphService graphService;
 @inject ILocalStorageService localStorage;
 @inject IScreenshotService screenshotService;
-@inject ShowCompoundLayerSetting showCompoundLayer
+@inject ShowCompoundLayerSetting showCompoundLayer;
 @inject NavigationManager navigationManager;
+@inject MergeOverlappingEdgesSetting mergeOverlappingEdgesSetting;
 
 <AuthorizeView>
     <NotAuthorized>
@@ -199,7 +200,10 @@
     protected override async Task OnInitializedAsync()
     {
         var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), showCompoundLayer.Value);
-        elements = graphService.MergeMultipleEdgesIntoOneEdge(elements);
+        if (mergeOverlappingEdgesSetting.Value)
+        {
+            elements = graphService.MergeMultipleEdgesIntoOneEdge(elements);
+        }   
         applicationGraph = new AppGraph(elements);
 
         foreach (var element in elements)

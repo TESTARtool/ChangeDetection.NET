@@ -55,6 +55,7 @@ builder.Services
     .AddScoped<ConcreteStateLabelSetting>()
     .AddScoped<EnableCompareExperimentalFeature>()
     .AddScoped<ShowOrientDbElementData>()
+    .AddScoped<MergeOverlappingEdgesSetting>()
     ;
 
 builder.Services
