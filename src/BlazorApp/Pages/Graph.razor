@@ -199,6 +199,7 @@
     protected override async Task OnInitializedAsync()
     {
         var elements = await graphService.FetchGraph(new ModelIdentifier(ModelIdentifier), showCompoundLayer.Value);
+        elements = graphService.MergeMultipleEdgesIntoOneEdge(elements);
         applicationGraph = new AppGraph(elements);
 
         foreach (var element in elements)
