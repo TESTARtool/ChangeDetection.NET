@@ -22,7 +22,7 @@
             <div class="input-group me-2" >
                 <span class="input-group-text" id="Layout-text">Layout</span>
                 <select id="layout-control" class="form-control text-secondary" aria-label="Default select example"
-                    aria-describedby="Layout-text" onchange="changeLayout('cyApp1', this.value); changeLayout('cyApp2', this.value)" >
+                    aria-describedby="Layout-text" onchange="changeLayout('mergeCy', this.value);" >
                     <option value="grid">Grid</option>
                     <option value="random">Random</option>
                     <option value="circle">Circle</option>
@@ -39,7 +39,7 @@
 
             <div class="btn-group me-2" role="group">
                 <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off"
-                onchange="showLabel('cyApp1', this.value); showLabel('cyApp2', this.value)">
+                onchange="showLabel('mergeCy', this.value);">
                 <label class="btn btn-outline-secondary" for="show-labels">Show Labels</label>
             </div>
 
@@ -104,17 +104,7 @@
 {
 <div class="container-fluid" style="height: calc(100% - 70px); ">
     <div class="row" style="height:100%" >
-        <div class="col-6 border-end" style="height:100%;">
-            <div id="cyApp1" style="height:100%;">
-            </div>
-        </div>
-        
-        <div class="col-6 border-end" style="height: 100%;">
-            <div id="cyApp2" style="height:100%;" >
-            </div>
-        </div>
-
-        <div class="col-6 border-end" style="height: 100%;">
+        <div class="col-12" style="height: 100%;">
             <div id="mergeCy" style="height:100%;" >
             </div>
         </div>
@@ -273,8 +263,8 @@ else
             dotNetHelper = DotNetObjectReference.Create(this);
             IsGraphVisible = true;
 
-            await JS.InvokeVoidAsync("loadGraphCanvas", App1GraphInJson, "cyApp1", dotNetHelper);
-            await JS.InvokeVoidAsync("loadGraphCanvas", App2GraphInJson, "cyApp2", dotNetHelper);
+            //await JS.InvokeVoidAsync("loadGraphCanvas", App1GraphInJson, "cyApp1", dotNetHelper);
+            //await JS.InvokeVoidAsync("loadGraphCanvas", App2GraphInJson, "cyApp2", dotNetHelper);
             await JS.InvokeVoidAsync("loadGraphCanvas", MergeGraphInJson, "mergeCy", dotNetHelper);
         }
     }

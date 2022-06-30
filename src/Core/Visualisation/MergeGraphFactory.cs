@@ -46,14 +46,14 @@ public class MergeGraphFactory : IMergeGraphFactory
 
             if (item.IsAbstractAction)
             {
-                if (item.IsHandeld)
+                if (item["CD_CompareResult"].Value == "new")
                 {
-                    item.AddClass("OldVersion");
-                    item.AddClass("Match");
+                    item.AddClass("New");
                 }
                 else
                 {
-                    item.AddClass("New");
+                    item.AddClass("OldVersion");
+                    item.AddClass("Match");
                 }
 
                 // for now only add the Abstract state and actions
@@ -85,6 +85,7 @@ public class MergeGraphFactory : IMergeGraphFactory
 
         foreach (var edge in oldEdges)
         {
+            edge.AddClass("OldVersion");
             if (edge.Document.TargetId is null || edge.Document.SourceId is null)
             {
                 throw new InvalidOperationException("Either TargetId or SourceId is null");
@@ -111,7 +112,12 @@ public class MergeGraphFactory : IMergeGraphFactory
                 edge.Document.SourceId = newIds[stateIdForSourceId] ?? throw new InvalidOperationException($"Id is missing here: '{stateId}'");
             }
 
+            // only add the old edge when there the Source-/TargetId combination does not exist yet.
+
+            //if (!mergeGraph.Any(x => x.IsAbstractAction && x.Document.TargetId == edge.Document.TargetId && x.Document.SourceId == edge.Document.SourceId))
+            //{
             mergeGraph.Add(edge);
+            // }
         }
 
         try
