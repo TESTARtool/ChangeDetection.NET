@@ -1,6 +1,13 @@
 # TESTAR Analysis Release notes
 The page covers the release notes of the new TESTAR .NET Analysis website. 
 
+## Version 1.7.0
+When there are multiple edges between two vertices, the edges overlap. This version addresses that issue by merging the edges into one single edge. When the edge is selected, they appear in an accordion where the data can be viewed individually.
+
+![Multiple edges fix](images/170-overlapping-edges.png)
+
+The merge feature is turned on by default but can be disabled on the settings page.
+
 ## Version 1.6.0
 Version 1.6.0 contains a couple of changes. 
 
