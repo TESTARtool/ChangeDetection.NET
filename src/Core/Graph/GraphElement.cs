@@ -39,6 +39,9 @@ public class GraphElement
     public bool IsConcreteState => Classes.Any(x => x == "ConcreteState" && Document is Vertex);
 
     [JsonIgnore]
+    public bool IsMergeEdges => Classes.Any(x => x == "MergedEdges" && Document is Edge);
+
+    [JsonIgnore]
     public bool IsTestSequence => Classes.Any(x => x == "TestSequence" && Document is Vertex);
 
     [JsonIgnore]

@@ -8,6 +8,7 @@
 @inject ShowPrefixLabelSettings showPrefixLabelSettings
 @inject EnableCompareExperimentalFeature enableCompareExperimentalFeature
 @inject ShowOrientDbElementData showOrientDbElementData
+@inject MergeOverlappingEdgesSetting mergeOverlappingEdgesSetting
 <AuthorizeView>
     <NotAuthorized>
         <div class="p-3">
@@ -31,6 +32,13 @@
       <label class="form-check-label" for="showOrientDbElementData">
         Show Orient DB database element data, that starts with a @@, in the element data overview
       </label>
+    </div>
+
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" @bind="mergeOverlappingEdgesSetting.Value" id="mergeOverlappingEdges" />
+        <label class="form-check-label" for="mergeOverlappingEdges">
+            Merge edges that have the same target and source vertices
+        </label>
     </div>
 
     <div class="card w-50 my-3">

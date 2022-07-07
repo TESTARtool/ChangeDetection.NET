@@ -45,7 +45,7 @@ public interface IGraphService
 
     Task<GraphElement[]> FetchWidgetTreeGraph(OrientDbId rid);
 
-    string GenerateJsonString(GraphElement[] elements);
+    GraphElement[] MergeMultipleEdgesIntoOneEdge(GraphElement[] graphElements);
 }
 
 public class GraphService : IGraphService
@@ -56,6 +56,7 @@ public class GraphService : IGraphService
     private readonly SequenceNodeLabelSetting sequenceNodeLabelSetting;
     private readonly ConcreteStateLabelSetting concreteStateLabelSetting;
     private readonly ShowPrefixLabelSettings showPrefixLabelSetting;
+    private readonly JsonSerializerOptions options;
 
     public GraphService(IChangeDetectionHttpClient httpClient,
         AbstractStateLabelSetting abstractStateLabelSetting,
@@ -70,17 +71,54 @@ public class GraphService : IGraphService
         this.sequenceNodeLabelSetting = sequenceNodeLabelSetting;
         this.concreteStateLabelSetting = concreteStateLabelSetting;
         this.showPrefixLabelSetting = showPrefixLabelSetting;
-    }
 
-    public string GenerateJsonString(GraphElement[] elements)
-    {
-        var options = new JsonSerializerOptions()
+        options = new JsonSerializerOptions()
         {
             WriteIndented = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         };
+    }
 
-        return JsonSerializer.Serialize(elements, options);
+    public GraphElement[] MergeMultipleEdgesIntoOneEdge(GraphElement[] graphElements)
+    {
+        var newElements = graphElements.Where(x => x.Document is not Edge).ToList();
+
+        var groupedEdges = graphElements
+            .Where(x => x.Document is Edge)
+            .GroupBy(x => string.Concat(x.Document.TargetId, "-", x.Document.SourceId))
+            .ToList();
+
+        var counter = 1;
+
+        foreach (var group in groupedEdges)
+        {
+            if (group.Count() > 1)
+            {
+                var firstGraph = group.First();
+
+                var document = new Edge($"em{counter}", firstGraph.Document.SourceId!, firstGraph.Document.TargetId!);
+
+                foreach (var element in group)
+                {
+                    var json = JsonSerializer.Serialize(element.Document.Properties, options);
+                    document.AddProperty(element.Document.Id, json);
+                }
+
+                counter++;
+
+                var graphElement = new GraphElement("edges", document, firstGraph.TypeName);
+                graphElement.Classes = firstGraph.Classes;
+                graphElement.AddClass("MergedEdges");
+
+                newElements.Add(graphElement);
+            }
+            else
+            {
+                newElements.Add(group.First());
+            }
+        }
+
+        return newElements.ToArray();
     }
 
     public async Task<GraphElement[]> FetchWidgetTreeGraph(OrientDbId rid)
