@@ -68,7 +68,7 @@ public class MergeGraphFactory : IMergeGraphFactory
         {
             if (node.Document.Properties.ContainsKey("CD_CorrespondingId"))
             {
-                // this is a matching node, skip but recorde Id because we need to wire it later
+                // this is a matching node, skip but record the Id because we need to wire it later
                 oldIds.Add(node.Document.Id, node.Document["stateId"].Value);
             }
             else
@@ -112,12 +112,7 @@ public class MergeGraphFactory : IMergeGraphFactory
                 edge.Document.SourceId = newIds[stateIdForSourceId] ?? throw new InvalidOperationException($"Id is missing here: '{stateId}'");
             }
 
-            // only add the old edge when there the Source-/TargetId combination does not exist yet.
-
-            //if (!mergeGraph.Any(x => x.IsAbstractAction && x.Document.TargetId == edge.Document.TargetId && x.Document.SourceId == edge.Document.SourceId))
-            //{
             mergeGraph.Add(edge);
-            // }
         }
 
         try
