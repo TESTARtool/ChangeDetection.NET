@@ -384,7 +384,6 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
         appStatus.concreteLayerPresent = appStatus.nrOfConcreteStates > 0;
         appStatus.sequenceLayerPresent = appStatus.nrOfSequenceNodes > 0;
         appStatus.nrOfLayersPresent = 0;
-        console.log(appStatus);
 
         // ready several toggle buttons
         // abstract layer toggle

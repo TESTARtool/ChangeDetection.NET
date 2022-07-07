@@ -2,6 +2,6 @@
 
 public class CompareResults
 {
-    public AppGraph GraphApp1 { get; set; }
-    public AppGraph GraphApp2 { get; set; }
+    public AppGraph OldGraphApp { get; set; }
+    public AppGraph NewGraphApp { get; set; }
 }
