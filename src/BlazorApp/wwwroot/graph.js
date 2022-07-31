@@ -198,16 +198,18 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
             },
 
             {
-                selector: '.Added',
+                selector: '.New',
                 style: {
-                    'background-image': "img/plus.png"
+                    'background-color': 'green',
+                    'background-image': 'linear-gradient(green 1px, black 1px), linear-gradient(to right, green 1px, black 1px)',
                 }
             },
 
             {
                 selector: '.Removed',
                 style: {
-                    'background-image': "img/min.png"
+                    'background-color': 'red',
+                    'background-image': 'repeating-linear-gradient(45deg, red 0, red 1px, black 0, black 50%)',
                 }
             },
 
