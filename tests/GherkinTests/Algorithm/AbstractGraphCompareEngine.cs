@@ -1,4 +1,6 @@
-﻿using TechTalk.SpecFlow.Assist;
+﻿using FluentAssertions.Execution;
+using System.Text.Json;
+using TechTalk.SpecFlow.Assist;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Algorithm;
 using Testar.ChangeDetection.Core.Graph;
@@ -34,14 +36,29 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
     };
 
     private readonly Dictionary<int, AppGraph> graphs = new Dictionary<int, AppGraph>();
+
     private AppGraph? oldGraph;
+
     private AppGraph? newGraph;
+
     private AppGraph? mergeGraph;
+
     private CompareResults? compareResult;
 
-    [Given(@"an abstract state (.*) in graph (.*) with the following data")]
-    [Given(@"another abstract state (.*) in graph (.*) with the following data")]
-    public void GivenAnAbstractStateNInGraphWithTheFollowingData(string abstrateStateId, int graphId, Table table)
+    [AfterScenario]
+    public void After()
+    {
+        var all = new List<GraphElement>();
+        foreach (var graphCol in graphs)
+        {
+            all.AddRange(graphCol.Value.Elements);
+        }
+        var json = JsonSerializer.Serialize(all);
+        File.WriteAllText("all.json", json);
+    }
+
+    [Given(@"an initial abstract state (.*) in graph (.*) with the following data")]
+    public void GivenAnInitialAbstractStateInGraphWithTheFollowingData(string abstrateStateId, int graphId, Table table)
     {
         var graph = GetGraphWithGraphId(graphId);
         var vertex = new Vertex(abstrateStateId);
@@ -50,11 +67,31 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
         {
             vertex.AddProperty(item.Name, item.Value);
         }
-        graph.Elements.Add(new GraphElement("test", vertex, "AbstractState"));
+        var graphElement = new GraphElement("nodes", vertex, "AbstractState");
+        vertex.AddProperty("uiname", $"{abstrateStateId}-{vertex["stateId"].Value}");
+        vertex.AddProperty("parent", $"GraphId{graphId}");
+        graphElement.Classes.Add("isInitial");
+        graph.Elements.Add(graphElement);
+    }
+
+    [Given(@"an abstract state (.*) in graph (.*) with the following data")]
+    [Given(@"another abstract state (.*) in graph (.*) with the following data")]
+    public void GivenAnAbstractStateInGraphWithTheFollowingData(string abstrateStateId, int graphId, Table table)
+    {
+        var graph = GetGraphWithGraphId(graphId);
+        var vertex = new Vertex(abstrateStateId);
+        var data = table.CreateSet<NameValue>();
+        foreach (var item in data)
+        {
+            vertex.AddProperty(item.Name, item.Value);
+        }
+        vertex.AddProperty("uiname", $"{abstrateStateId}-{vertex["stateId"].Value}");
+        vertex.AddProperty("parent", $"GraphId{graphId}");
+        graph.Elements.Add(new GraphElement("nodes", vertex, "AbstractState"));
     }
 
     [Given(@"an egde (.*) in graph (.*) to connect verteces (.*) and (.*) with the following data")]
-    public void GivenAnEgdeEInGraphToConnectVertecesNAndNWithTheFollowingData(string edgeId, int graphId, string sourceId, string targetId, Table table)
+    public void GivenAnEgdeInGraphToConnectVertecesAndWithTheFollowingData(string edgeId, int graphId, string sourceId, string targetId, Table table)
     {
         var graph = GetGraphWithGraphId(graphId);
         var edge = new Edge(edgeId, sourceId, targetId);
@@ -63,7 +100,8 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
         {
             edge.AddProperty(item.Name, item.Value);
         }
-        graph.Elements.Add(new GraphElement("test", edge, "AbstractAction"));
+        edge.AddProperty("uiname", $"{edgeId}-{edge["actionId"].Value}");
+        graph.Elements.Add(new GraphElement("edges", edge, "AbstractAction"));
     }
 
     [Given(@"graph (.*) as the old graph")]
@@ -90,9 +128,10 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
     [When(@"the comparison result is merged")]
     public void WhenTheComparisonResultIsMerged()
     {
+        compareResult.Should().NotBeNull();
         var graphMerger = new MergeGraphFactory();
 
-        mergeGraph = graphMerger.Create(compareResult);
+        mergeGraph = graphMerger.Create(compareResult!);
     }
 
     [Then(@"merge is not null")]
@@ -116,6 +155,70 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
         throw new InvalidOperationException("AppGraph and or model is incorrect");
     }
 
+    [Then(@"the merge contains (.*) abstract states and (.*) abstract actions")]
+    [Then(@"the merge contains (.*) abstract states and (.*) abstract action")]
+    public void ThenTheMergeContainsStatesAndActions(int statesCount, int actionCount)
+    {
+        mergeGraph.Should().NotBeNull();
+        mergeGraph!.AbstractStates.Should().HaveCount(statesCount);
+        mergeGraph!.AbstractActions.Should().HaveCount(actionCount);
+    }
+
+    [Then(@"the initial abstract state has the following data")]
+    public void ThenTheInitialAbstractStateHasTheFollowingData(Table table)
+    {
+        var initialState = mergeGraph!.AbstractStates.First(x => x.IsInitial);
+        var data = table.CreateSet<NameValue>();
+        var props = initialState.Document.Properties;
+        using (new AssertionScope())
+        {
+            foreach (var item in data)
+            {
+                initialState[item.Name].Value.Should().Be(item.Value);
+            }
+        }
+    }
+
+    [Then(@"abstract state with stateId (.*) has the following data")]
+    public void ThenAbstractStateWithStateIdHasTheFollowingData(string abstractStateId, Table table)
+    {
+        var state = mergeGraph!.AbstractStates.FirstOrDefault(x => x["stateId"].Value == abstractStateId);
+        state.Should().NotBeNull();
+
+        var data = table.CreateSet<NameValue>();
+        var props = state!.Document.Properties;
+        using (new AssertionScope())
+        {
+            foreach (var item in data)
+            {
+                state[item.Name].Value.Should().Be(item.Value);
+            }
+        }
+    }
+
+    [Then(@"abstract state with stateId (.*) is not included in the merge graph")]
+    public void ThenAbstractStateWithStateIdIsNotIncludedInTheMergeGraph(string abstractStateId)
+    {
+        var state = mergeGraph!.AbstractStates.FirstOrDefault(x => x["stateId"].Value == abstractStateId);
+        state.Should().BeNull();
+    }
+
+    [Then(@"abstract state with stateId (.*) has the following class")]
+    public void ThenAbstractStateWithStateIdHasTheFollowingClass(string abstractStateId, Table table)
+    {
+        var state = mergeGraph!.AbstractStates.FirstOrDefault(x => x["stateId"].Value == abstractStateId);
+        state.Should().NotBeNull();
+
+        var classNames = table.CreateSet<string>(x => x["ClassName"].ToString());
+        using (new AssertionScope())
+        {
+            foreach (var className in classNames)
+            {
+                state!.Classes.Should().Contain(className);
+            }
+        }
+    }
+
     private AppGraph GetGraphWithGraphId(int graphId)
     {
         if (graphs.TryGetValue(graphId, out var graph))
@@ -125,6 +228,9 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
 
         var appGraph = new AppGraph(new List<GraphElement>());
 
+        var compound = new GraphElement("nodes", new Vertex($"GraphId{graphId}"), $"Compound");
+        compound.Document.AddProperty("uiname", $"Graph {graphId}");
+        appGraph.Elements.Add(compound);
         graphs.Add(graphId, appGraph);
 
         return appGraph;
