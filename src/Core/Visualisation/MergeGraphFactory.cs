@@ -25,6 +25,7 @@ public class MergeGraphFactory : IMergeGraphFactory
 
         // First all nodes and edges from Gn are added to Gm
         var mergeGraph = new List<GraphElement>();
+        var actionsId = new List<string>();
         foreach (var item in newGraph)
         {
             item.AddClass("NewVersion");
@@ -56,6 +57,8 @@ public class MergeGraphFactory : IMergeGraphFactory
                     item.AddClass("Match");
                 }
 
+                actionsId.Add(item["actionId"].Value);
+
                 // for now only add the Abstract state and actions
                 mergeGraph.Add(item);
             }
@@ -63,8 +66,8 @@ public class MergeGraphFactory : IMergeGraphFactory
 
         // Then all non-matching nodes from Go are added to Gm
         var oldIds = new Dictionary<string, string>();
-        var nodes = oldGraph.Where(x => x.IsAbstractState);
-        foreach (var node in nodes)
+        var abstractStates = oldGraph.Where(x => x.IsAbstractState);
+        foreach (var node in abstractStates)
         {
             if (node.Document.Properties.ContainsKey("CD_CorrespondingId"))
             {
@@ -81,7 +84,9 @@ public class MergeGraphFactory : IMergeGraphFactory
         }
 
         // Finally, all edges from Go are added to Gm and wired
-        var oldEdges = oldGraph.Where(x => x.IsAbstractAction);
+        // except the one with an existing actionId, those are already added
+        var oldEdges = oldGraph.Where(x => x.IsAbstractAction)
+           .Where(x => !actionsId.Contains(x["actionId"].Value));
 
         foreach (var edge in oldEdges)
         {
