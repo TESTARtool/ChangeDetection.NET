@@ -7,7 +7,7 @@ Given an initial abstract state n11 in graph 1 with the following data
 And another abstract state n12 in graph 1 with the following data
     | Name    | Value   |
     | stateId | abc5678 |
-And an egde e12 in graph 1 to connect verteces n11 and n12 with the following data
+And an egde e12 in graph 1 to connect vertices n11 and n12 with the following data
     | Name     | Value   |
     | actionId | zxy1234 |
 
@@ -17,7 +17,7 @@ Given an initial abstract state n21 in graph 2 with the following data
 And another abstract state n22 in graph 2 with the following data
     | Name    | Value   |
     | stateId | xyz5678 |
-And an egde e22 in graph 2 to connect verteces n21 and n22 with the following data
+And an egde e22 in graph 2 to connect vertices n21 and n22 with the following data
     | Name     | Value    |
     | actionId | abc12345 |
 
@@ -27,7 +27,7 @@ Given an initial abstract state n31 in graph 3 with the following data
 And another abstract state n32 in graph 3 with the following data
     | Name    | Value   |
     | stateId | 1234567 |
-And an egde e32 in graph 3 to connect verteces n31 and n32 with the following data
+And an egde e32 in graph 3 to connect vertices n31 and n32 with the following data
     | Name     | Value    |
     | actionId | abc12345 |
 
@@ -37,13 +37,13 @@ Given an initial abstract state n41 in graph 4 with the following data
 And another abstract state n42 in graph 4 with the following data
     | Name    | Value   |
     | stateId | 1234567 |
-And an egde e42 in graph 4 to connect verteces n41 and n42 with the following data
+And an egde e42 in graph 4 to connect vertices n41 and n42 with the following data
     | Name     | Value    |
     | actionId | abc12345 |
 And another abstract state n43 in graph 4 with the following data
     | Name    | Value   |
     | stateId | 9876543 |
-And an egde e43 in graph 4 to connect verteces n41 and n43 with the following data
+And an egde e43 in graph 4 to connect vertices n41 and n43 with the following data
     | Name     | Value    |
     | actionId | poiu1233 | 
 
@@ -59,22 +59,22 @@ And another abstract state n53 in graph 5 with the following data
 And another abstract state n54 in graph 5 with the following data
     | Name    | Value   |
     | stateId | v2G5    |
-And an egde e51 in graph 5 to connect verteces n51 and n52 with the following data
+And an egde e51 in graph 5 to connect vertices n51 and n52 with the following data
     | Name     | Value     |
     | actionId | gotostart |
-And an egde e52 in graph 5 to connect verteces n52 and n51 with the following data
+And an egde e52 in graph 5 to connect vertices n52 and n51 with the following data
     | Name     | Value     |
     | actionId | goback    |
-And an egde e53 in graph 5 to connect verteces n52 and n53 with the following data
+And an egde e53 in graph 5 to connect vertices n52 and n53 with the following data
     | Name     | Value     |
     | actionId | gov1      |
-And an egde e54 in graph 5 to connect verteces n53 and n52 with the following data
+And an egde e54 in graph 5 to connect vertices n53 and n52 with the following data
     | Name     | Value     |
     | actionId | v1tostart |
-And an egde e55 in graph 5 to connect verteces n52 and n54 with the following data
+And an egde e55 in graph 5 to connect vertices n52 and n54 with the following data
     | Name     | Value     |
     | actionId | gov2      |
-And an egde e56 in graph 5 to connect verteces n54 and n52 with the following data
+And an egde e56 in graph 5 to connect vertices n54 and n52 with the following data
     | Name     | Value     |
     | actionId | v2tostart |
 Given an initial abstract state n61 in graph 6 with the following data
@@ -89,27 +89,27 @@ And another abstract state n63 in graph 6 with the following data
 And another abstract state n64 in graph 6 with the following data
     | Name    | Value   |
     | stateId | v3G6    |
-And an egde e61 in graph 6 to connect verteces n61 and n62 with the following data
+And an egde e61 in graph 6 to connect vertices n61 and n62 with the following data
     | Name     | Value     |
     | actionId | gotostart |
-And an egde e62 in graph 6 to connect verteces n62 and n61 with the following data
+And an egde e62 in graph 6 to connect vertices n62 and n61 with the following data
     | Name     | Value     |
     | actionId | goback    |
-And an egde e63 in graph 6 to connect verteces n62 and n63 with the following data
+And an egde e63 in graph 6 to connect vertices n62 and n63 with the following data
     | Name     | Value     |
     | actionId | gov2      |
-And an egde e64 in graph 6 to connect verteces n63 and n62 with the following data
+And an egde e64 in graph 6 to connect vertices n63 and n62 with the following data
     | Name     | Value     |
     | actionId | v2tostart |
-And an egde e65 in graph 6 to connect verteces n62 and n64 with the following data
+And an egde e65 in graph 6 to connect vertices n62 and n64 with the following data
     | Name     | Value     |
     | actionId | gov3      |
-And an egde e66 in graph 6 to connect verteces n64 and n62 with the following data
+And an egde e66 in graph 6 to connect vertices n64 and n62 with the following data
     | Name     | Value     |
     | actionId | v3tostart |
 
 Scenario: Initial states are marked as corresponding states
-For this test we use two graph that do not have a similar action id 
+For this test we use two graph that do not have a similar state id 
 Given graph 1 as the old graph
 And graph 2 as the new graph
 When the comparison between the new and old graph has run
@@ -149,7 +149,7 @@ And abstract state with stateId 9876543 has the following class
 
 Scenario: A removed state is merged as such
 In graph 4 the state (9876543 - n43) has been added, so taking graph 3 al new graph
-this will generated the removal of mentioned state
+this will generate the removal of mentioned state
 Given graph 4 as the old graph
 And graph 3 as the new graph
 When the comparison between the new and old graph has run
@@ -161,9 +161,35 @@ And abstract state with stateId 9876543 has the following class
     | AbstractState |
     | OldVersion    |
 
-Scenario: Button experiment 
+Scenario: Two complex graphs 
 Given graph 5 as the old graph
 And graph 6 as the new graph
 When the comparison between the new and old graph has run
 And the comparison result is merged
 Then the merge contains 5 abstract states and 8 abstract actions
+And abstract state with stateId initG6 has the following class
+    | ClassName     |
+    | Match         |
+    | NewVersion    |
+    | OldVersion    |
+And abstract state with stateId startG6 has the following class
+    | ClassName     |
+    | Match         |
+    | NewVersion    |
+    | OldVersion    |
+And abstract state with stateId v2G6 has the following class
+    | ClassName     |
+    | Match         |
+    | NewVersion    |
+    | OldVersion    |
+And abstract state with stateId v1G5 has the following class
+    | ClassName     |
+    | Removed       |
+    | OldVersion    |
+And abstract state with stateId v3G6 has the following class
+    | ClassName     |
+    | New           |
+    | NewVersion    |
+And abstract state with stateId initG5 is not included in the merge graph
+And abstract state with stateId startG5 is not included in the merge graph
+And abstract state with stateId v2G5 is not included in the merge graph

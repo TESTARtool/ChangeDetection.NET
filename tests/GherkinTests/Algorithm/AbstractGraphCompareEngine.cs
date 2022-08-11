@@ -45,8 +45,8 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
 
     private CompareResults? compareResult;
 
-    [AfterScenario]
-    public void After()
+    [Given(@"SaveAll")]
+    public void GivenSaveAll()
     {
         var all = new List<GraphElement>();
         foreach (var graphCol in graphs)
@@ -56,6 +56,27 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
         var json = JsonSerializer.Serialize(all);
         File.WriteAllText("all.json", json);
     }
+
+    [Then(@"Saved merge result")]
+    public void ThenSavedMergeResult()
+    {
+        var all = new List<GraphElement>();
+        all.AddRange(mergeGraph.Elements);
+        var json = JsonSerializer.Serialize(all);
+        File.WriteAllText("mergeResult.json", json);
+    }
+
+    //[AfterScenario]
+    //public void After()
+    //{
+    //    var all = new List<GraphElement>();
+    //    foreach (var graphCol in graphs)
+    //    {
+    //        all.AddRange(graphCol.Value.Elements);
+    //    }
+    //    var json = JsonSerializer.Serialize(all);
+    //    File.WriteAllText("all.json", json);
+    //}
 
     [Given(@"an initial abstract state (.*) in graph (.*) with the following data")]
     public void GivenAnInitialAbstractStateInGraphWithTheFollowingData(string abstrateStateId, int graphId, Table table)
@@ -90,7 +111,7 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
         graph.Elements.Add(new GraphElement("nodes", vertex, "AbstractState"));
     }
 
-    [Given(@"an egde (.*) in graph (.*) to connect verteces (.*) and (.*) with the following data")]
+    [Given(@"an egde (.*) in graph (.*) to connect vertices (.*) and (.*) with the following data")]
     public void GivenAnEgdeInGraphToConnectVertecesAndWithTheFollowingData(string edgeId, int graphId, string sourceId, string targetId, Table table)
     {
         var graph = GetGraphWithGraphId(graphId);

@@ -410,7 +410,7 @@ testRunner.And("an egde e66 in graph 6 to connect verteces n64 and n62 with the 
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Initial states are marked as corresponding states", "For this test we use two graph that do not have a similar action id ", tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Initial states are marked as corresponding states", "For this test we use two graph that do not have a similar state id ", tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 111
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -704,6 +704,66 @@ testRunner.And("the comparison result is merged", ((string)(null)), ((TechTalk.S
 #line hidden
 #line 169
 testRunner.Then("the merge contains 5 abstract states and 8 abstract actions", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table39 = new TechTalk.SpecFlow.Table(new string[] {
+                            "ClassName"});
+                table39.AddRow(new string[] {
+                            "Match"});
+                table39.AddRow(new string[] {
+                            "NewVersion"});
+                table39.AddRow(new string[] {
+                            "OldVersion"});
+#line 170
+testRunner.And("abstract state with stateId initG6 has the following class", ((string)(null)), table39, "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table40 = new TechTalk.SpecFlow.Table(new string[] {
+                            "ClassName"});
+                table40.AddRow(new string[] {
+                            "Match"});
+                table40.AddRow(new string[] {
+                            "NewVersion"});
+                table40.AddRow(new string[] {
+                            "OldVersion"});
+#line 175
+testRunner.And("abstract state with stateId startG6 has the following class", ((string)(null)), table40, "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table41 = new TechTalk.SpecFlow.Table(new string[] {
+                            "ClassName"});
+                table41.AddRow(new string[] {
+                            "Match"});
+                table41.AddRow(new string[] {
+                            "NewVersion"});
+                table41.AddRow(new string[] {
+                            "OldVersion"});
+#line 180
+testRunner.And("abstract state with stateId v2G6 has the following class", ((string)(null)), table41, "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table42 = new TechTalk.SpecFlow.Table(new string[] {
+                            "ClassName"});
+                table42.AddRow(new string[] {
+                            "Removed"});
+                table42.AddRow(new string[] {
+                            "OldVersion"});
+#line 185
+testRunner.And("abstract state with stateId v1G5 has the following class", ((string)(null)), table42, "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table43 = new TechTalk.SpecFlow.Table(new string[] {
+                            "ClassName"});
+                table43.AddRow(new string[] {
+                            "New"});
+                table43.AddRow(new string[] {
+                            "NewVersion"});
+#line 189
+testRunner.And("abstract state with stateId v3G6 has the following class", ((string)(null)), table43, "And ");
+#line hidden
+#line 193
+testRunner.And("abstract state with stateId initG5 is not included in the merge graph", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 194
+testRunner.And("abstract state with stateId startG5 is not included in the merge graph", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 195
+testRunner.And("abstract state with stateId v2G5 is not included in the merge graph", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             }
             this.ScenarioCleanup();
