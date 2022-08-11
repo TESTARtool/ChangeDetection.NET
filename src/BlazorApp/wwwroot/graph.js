@@ -196,23 +196,19 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
                     'label': 'BlackHole'
                 }
             },
-
             {
                 selector: '.New',
                 style: {
                     'background-color': 'green',
-                    'background-image': 'linear-gradient(green 1px, black 1px), linear-gradient(to right, green 1px, black 1px)',
+                    'shape': 'star',
                 }
             },
-
             {
                 selector: '.Removed',
                 style: {
                     'background-color': 'red',
-                    'background-image': 'repeating-linear-gradient(45deg, red 0, red 1px, black 0, black 50%)',
                 }
             },
-
             {
                 selector: '.UnvisitedAbstractAction',
                 style: {
