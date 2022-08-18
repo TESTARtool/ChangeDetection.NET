@@ -207,6 +207,15 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
                 selector: '.Removed',
                 style: {
                     'background-color': 'red',
+                    'shape': 'triangle',
+                }
+            },
+            {
+                selector: '.RemovedEdge',
+                style: {
+                    'line-color': 'red',
+                    'line-style': 'dashed',
+                    'target-arrow-color': "red",
                 }
             },
             {

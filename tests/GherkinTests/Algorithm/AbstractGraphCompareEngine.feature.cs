@@ -120,7 +120,7 @@ testRunner.And("another abstract state n12 in graph 1 with the following data", 
                         "actionId",
                         "zxy1234"});
 #line 10
-testRunner.And("an egde e12 in graph 1 to connect verteces n11 and n12 with the following data", ((string)(null)), table3, "And ");
+testRunner.And("an egde e12 in graph 1 to connect vertices n11 and n12 with the following data", ((string)(null)), table3, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -147,7 +147,7 @@ testRunner.And("another abstract state n22 in graph 2 with the following data", 
                         "actionId",
                         "abc12345"});
 #line 20
-testRunner.And("an egde e22 in graph 2 to connect verteces n21 and n22 with the following data", ((string)(null)), table6, "And ");
+testRunner.And("an egde e22 in graph 2 to connect vertices n21 and n22 with the following data", ((string)(null)), table6, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -174,7 +174,7 @@ testRunner.And("another abstract state n32 in graph 3 with the following data", 
                         "actionId",
                         "abc12345"});
 #line 30
-testRunner.And("an egde e32 in graph 3 to connect verteces n31 and n32 with the following data", ((string)(null)), table9, "And ");
+testRunner.And("an egde e32 in graph 3 to connect vertices n31 and n32 with the following data", ((string)(null)), table9, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table10 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -201,7 +201,7 @@ testRunner.And("another abstract state n42 in graph 4 with the following data", 
                         "actionId",
                         "abc12345"});
 #line 40
-testRunner.And("an egde e42 in graph 4 to connect verteces n41 and n42 with the following data", ((string)(null)), table12, "And ");
+testRunner.And("an egde e42 in graph 4 to connect vertices n41 and n42 with the following data", ((string)(null)), table12, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table13 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -219,7 +219,7 @@ testRunner.And("another abstract state n43 in graph 4 with the following data", 
                         "actionId",
                         "poiu1233"});
 #line 46
-testRunner.And("an egde e43 in graph 4 to connect verteces n41 and n43 with the following data", ((string)(null)), table14, "And ");
+testRunner.And("an egde e43 in graph 4 to connect vertices n41 and n43 with the following data", ((string)(null)), table14, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table15 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -264,7 +264,7 @@ testRunner.And("another abstract state n54 in graph 5 with the following data", 
                         "actionId",
                         "gotostart"});
 #line 62
-testRunner.And("an egde e51 in graph 5 to connect verteces n51 and n52 with the following data", ((string)(null)), table19, "And ");
+testRunner.And("an egde e51 in graph 5 to connect vertices n51 and n52 with the following data", ((string)(null)), table19, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table20 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -273,7 +273,7 @@ testRunner.And("an egde e51 in graph 5 to connect verteces n51 and n52 with the 
                         "actionId",
                         "goback"});
 #line 65
-testRunner.And("an egde e52 in graph 5 to connect verteces n52 and n51 with the following data", ((string)(null)), table20, "And ");
+testRunner.And("an egde e52 in graph 5 to connect vertices n52 and n51 with the following data", ((string)(null)), table20, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table21 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -282,16 +282,16 @@ testRunner.And("an egde e52 in graph 5 to connect verteces n52 and n51 with the 
                         "actionId",
                         "gov1"});
 #line 68
-testRunner.And("an egde e53 in graph 5 to connect verteces n52 and n53 with the following data", ((string)(null)), table21, "And ");
+testRunner.And("an egde e53 in graph 5 to connect vertices n52 and n53 with the following data", ((string)(null)), table21, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table22 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
                         "Value"});
             table22.AddRow(new string[] {
                         "actionId",
-                        "v1tostart"});
+                        "tomain"});
 #line 71
-testRunner.And("an egde e54 in graph 5 to connect verteces n53 and n52 with the following data", ((string)(null)), table22, "And ");
+testRunner.And("an egde e54 in graph 5 to connect vertices n53 and n52 with the following data", ((string)(null)), table22, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table23 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -300,16 +300,16 @@ testRunner.And("an egde e54 in graph 5 to connect verteces n53 and n52 with the 
                         "actionId",
                         "gov2"});
 #line 74
-testRunner.And("an egde e55 in graph 5 to connect verteces n52 and n54 with the following data", ((string)(null)), table23, "And ");
+testRunner.And("an egde e55 in graph 5 to connect vertices n52 and n54 with the following data", ((string)(null)), table23, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table24 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
                         "Value"});
             table24.AddRow(new string[] {
                         "actionId",
-                        "v2tostart"});
+                        "tomain"});
 #line 77
-testRunner.And("an egde e56 in graph 5 to connect verteces n54 and n52 with the following data", ((string)(null)), table24, "And ");
+testRunner.And("an egde e56 in graph 5 to connect vertices n54 and n52 with the following data", ((string)(null)), table24, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table25 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -354,7 +354,7 @@ testRunner.And("another abstract state n64 in graph 6 with the following data", 
                         "actionId",
                         "gotostart"});
 #line 92
-testRunner.And("an egde e61 in graph 6 to connect verteces n61 and n62 with the following data", ((string)(null)), table29, "And ");
+testRunner.And("an egde e61 in graph 6 to connect vertices n61 and n62 with the following data", ((string)(null)), table29, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table30 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -363,7 +363,7 @@ testRunner.And("an egde e61 in graph 6 to connect verteces n61 and n62 with the 
                         "actionId",
                         "goback"});
 #line 95
-testRunner.And("an egde e62 in graph 6 to connect verteces n62 and n61 with the following data", ((string)(null)), table30, "And ");
+testRunner.And("an egde e62 in graph 6 to connect vertices n62 and n61 with the following data", ((string)(null)), table30, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table31 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -372,16 +372,16 @@ testRunner.And("an egde e62 in graph 6 to connect verteces n62 and n61 with the 
                         "actionId",
                         "gov2"});
 #line 98
-testRunner.And("an egde e63 in graph 6 to connect verteces n62 and n63 with the following data", ((string)(null)), table31, "And ");
+testRunner.And("an egde e63 in graph 6 to connect vertices n62 and n63 with the following data", ((string)(null)), table31, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table32 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
                         "Value"});
             table32.AddRow(new string[] {
                         "actionId",
-                        "v2tostart"});
+                        "tomain"});
 #line 101
-testRunner.And("an egde e64 in graph 6 to connect verteces n63 and n62 with the following data", ((string)(null)), table32, "And ");
+testRunner.And("an egde e64 in graph 6 to connect vertices n63 and n62 with the following data", ((string)(null)), table32, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table33 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
@@ -390,16 +390,16 @@ testRunner.And("an egde e64 in graph 6 to connect verteces n63 and n62 with the 
                         "actionId",
                         "gov3"});
 #line 104
-testRunner.And("an egde e65 in graph 6 to connect verteces n62 and n64 with the following data", ((string)(null)), table33, "And ");
+testRunner.And("an egde e65 in graph 6 to connect vertices n62 and n64 with the following data", ((string)(null)), table33, "And ");
 #line hidden
             TechTalk.SpecFlow.Table table34 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
                         "Value"});
             table34.AddRow(new string[] {
                         "actionId",
-                        "v3tostart"});
+                        "tomain"});
 #line 107
-testRunner.And("an egde e66 in graph 6 to connect verteces n64 and n62 with the following data", ((string)(null)), table34, "And ");
+testRunner.And("an egde e66 in graph 6 to connect vertices n64 and n62 with the following data", ((string)(null)), table34, "And ");
 #line hidden
         }
         
@@ -605,7 +605,7 @@ testRunner.And("abstract state with stateId 9876543 has the following class", ((
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("A removed state is merged as such", "In graph 4 the state (9876543 - n43) has been added, so taking graph 3 al new gra" +
-                    "ph\r\nthis will generated the removal of mentioned state", tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    "ph\r\nthis will generate the removal of mentioned state", tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 150
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -660,13 +660,13 @@ testRunner.And("abstract state with stateId 9876543 has the following class", ((
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.DescriptionAttribute("Button experiment")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.DescriptionAttribute("Two complex graphs")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("FeatureTitle", "AbstractGraphCompareEngine")]
-        public virtual void ButtonExperiment()
+        public virtual void TwoComplexGraphs()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Button experiment", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Two complex graphs", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 164
 this.ScenarioInitialize(scenarioInfo);
 #line hidden

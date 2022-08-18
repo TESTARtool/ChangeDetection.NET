@@ -70,13 +70,13 @@ And an egde e53 in graph 5 to connect vertices n52 and n53 with the following da
     | actionId | gov1      |
 And an egde e54 in graph 5 to connect vertices n53 and n52 with the following data
     | Name     | Value     |
-    | actionId | v1tostart |
+    | actionId | tomain    |
 And an egde e55 in graph 5 to connect vertices n52 and n54 with the following data
     | Name     | Value     |
     | actionId | gov2      |
 And an egde e56 in graph 5 to connect vertices n54 and n52 with the following data
     | Name     | Value     |
-    | actionId | v2tostart |
+    | actionId | tomain    |
 Given an initial abstract state n61 in graph 6 with the following data
     | Name    | Value    |
     | stateId | initG6   |
@@ -100,13 +100,13 @@ And an egde e63 in graph 6 to connect vertices n62 and n63 with the following da
     | actionId | gov2      |
 And an egde e64 in graph 6 to connect vertices n63 and n62 with the following data
     | Name     | Value     |
-    | actionId | v2tostart |
+    | actionId | tomain    |
 And an egde e65 in graph 6 to connect vertices n62 and n64 with the following data
     | Name     | Value     |
     | actionId | gov3      |
 And an egde e66 in graph 6 to connect vertices n64 and n62 with the following data
     | Name     | Value     |
-    | actionId | v3tostart |
+    | actionId | tomain    |
 
 Scenario: Initial states are marked as corresponding states
 For this test we use two graph that do not have a similar state id 

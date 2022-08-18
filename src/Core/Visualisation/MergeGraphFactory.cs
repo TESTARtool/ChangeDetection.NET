@@ -50,6 +50,7 @@ public class MergeGraphFactory : IMergeGraphFactory
                 if (item["CD_CompareResult"].Value == "new")
                 {
                     item.AddClass("New");
+                    item.AddClass("NewEdge");
                 }
                 else
                 {
@@ -57,7 +58,7 @@ public class MergeGraphFactory : IMergeGraphFactory
                     item.AddClass("Match");
                 }
 
-                actionsId.Add(item["actionId"].Value);
+                actionsId.Add($"{item["actionId"].Value}_{item.Document.TargetId ?? "NULL"}_{item.Document.SourceId ?? "NULL"}");
 
                 // for now only add the Abstract state and actions
                 mergeGraph.Add(item);
@@ -84,13 +85,13 @@ public class MergeGraphFactory : IMergeGraphFactory
         }
 
         // Finally, all edges from Go are added to Gm and wired
-        // except the one with an existing actionId, those are already added
-        var oldEdges = oldGraph.Where(x => x.IsAbstractAction)
-           .Where(x => !actionsId.Contains(x["actionId"].Value));
+        var oldEdges = oldGraph
+            .Where(x => x.IsAbstractAction)
+            .ToList();
 
         foreach (var edge in oldEdges)
         {
-            edge.AddClass("OldVersion");
+          
             if (edge.Document.TargetId is null || edge.Document.SourceId is null)
             {
                 throw new InvalidOperationException("Either TargetId or SourceId is null");
@@ -117,7 +118,13 @@ public class MergeGraphFactory : IMergeGraphFactory
                 edge.Document.SourceId = newIds[stateIdForSourceId] ?? throw new InvalidOperationException($"Id is missing here: '{stateId}'");
             }
 
-            mergeGraph.Add(edge);
+            // Only add edge when they if actionid + TargetId + sourceId not yet exist
+            if (!actionsId.Contains($"{edge["actionId"].Value}_{edge.Document.TargetId ?? "NULL"}_{edge.Document.SourceId ?? "NULL"}"))
+            {
+                edge.AddClass("OldVersion");
+                edge.AddClass("RemovedEdge");
+                mergeGraph.Add(edge);
+            }
         }
 
         try
