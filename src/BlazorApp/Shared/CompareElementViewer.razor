@@ -11,6 +11,15 @@
 
 @if (SelectedElement is not null)
 {
+     @if (SelectedElement.IsAbstractState)
+     {
+         @foreach (var screenshot in SelectedElement["screenshots"].AsArray())
+         {
+             <img alt="Concrete state screenshot" class="ps-3 p3-3"
+                  src="data:image/png;base64,@screenshot.Value">
+         }
+     }
+
     <div class="p-3">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">

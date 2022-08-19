@@ -146,7 +146,7 @@ else
     public string? App1GraphInJson { get; set; }
     public string? App2GraphInJson { get; set; }
     public string? MergeGraphInJson { get; set; }
-    
+
     public Model? App1Model { get; set; }
     public Model? App2Model { get; set; }
 
@@ -221,8 +221,8 @@ else
         var mergeGraph = graphMerger.Create(results);
 
         //await DownloadScreenshotAsync(results.OldGraphApp);
-       // await DownloadScreenshotAsync(results.NewGraphApp);
-     //   await DownloadScreenshotAsync(mergeGraph);
+        // await DownloadScreenshotAsync(results.NewGraphApp);
+        await DownloadScreenshotAsync(mergeGraph);
 
         ProgressStatus = "Transforming graph data";
         StateHasChanged();
@@ -254,6 +254,22 @@ else
 
                 element.Document.Properties["screenshot"] = base64screenshot.Value;
             }
+
+            var screenshots = element.Document["screenshots"].AsArray();
+            var base64screenshots = new List<string>();
+            foreach (var screenshot in screenshots)
+            {
+                ProgressStatus = $"Download image {screenshot.Value}.png";
+                StateHasChanged();
+
+                var base64screenshot = await screenshotService.DownloadScreenshotAsync(screenshot.Value!);
+                if (base64screenshot is not null)
+                {
+                    base64screenshots.Add(base64screenshot.Value);
+                }
+            }
+
+            element["screenshots"] = new PropertyValue($"[{string.Join(",", base64screenshots)}]");
         }
     }
 
