@@ -68,16 +68,14 @@ public class GraphForCompareRetriever : IRetrieveGraphForComparison
     {
         foreach (var item in appGraph.AbstractStates)
         {
-            var concreteStateIds = item["concreteStateIds"].AsArray();
-            foreach (var id in concreteStateIds)
-            {
-                var screenshots = appGraph.ConcreteStates
-                    .Where(x => x["stateId"] == id)
-                    .Select(x => x["screenshot"].Value)
-                    .ToList();
+            var id = item["concreteStateIds"].AsArray()
+                .First().Value;
 
-                item["screenshots"] = new PropertyValue($"[{string.Join(",", screenshots)}]");
-            }
+            var screenshot = appGraph.ConcreteStates
+                   .First(x => x["stateId"].Value == id)
+                   .Document["screenshot"];
+
+            item.Document["screenshot"] = screenshot;
         }
     }
 

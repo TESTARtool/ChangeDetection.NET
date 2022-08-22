@@ -220,8 +220,8 @@ else
 
         var mergeGraph = graphMerger.Create(results);
 
-        //await DownloadScreenshotAsync(results.OldGraphApp);
-        // await DownloadScreenshotAsync(results.NewGraphApp);
+        await DownloadScreenshotAsync(results.OldGraphApp);
+        await DownloadScreenshotAsync(results.NewGraphApp);
         await DownloadScreenshotAsync(mergeGraph);
 
         ProgressStatus = "Transforming graph data";
@@ -245,31 +245,24 @@ else
     {
         foreach (var element in graph.Elements)
         {
-            if (element.Document.Properties.TryGetValue("screenshot", out var screenshotId))
-            {
-                ProgressStatus = $"Download image {screenshotId.ToString()}.png";
-                StateHasChanged();
+            await DownloadScreenshotAsync(element, "screenshot");
+            await DownloadScreenshotAsync(element, "CD_CO_screenshot");
+            await DownloadScreenshotAsync(element, "CD_CN_screenshot");
+        }
+    }
 
-                var base64screenshot = await screenshotService.DownloadScreenshotAsync(screenshotId.ToString()!);
+    private async Task DownloadScreenshotAsync(GraphElement element, string name)
+    {
+        if (element.Document.Properties.TryGetValue(name, out var screenshotId) 
+            && screenshotId is not null
+            && screenshotId.ToString().Contains('_'))
+        {
+            ProgressStatus = $"Download image {screenshotId.ToString()}.png";
+            StateHasChanged();
 
-                element.Document.Properties["screenshot"] = base64screenshot.Value;
-            }
+            var base64screenshot = await screenshotService.DownloadScreenshotAsync(screenshotId.ToString()!);
 
-            var screenshots = element.Document["screenshots"].AsArray();
-            var base64screenshots = new List<string>();
-            foreach (var screenshot in screenshots)
-            {
-                ProgressStatus = $"Download image {screenshot.Value}.png";
-                StateHasChanged();
-
-                var base64screenshot = await screenshotService.DownloadScreenshotAsync(screenshot.Value!);
-                if (base64screenshot is not null)
-                {
-                    base64screenshots.Add(base64screenshot.Value);
-                }
-            }
-
-            element["screenshots"] = new PropertyValue($"[{string.Join(",", base64screenshots)}]");
+            element.Document.Properties[name] = base64screenshot.Value;
         }
     }
 

@@ -39,6 +39,8 @@ public class MergeGraphFactory : IMergeGraphFactory
                 else
                 {
                     item.AddClass("New");
+                    item.Document["CD_CN_screenshot"] = item.Document["screenshot"];
+                    item.Document.Properties.Remove("screenshot");
                 }
 
                 // for now only add the Abstract state and actions
@@ -80,6 +82,10 @@ public class MergeGraphFactory : IMergeGraphFactory
                 // this is a non-matching node. Add to merge Graph
                 node.AddClass("Removed");
                 node.AddClass("OldVersion");
+
+                node.Document["CD_CO_screenshot"] = node.Document["screenshot"];
+                node.Document.Properties.Remove("screenshot");
+
                 mergeGraph.Add(node);
             }
         }
@@ -91,7 +97,6 @@ public class MergeGraphFactory : IMergeGraphFactory
 
         foreach (var edge in oldEdges)
         {
-          
             if (edge.Document.TargetId is null || edge.Document.SourceId is null)
             {
                 throw new InvalidOperationException("Either TargetId or SourceId is null");
