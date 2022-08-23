@@ -24,7 +24,7 @@
           </li>
         </ul>
         <div class="tab-content p-1" id="myTabContent">
-            <div class="tab-pane fade active" id="screenshotTab" role="tabpanel" aria-labelledby="screenshot-tab">
+            <div class="tab-pane fade active show" id="screenshotTab" role="tabpanel" aria-labelledby="screenshot-tab">
                 @if (NewScreenshot is not null)
                 {
                     <h3>New version</h3>
@@ -33,7 +33,7 @@
                 @if (OldScreenshot is not null)
                 {
                     <h3>Old version</h3>
-                    <img alt="Concrete state screenshot" class="card-img" src="data:image/png;base64,@OldScreenshot">
+                    <img alt="Concrete state screenshot" class="card-img" src="data:image/png;base64, @OldScreenshot">
                 }
             </div>
             <div class="tab-pane fade" id="compareTab" role="tabpanel" aria-labelledby="compare-tab">
