@@ -7,6 +7,8 @@
 @inject IScreenshotService screenshotService;
 @inject NavigationManager navigationManager;
 @inject MergeOverlappingEdgesSetting mergeOverlappingEdgesSetting;
+@inject IMergeGraphFactory graphMerger;
+
 <AuthorizeView>
     <NotAuthorized>
         <div class="p-3">
@@ -21,7 +23,7 @@
             <div class="input-group me-2" >
                 <span class="input-group-text" id="Layout-text">Layout</span>
                 <select id="layout-control" class="form-control text-secondary" aria-label="Default select example"
-                    aria-describedby="Layout-text" onchange="changeLayout('cyApp1', this.value); changeLayout('cyApp2', this.value)" >
+                    aria-describedby="Layout-text" onchange="changeLayout('mergeCy', this.value);" >
                     <option value="grid">Grid</option>
                     <option value="random">Random</option>
                     <option value="circle">Circle</option>
@@ -38,7 +40,7 @@
 
             <div class="btn-group me-2" role="group">
                 <input type="checkbox" class="btn-check" id="show-labels" checked autocomplete="off"
-                onchange="showLabel('cyApp1', this.value); showLabel('cyApp2', this.value)">
+                onchange="showLabel('mergeCy', this.value);">
                 <label class="btn btn-outline-secondary" for="show-labels">Show Labels</label>
             </div>
 
@@ -103,19 +105,11 @@
 {
 <div class="container-fluid" style="height: calc(100% - 70px); ">
     <div class="row" style="height:100%" >
-        <div class="col-6 border-end" style="height:100%;">
-            <div id="cyApp1" style="height:100%;">
+        <div class="col-12" style="height: 100%;">
+            <div id="mergeCy" style="height:100%;" >
             </div>
         </div>
-        
-        <div class="col-6 border-end" style="height: 100%;">
-            <div id="cyApp2" style="height:100%;" >
-            </div>
-        </div>
-      @*  <div class="col">
-            <div class="viewpane" id="cy">
-            </div>
-        </div>*@
+       
     </div>
 </div>
 
@@ -151,10 +145,15 @@ else
 
     public string? App1GraphInJson { get; set; }
     public string? App2GraphInJson { get; set; }
+    public string? MergeGraphInJson { get; set; }
+
     public Model? App1Model { get; set; }
     public Model? App2Model { get; set; }
+
     public AppGraph? AppGraph1 { get; set; }
     public AppGraph? AppGraph2 { get; set; }
+    public AppGraph? MergeGraph { get; set; }
+
     private GraphElement? SelectedElement { get; set; }
 
     [JSInvokable]
@@ -219,20 +218,22 @@ else
 
         var results = await graphCompareService.CompareAsync(model2, model1);
 
-        await DownloadScreenshotAsync(results.GraphApp1.Elements);
-        await DownloadScreenshotAsync(results.GraphApp2.Elements);
+        var mergeGraph = graphMerger.Create(results);
+
+        await DownloadScreenshotAsync(results.OldGraphApp);
+        await DownloadScreenshotAsync(results.NewGraphApp);
+        await DownloadScreenshotAsync(mergeGraph);
 
         ProgressStatus = "Transforming graph data";
         StateHasChanged();
 
-        App1GraphInJson = JsonSerializer.Serialize(results.GraphApp1.Elements);
-        App2GraphInJson = JsonSerializer.Serialize(results.GraphApp2.Elements);
+        App1GraphInJson = JsonSerializer.Serialize(results.OldGraphApp.Elements);
+        App2GraphInJson = JsonSerializer.Serialize(results.NewGraphApp.Elements);
+        MergeGraphInJson = JsonSerializer.Serialize(mergeGraph.Elements);
 
-        App1Model = model1;
-        App2Model = model2;
-
-        AppGraph1 = results.GraphApp1;
-        AppGraph2 = results.GraphApp2;
+        AppGraph1 = results.OldGraphApp;
+        AppGraph2 = results.NewGraphApp;
+        MergeGraph = mergeGraph;
 
         ProgressStatus = "Loading graph done";
         IsGraphAvailable = true;
@@ -240,19 +241,28 @@ else
         OnParametersSet();
     }
 
-    private async Task DownloadScreenshotAsync(List<GraphElement> elements)
+    private async Task DownloadScreenshotAsync(AppGraph graph)
     {
-        foreach (var element in elements)
+        foreach (var element in graph.Elements)
         {
-            if (element.Document.Properties.TryGetValue("screenshot", out var screenshotId))
-            {
-                ProgressStatus = $"Download image {screenshotId.ToString()}.png";
-                StateHasChanged();
+            await DownloadScreenshotAsync(element, "screenshot");
+            await DownloadScreenshotAsync(element, "CD_CO_screenshot");
+            await DownloadScreenshotAsync(element, "CD_CN_screenshot");
+        }
+    }
 
-                var base64screenshot = await screenshotService.DownloadScreenshotAsync(screenshotId.ToString()!);
+    private async Task DownloadScreenshotAsync(GraphElement element, string name)
+    {
+        if (element.Document.Properties.TryGetValue(name, out var screenshotId) 
+            && screenshotId is not null
+            && screenshotId.ToString().Contains('_'))
+        {
+            ProgressStatus = $"Download image {screenshotId.ToString()}.png";
+            StateHasChanged();
 
-                element.Document.Properties["screenshot"] = base64screenshot.Value;
-            }
+            var base64screenshot = await screenshotService.DownloadScreenshotAsync(screenshotId.ToString()!);
+
+            element.Document.Properties[name] = base64screenshot.Value;
         }
     }
 
@@ -263,8 +273,9 @@ else
             dotNetHelper = DotNetObjectReference.Create(this);
             IsGraphVisible = true;
 
-            await JS.InvokeVoidAsync("loadGraphCanvas", App1GraphInJson, "cyApp1", dotNetHelper);
-            await JS.InvokeVoidAsync("loadGraphCanvas", App2GraphInJson, "cyApp2", dotNetHelper);
+            //await JS.InvokeVoidAsync("loadGraphCanvas", App1GraphInJson, "cyApp1", dotNetHelper);
+            //await JS.InvokeVoidAsync("loadGraphCanvas", App2GraphInJson, "cyApp2", dotNetHelper);
+            await JS.InvokeVoidAsync("loadGraphCanvas", MergeGraphInJson, "mergeCy", dotNetHelper);
         }
     }
 

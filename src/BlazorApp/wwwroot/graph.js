@@ -196,21 +196,28 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
                     'label': 'BlackHole'
                 }
             },
-
             {
-                selector: '.Added',
+                selector: '.New',
                 style: {
-                    'background-image': "img/plus.png"
+                    'background-color': 'green',
+                    'shape': 'star',
                 }
             },
-
             {
                 selector: '.Removed',
                 style: {
-                    'background-image': "img/min.png"
+                    'background-color': 'red',
+                    'shape': 'triangle',
                 }
             },
-
+            {
+                selector: '.RemovedEdge',
+                style: {
+                    'line-color': 'red',
+                    'line-style': 'dashed',
+                    'target-arrow-color': "red",
+                }
+            },
             {
                 selector: '.UnvisitedAbstractAction',
                 style: {
@@ -384,7 +391,6 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
         appStatus.concreteLayerPresent = appStatus.nrOfConcreteStates > 0;
         appStatus.sequenceLayerPresent = appStatus.nrOfSequenceNodes > 0;
         appStatus.nrOfLayersPresent = 0;
-        console.log(appStatus);
 
         // ready several toggle buttons
         // abstract layer toggle

@@ -37,8 +37,8 @@ public class AbstractGraphCompareEngine : ICompareGraph
 
         return new CompareResults
         {
-            GraphApp1 = oldGraphApp,
-            GraphApp2 = newGraphApp,
+            OldGraphApp = oldGraphApp,
+            NewGraphApp = newGraphApp,
         };
     }
 

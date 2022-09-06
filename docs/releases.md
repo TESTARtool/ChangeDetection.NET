@@ -1,6 +1,18 @@
 # TESTAR Analysis Release notes
 The page covers the release notes of the new TESTAR .NET Analysis website. 
 
+## Version 1.8.0
+*Note the compare features needs to be enabled on the settings page*
+
+The comparison feature got an upgrade in this version. It will compare two versions and merge the two graphs into a merge graph. The red triangle represents a removed state, whereas the green star shows a new state.
+
+Selecting a state in the graph shows screenshots from the new and old versions. A new or removed state only displayed a single screenshot. 
+
+![Comparison feature](images/180-Screenshot.png)
+
+The version of the server container is also updated to version 1.8.0 but does not contain changes.
+
+
 ## Version 1.7.0
 When there are multiple edges between two vertices, the edges overlap. This version addresses that issue by merging the edges into one single edge. When the edge is selected, they appear in an accordion where the data can be viewed individually.
 

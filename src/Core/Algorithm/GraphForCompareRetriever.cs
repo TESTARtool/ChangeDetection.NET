@@ -50,6 +50,7 @@ public class GraphForCompareRetriever : IRetrieveGraphForComparison
         // this information is not present in the abstract action
         // so find for each abstract action a description.
         ForEveryAbstractActionSetTheDescriptionFromConcreteAction(appGraph);
+        ForEveryAbstractStateSetTheScreenshot(appGraph);
 
         return appGraph;
     }
@@ -61,6 +62,21 @@ public class GraphForCompareRetriever : IRetrieveGraphForComparison
         parent[nameof(model.Version)] = new PropertyValue(model.Version);
 
         return parent;
+    }
+
+    private static void ForEveryAbstractStateSetTheScreenshot(AppGraph appGraph)
+    {
+        foreach (var item in appGraph.AbstractStates)
+        {
+            var id = item["concreteStateIds"].AsArray()
+                .First().Value;
+
+            var screenshot = appGraph.ConcreteStates
+                   .First(x => x["stateId"].Value == id)
+                   .Document["screenshot"];
+
+            item.Document["screenshot"] = screenshot;
+        }
     }
 
     private static void ForEveryAbstractActionSetTheDescriptionFromConcreteAction(AppGraph appGraph)

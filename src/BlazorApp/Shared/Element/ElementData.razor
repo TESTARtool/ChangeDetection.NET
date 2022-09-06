@@ -2,24 +2,18 @@
  
 @if (IsImage())
 { 
-    <td>
-        <img alt="@Key" src="data:image/png;base64,@PropertyValue.Value">
-    </td>
     if (HasOldValue())
     {
         <td>
             <img alt="@Key" src="data:image/png;base64,@OldPropertyValue.Value">
         </td>
     }
+     <td>
+        <img alt="@Key" src="data:image/png;base64,@PropertyValue.Value">
+    </td>
 } 
 else if (IsArrayOfIds())
 {
-    <td>
-    @foreach (var propertyValue in PropertyValue.AsArray())
-    {
-        <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
-    }
-    </td>
     if (HasOldValue())
     {
         <td>
@@ -29,22 +23,28 @@ else if (IsArrayOfIds())
             }
         </td>
     }
+    <td>
+    @foreach (var propertyValue in PropertyValue.AsArray())
+    {
+        <p><a href="@BaseUrl/@propertyValue.AsOrientDbId().FormatId()">@propertyValue.Value</a></p>
+    }
+    </td>
 } 
 else if (IsId())
 {
-    <td><a href="@BaseUrl/@PropertyValue.AsOrientDbId().FormatId()">@PropertyValue.Value</a></td>
     if (HasOldValue())
     {
         <td><a href="@BaseUrl/@OldPropertyValue!.AsOrientDbId().FormatId()">@OldPropertyValue.Value</a></td>
     }
+    <td><a href="@BaseUrl/@PropertyValue.AsOrientDbId().FormatId()">@PropertyValue.Value</a></td>
 }
 else
 {
-    <td class="text-break">@PropertyValue.Value</td>
     if (HasOldValue())
     {
         <td class="text-break">@OldPropertyValue.Value</td>
     }
+    <td class="text-break">@PropertyValue.Value</td>
 }
 
 @code {
