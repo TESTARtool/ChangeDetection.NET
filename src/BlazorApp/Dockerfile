@@ -5,7 +5,7 @@ WORKDIR /source
 COPY src/BlazorApp/*.csproj src/BlazorApp/
 COPY src/Core/*.csproj src/Core/
 COPY src/Analyser.cs src/
-COPY Directory.Build.props /
+COPY src/Directory.Build.props src/
 RUN dotnet restore src/BlazorApp/BlazorApp.csproj
 
 COPY . .

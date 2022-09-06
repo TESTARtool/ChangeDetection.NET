@@ -9,7 +9,7 @@ WORKDIR /source
 COPY src/ChangeDetection.Server/*.csproj src/ChangeDetection.Server/
 COPY src/Core/*.csproj src/Core/
 COPY src/Analyser.cs src/
-COPY Directory.Build.props /
+COPY src/Directory.Build.props src/
 RUN dotnet restore src/ChangeDetection.Server/ChangeDetection.Server.csproj
 
 COPY . .
