@@ -35,6 +35,11 @@ public class MergeGraphFactory : IMergeGraphFactory
                 {
                     item.AddClass("OldVersion");
                     item.AddClass("Match");
+
+                    if (item.Document.Properties.ContainsKey("CD_ContainsChanges"))
+                    {
+                        item.AddClass("ContainsChanges");
+                    }
                 }
                 else
                 {

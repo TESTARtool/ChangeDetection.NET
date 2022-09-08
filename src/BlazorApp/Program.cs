@@ -44,6 +44,7 @@ builder.Services
     .AddScoped<IStartingAbstractState, InitialStartingAbstractState>()
     .AddScoped<IRetrieveGraphForComparison, GraphForCompareRetriever>()
     .AddScoped<IScreenshotService, ScreenshotService>()
+    .AddScoped<IDetectChangeInCorrespondingStates, ContainsChangesWhenActionsDoNotMatch>()
     ;
 
 builder.Services
