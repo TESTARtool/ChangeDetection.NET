@@ -103,6 +103,8 @@ public class AbstractGraphCompareEngine : ICompareGraph
         }
         else
         {
+            action["CD_CompareResult"] = new PropertyValue("match");
+
             // corresponding action found. continue with outgoing state
             correspondingAction.IsHandeld = true;
 

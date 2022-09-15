@@ -224,12 +224,14 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
                     'line-color': 'green',
                     'line-style': 'dotted',
                     'target-arrow-color': "green",
+                    'width': 2
                 }
             },
             {
                 selector: '.ContainsChanges',
                 style: {
                     'border-style': 'dashed',
+                    'border-width': 2
                 }
             },
             {
