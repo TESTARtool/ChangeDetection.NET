@@ -35,6 +35,11 @@ public class MergeGraphFactory : IMergeGraphFactory
                 {
                     item.AddClass("OldVersion");
                     item.AddClass("Match");
+
+                    if (item.Document.Properties.ContainsKey("CD_ContainsChanges"))
+                    {
+                        item.AddClass("ContainsChanges");
+                    }
                 }
                 else
                 {
@@ -49,15 +54,15 @@ public class MergeGraphFactory : IMergeGraphFactory
 
             if (item.IsAbstractAction)
             {
-                if (item["CD_CompareResult"].Value == "new")
-                {
-                    item.AddClass("New");
-                    item.AddClass("NewEdge");
-                }
-                else
+                if (item["CD_CompareResult"].Value == "match")
                 {
                     item.AddClass("OldVersion");
                     item.AddClass("Match");
+                }
+                else
+                {
+                    item.AddClass("New");
+                    item.AddClass("NewEdge");
                 }
 
                 actionsId.Add($"{item["actionId"].Value}_{item.Document.TargetId ?? "NULL"}_{item.Document.SourceId ?? "NULL"}");

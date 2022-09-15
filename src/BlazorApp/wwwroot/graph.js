@@ -219,6 +219,22 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
                 }
             },
             {
+                selector: '.NewEdge',
+                style: {
+                    'line-color': 'green',
+                    'line-style': 'dotted',
+                    'target-arrow-color': "green",
+                    'width': 2
+                }
+            },
+            {
+                selector: '.ContainsChanges',
+                style: {
+                    'border-style': 'dashed',
+                    'border-width': 2
+                }
+            },
+            {
                 selector: '.UnvisitedAbstractAction',
                 style: {
                     'line-color': "#1c9099",

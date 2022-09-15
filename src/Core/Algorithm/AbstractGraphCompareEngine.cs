@@ -12,12 +12,16 @@ public class AbstractGraphCompareEngine : ICompareGraph
     private readonly IRetrieveGraphForComparison graphRetriever;
     private readonly ICompareVertices verticesComparer;
     private readonly IStartingAbstractState startingAbstractStates;
+    private readonly IDetectChangeInCorrespondingStates detectChangeInCorrespondingStates;
 
-    public AbstractGraphCompareEngine(IRetrieveGraphForComparison graphRetriever, ICompareVertices verticesComparer, IStartingAbstractState startingAbstractStates)
+    public AbstractGraphCompareEngine(IRetrieveGraphForComparison graphRetriever,
+        ICompareVertices verticesComparer, IStartingAbstractState startingAbstractStates,
+        IDetectChangeInCorrespondingStates detectChangeInCorrespondingStates)
     {
         this.graphRetriever = graphRetriever;
         this.verticesComparer = verticesComparer;
         this.startingAbstractStates = startingAbstractStates;
+        this.detectChangeInCorrespondingStates = detectChangeInCorrespondingStates;
     }
 
     public async Task<CompareResults> CompareAsync(Model oldModel, Model newModel)
@@ -65,6 +69,11 @@ public class AbstractGraphCompareEngine : ICompareGraph
         newAbstractState.IsHandeld = true;
 
         verticesComparer.CompareProperties(oldAbstractState, newAbstractState);
+        if (detectChangeInCorrespondingStates.ContainsChanges(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp))
+        {
+            newAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);
+            oldAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);
+        }
 
         var abstractActionsForOldState = oldGraphApp.FindAbstractActionsFor(oldAbstractState).ToArray();
         var unhandeldActions = newGraphApp
@@ -94,6 +103,8 @@ public class AbstractGraphCompareEngine : ICompareGraph
         }
         else
         {
+            action["CD_CompareResult"] = new PropertyValue("match");
+
             // corresponding action found. continue with outgoing state
             correspondingAction.IsHandeld = true;
 
