@@ -69,7 +69,7 @@ public class AbstractGraphCompareEngine : ICompareGraph
         newAbstractState.IsHandeld = true;
 
         verticesComparer.CompareProperties(oldAbstractState, newAbstractState);
-        if (detectChangeInCorrespondingStates.ContainsChanges(oldAbstractState, newAbstractState))
+        if (detectChangeInCorrespondingStates.ContainsChanges(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp))
         {
             newAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);
             oldAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);
