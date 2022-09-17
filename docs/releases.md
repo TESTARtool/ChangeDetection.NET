@@ -1,6 +1,21 @@
 # TESTAR Analysis Release notes
 The page covers the release notes of the new TESTAR .NET Analysis website. 
 
+## Version 1.9.0
+*Note the compare features needs to be enabled on the settings page*
+
+The change detection algorithm visualisation got an update indicating a change in new actions and updated corresponding states better. 
+
+New actions are displayed in a green dotted arrow. 
+
+![New action](images/190-NewAction.png)
+
+When a change in a corresponding state is found, the state is shown with a dashed circle. 
+
+![Updated corresponding state](images/190-UpdatedState.png)
+
+Since the algorithm's core works by looking at actions to find new and removed states, a corresponding state is indicated as a change when the algorithm finds a change in actions. In a later version, this can be changed into an in-depth change detection within the state, such as comparing widget trees.
+
 ## Version 1.8.0
 *Note the compare features needs to be enabled on the settings page*
 
@@ -60,7 +75,7 @@ This version introduced an experimental feature, compare. Before it is possible 
 
 ![compare viewer](images/compare-option.png)
 
-This opens a side by side graph viewer window where two graphs can be compared. More features are to come in later versions.
+This opens a side-by-side graph viewer window where two graphs can be compared. More features are to come in later versions.
 
 ## Version 1.3.0
 It is now possible to filter the available models in the overview. Filtering is enabled for the name, version and model identifier. 
@@ -68,7 +83,7 @@ It is now possible to filter the available models in the overview. Filtering is 
 ![Search](images/search.png)
 
 ## Version 1.2.0
-There is no visual upgrade in this version but a health endpoint for the docker image. To check whether the docker container is healthy, execute a GET request to `/healthz`. The result should be `Healthy`.
+This version has no visual upgrade but a health endpoint for the docker image. To check whether the docker container is healthy, execute a GET request to `/healthz`. The result should be `Healthy`.
 
 ## Version 1.1.0
 The models' overview page has got a new visual upgrade. The Logout button has been replaced with a user menu. 
@@ -84,4 +99,3 @@ The first version of the new TESTAR .NET analysis website. It contains some earl
 See all the open problems by following the below link.
 
 [Known issues](https://github.com/TESTARtool/ChangeDetection.NET/labels/known-issue)
-
