@@ -59,6 +59,7 @@ builder.Services
     .AddScoped<ShowOrientDbElementData>()
     .AddScoped<MergeOverlappingEdgesSetting>()
     .AddScoped<CompareAbstractActionLabelSetting>()
+    .AddScoped<ComparableDataElementNameSetting>()
     ;
 
 builder.Services

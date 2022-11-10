@@ -1,4 +1,5 @@
 ﻿using Testar.ChangeDetection.Core.Graph;
+using Testar.ChangeDetection.Core.Settings;
 
 namespace Testar.ChangeDetection.Core.Algorithm;
 
@@ -13,15 +14,17 @@ public class AbstractGraphCompareEngine : ICompareGraph
     private readonly ICompareVertices verticesComparer;
     private readonly IStartingAbstractState startingAbstractStates;
     private readonly IDetectChangeInCorrespondingStates detectChangeInCorrespondingStates;
+    private readonly ComparableDataElementNameSetting comparableDataElementNameSetting;
 
     public AbstractGraphCompareEngine(IRetrieveGraphForComparison graphRetriever,
         ICompareVertices verticesComparer, IStartingAbstractState startingAbstractStates,
-        IDetectChangeInCorrespondingStates detectChangeInCorrespondingStates)
+        IDetectChangeInCorrespondingStates detectChangeInCorrespondingStates, ComparableDataElementNameSetting comparableDataElementNameSetting)
     {
         this.graphRetriever = graphRetriever;
         this.verticesComparer = verticesComparer;
         this.startingAbstractStates = startingAbstractStates;
         this.detectChangeInCorrespondingStates = detectChangeInCorrespondingStates;
+        this.comparableDataElementNameSetting = comparableDataElementNameSetting;
     }
 
     public async Task<CompareResults> CompareAsync(Model oldModel, Model newModel)
@@ -91,8 +94,8 @@ public class AbstractGraphCompareEngine : ICompareGraph
     {
         // always mark as handeld for prevent double handling
         action.IsHandeld = true;
-
-        var correspondingAction = actionsStateFromApp1.FirstOrDefault(x => x["actionId"] == action["actionId"]);
+        // actopm
+        var correspondingAction = actionsStateFromApp1.FirstOrDefault(x => x[comparableDataElementNameSetting.Value] == action[comparableDataElementNameSetting.Value]);
         if (correspondingAction is null)
         {
             // this must be a new or altered action since a corresponding action

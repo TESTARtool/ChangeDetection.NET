@@ -11,6 +11,7 @@
 @inject MergeOverlappingEdgesSetting mergeOverlappingEdgesSetting
 @inject CompareAbstractActionLabelSetting abstractActionLabelSetting
 @inject CompareAbstractActionLabelSetting compareAbstractActionLabelSetting
+@inject ComparableDataElementNameSetting comparableDataElementNameSetting
 
 <AuthorizeView>
     <NotAuthorized>
@@ -103,8 +104,12 @@
           <div class="card-body">
             <h5 class="card-title">Specify which what the label of the element should show</h5>
             <div class="input-group mb-3">
-                <span class="input-group-text" id="inputGroup-sizing-default" style="width:170px">Abstract State Label</span>
+                <span class="input-group-text" id="inputGroup-sizing-default" style="width:190px">Abstract State Label</span>
                 <input type="text" class="form-control" @bind-value="compareAbstractActionLabelSetting.Value">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default" style="width:190px">Comparable Data Element Name</span>
+                <input type="text" class="form-control" @bind-value="comparableDataElementNameSetting.Value">
             </div>
           </div>
         </div>
