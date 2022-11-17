@@ -6,7 +6,6 @@
 @inject TestSequenceLabelSetting testSequenceLabelSetting
 @inject SequenceNodeLabelSetting sequenceNodeLabelSetting
 @inject ShowPrefixLabelSettings showPrefixLabelSettings
-@inject EnableCompareExperimentalFeature enableCompareExperimentalFeature
 @inject ShowOrientDbElementData showOrientDbElementData
 @inject MergeOverlappingEdgesSetting mergeOverlappingEdgesSetting
 @inject CompareAbstractActionLabelSetting abstractActionLabelSetting
@@ -45,22 +44,7 @@
             </label>
         </div>
 
-        <div class="card w-50 my-3">
-            <div class="card-header">
-                Expiremental features
-            </div>
-            <div class="card-body">
-                <h5 class="card-title">Expiremental features could generated issues, use with caution.</h5>
-                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" @bind="enableCompareExperimentalFeature.Value" id="showEnableCompareExperimentalFeature">
-                  <label class="form-check-label" for="showEnableCompareExperimentalFeature">
-                    Enable graph comparison feature
-                  </label>
-                </div>
-            </div>
-        </div>
-
-        <div class="card w-50">
+        <div class="card w-50 mb-3 mt-3">
           <div class="card-header">
             Graph element labels
           </div>
@@ -102,13 +86,12 @@
             Compare feature
           </div>
           <div class="card-body">
-            <h5 class="card-title">Specify which what the label of the element should show</h5>
             <div class="input-group mb-3">
-                <span class="input-group-text" id="inputGroup-sizing-default" style="width:190px">Abstract State Label</span>
+                <span class="input-group-text" id="inputGroup-sizing-default" style="width:250px">Abstract State Label Name</span>
                 <input type="text" class="form-control" @bind-value="compareAbstractActionLabelSetting.Value">
             </div>
             <div class="input-group mb-3">
-                <span class="input-group-text" id="inputGroup-sizing-default" style="width:190px">Comparable Data Element Name</span>
+                <span class="input-group-text" id="inputGroup-sizing-default" style="width:250px">Comparable Data Element Name</span>
                 <input type="text" class="form-control" @bind-value="comparableDataElementNameSetting.Value">
             </div>
           </div>

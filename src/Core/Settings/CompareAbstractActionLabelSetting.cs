@@ -3,6 +3,6 @@
 public class CompareAbstractActionLabelSetting : SettingBase<string>
 {
     public CompareAbstractActionLabelSetting(ISaveLoadSettings storage) :
-    base(storage, nameof(CompareAbstractActionLabelSetting), "Desc")
+    base(storage, nameof(CompareAbstractActionLabelSetting), "Description")
     { }
 }

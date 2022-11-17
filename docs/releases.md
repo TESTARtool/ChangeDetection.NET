@@ -1,6 +1,21 @@
 # TESTAR Analysis Release notes
 The page covers the release notes of the new TESTAR .NET Analysis website. 
 
+
+## Version 1.10.0
+With version 1.10.0, the compare feature is enabled by default. The setting page now has a separate section for compare feature.
+
+![New settings for Compare feature](images/1100-newSettings.png)
+
+With the "Abstract State Label Name", it is possible to specify which data element each Abstract State should display.
+
+With the "Comparable Data Element Name", is it possible to control which data element name the compare strategy uses to compare the actions. 
+
+### Screenshots in changed states
+![Screenshots in changed states](images/1100-screenshots.png)
+
+The screenshot from a corresponding concrete state is shown to make it easier to recognise the abstract state that is removed, added or changed. 
+
 ## Version 1.9.0
 *Note the compare features needs to be enabled on the settings page*
 

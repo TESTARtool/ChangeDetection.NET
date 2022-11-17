@@ -2,7 +2,6 @@
 @page "/"
 @inject IModelService modelService;
 @inject AuthenticationStateProvider AuthenticationStateProvider;
-@inject EnableCompareExperimentalFeature enableCompareExperimentalFeature
 
 <AuthorizeView>
     <NotAuthorized>
@@ -76,8 +75,7 @@
                       </div>
                       <div class="col-4 text-end align-self-center">
                           <a href="/Graph/@SelectedModel.ModelIdentifier.Value" class="btn btn-secondary">Open Graph</a>
-                            @if (enableCompareExperimentalFeature.Value)
-                            {
+                        
                                 <div class="btn-group m-1">
                                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Compare with
@@ -94,7 +92,7 @@
                                         }
                                     </ul>
                                 </div>
-                            }
+                            
                         </div>
                   </div>
                   <div class="row mt-3">
@@ -220,7 +218,7 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        if (user is not null && user.Identity.IsAuthenticated)
+        if (user is not null && user.Identity is not null && user.Identity.IsAuthenticated)
         {
 
             if (!allModels.Any())
