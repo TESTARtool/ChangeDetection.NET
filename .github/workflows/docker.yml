@@ -27,7 +27,7 @@ jobs:
           context: .
           file: ./src/BlazorApp/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:1.9.0, ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:1.10.0, ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-ui:latest
 
       - name: Build and push testar-net-server
         uses: docker/build-push-action@v2
@@ -35,4 +35,4 @@ jobs:
           context: .
           file: ./src/ChangeDetection.Server/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-server:1.9.0, ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-server:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-server:1.10.0, ${{ secrets.DOCKER_HUB_USERNAME }}/testar-net-server:latest

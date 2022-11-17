@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Testar.ChangeDetection.Core.Algorithm;
 using Testar.ChangeDetection.Core.Graph;
+using Testar.ChangeDetection.Core.Settings;
 
 namespace Testar.ChangeDetection.Core.Visualisation;
 
@@ -12,6 +13,13 @@ public interface IMergeGraphFactory
 
 public class MergeGraphFactory : IMergeGraphFactory
 {
+    private readonly CompareAbstractActionLabelSetting compareAbstractActionLabelSetting;
+
+    public MergeGraphFactory(CompareAbstractActionLabelSetting compareAbstractActionLabelSetting)
+    {
+        this.compareAbstractActionLabelSetting = compareAbstractActionLabelSetting;
+    }
+
     public AppGraph Create(CompareResults compareResults)
     {
         var oldGraph = compareResults.OldGraphApp.Elements.ToList();
@@ -145,7 +153,14 @@ public class MergeGraphFactory : IMergeGraphFactory
         {
             var x = ex.Message;
         }
-        return new AppGraph(mergeGraph);
+        var appGraph = new AppGraph(mergeGraph);
+
+        foreach (var edge in appGraph.AbstractActions)
+        {
+            edge["uiLabel"] = edge[compareAbstractActionLabelSetting.Value];
+        }
+
+        return appGraph;
     }
 
     /// <summary>

@@ -201,6 +201,10 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
                 style: {
                     'background-color': 'green',
                     'shape': 'star',
+                    'background-fit': 'contain',
+                    'background-image': function (ele) {
+                        return "data:image/png;base64," + ele.data('CD_CN_screenshot')
+                    },
                 }
             },
             {
@@ -208,6 +212,10 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
                 style: {
                     'background-color': 'red',
                     'shape': 'triangle',
+                    'background-fit': 'contain',
+                    'background-image': function (ele) {
+                        return "data:image/png;base64," + ele.data('CD_CO_screenshot')
+                    },
                 }
             },
             {
@@ -231,7 +239,11 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
                 selector: '.ContainsChanges',
                 style: {
                     'border-style': 'dashed',
-                    'border-width': 2
+                    'border-width': 2,
+                    'background-fit': 'contain',
+                    'background-image': function (ele) {
+                        return "data:image/png;base64," + ele.data('CD_CN_screenshot')
+                    },
                 }
             },
             {

@@ -30,7 +30,6 @@ builder
     .AddScoped<TestSequenceLabelSetting>()
     .AddScoped<SequenceNodeLabelSetting>()
     .AddScoped<ConcreteStateLabelSetting>()
-    .AddScoped<EnableCompareExperimentalFeature>()
     .AddScoped<ShowOrientDbElementData>()
     ;
 

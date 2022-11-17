@@ -55,9 +55,10 @@ builder.Services
     .AddScoped<TestSequenceLabelSetting>()
     .AddScoped<SequenceNodeLabelSetting>()
     .AddScoped<ConcreteStateLabelSetting>()
-    .AddScoped<EnableCompareExperimentalFeature>()
     .AddScoped<ShowOrientDbElementData>()
     .AddScoped<MergeOverlappingEdgesSetting>()
+    .AddScoped<CompareAbstractActionLabelSetting>()
+    .AddScoped<ComparableDataElementNameSetting>()
     ;
 
 builder.Services
