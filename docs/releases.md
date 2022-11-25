@@ -1,13 +1,17 @@
 # TESTAR Analysis Release notes
 The page covers the release notes of the new TESTAR .NET Analysis website. 
 
+## Version 1.10.1
+The previous versions has a feature to change the name of the actions, however it was displayed as 'Abstract State Label Name'. In the bug fix release this is fixed into 'Abstract Action label Name'
 
 ## Version 1.10.0
 With version 1.10.0, the compare feature is enabled by default. The setting page now has a separate section for compare feature.
 
 ![New settings for Compare feature](images/1100-newSettings.png)
 
-With the "Abstract State Label Name", it is possible to specify which data element each Abstract State should display.
+~~With the "Abstract State Label Name", it is possible to specify which data element each Abstract State should display.~~
+
+With the "Abstract Action label Name", it is possible to specify which data element each Abstract Action should display.
 
 With the "Comparable Data Element Name", is it possible to control which data element name the compare strategy uses to compare the actions. 
 
