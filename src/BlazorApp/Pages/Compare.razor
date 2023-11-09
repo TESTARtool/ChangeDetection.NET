@@ -44,6 +44,12 @@
                 <label class="btn btn-outline-secondary" for="show-labels">Show Labels</label>
             </div>
 
+            <div class="btn-group me-2" role="group">
+                <input type="checkbox" class="btn-check" id="show-new-removed-states" checked autocomplete="off"
+                onchange="showNewRemovedStates('mergeCy', this.value);">
+                <label class="btn btn-outline-secondary" for="show-new-removed-states">Show New/Removed States</label>
+            </div>
+
          @*   <div class="btn-group" role="group" aria-label="Show amount of nodes">
                 <button type="button" class="btn btn-secondary" disabled>
                   Abstract States <span class="badge bg-light text-dark rounded-pill" id="stats-abstract-states"></span>

@@ -378,6 +378,24 @@ function loadGraphCanvas(graph, elementId, dotNetHelper) {
         });
     }
 
+    let showNewRemovedStates = document.getElementById("show-new-removed-states");
+    if (showNewRemovedStates != null) {
+        showNewRemovedStates.addEventListener("change", function () {
+            if (showNewRemovedStates.checked) {
+                cy.$('.New').show();
+                cy.$('.Removed').show();
+                cy.$('.NewEdge').show();
+                cy.$('.RemovedEdge').show();
+            }
+            else {
+                cy.$('.New').hide();
+                cy.$('.Removed').hide();
+                cy.$('.NewEdge').hide();
+                cy.$('.RemovedEdge').hide();
+            }
+        });
+    }
+
     // when nodes get clicked, we need to open the side bar
     cy.on('tap', function (evt) {
         dotNetHelper.invokeMethodAsync('UpdateSelectedElement', evt.target.data('id'));
