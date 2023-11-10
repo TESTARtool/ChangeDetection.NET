@@ -35,6 +35,11 @@
                     <h3>Old version</h3>
                     <img alt="Concrete state screenshot" class="card-img" src="data:image/png;base64, @OldScreenshot">
                 }
+                @if (CompareScreenshot is not null)
+                {
+                    <h3>Compared version</h3>
+                    <img alt="Concrete state screenshot" class="card-img" src="data:image/png;base64, @CompareScreenshot">
+                }
             </div>
             <div class="tab-pane fade" id="compareTab" role="tabpanel" aria-labelledby="compare-tab">
             <h3>Added Element Data</h3>
@@ -140,6 +145,7 @@
     public List<ChangedProperty> ChangeDetectionProperties = new();
     public string? NewScreenshot;
     public string? OldScreenshot;
+    public string? CompareScreenshot;
     public GraphElement? SelectedElement { get; set; }
     public bool IsAbstractState { get; set; }
     private string Filter { get; set; }
@@ -162,7 +168,7 @@
         return property.Key.Contains(Filter, StringComparison.CurrentCultureIgnoreCase);
     }
 
-    public void ShowGraphElementAsync(string baseUrl, GraphElement element)
+    public async Task ShowGraphElementAsync(string baseUrl, GraphElement element)
     {
         ChangeDetectionProperties.Clear();
         BaseUrl = baseUrl;
@@ -184,6 +190,15 @@
         else
         {
             OldScreenshot = null;
+        }
+
+        if (newScreenshot != null && oldScreenshot != null)
+        {
+            CompareScreenshot = await JS.InvokeAsync<string>("pixelmatchInterop.compareImages", newScreenshot.ToString(), oldScreenshot.ToString());
+        }
+        else
+        {
+            CompareScreenshot = null;
         }
 
         Properties = element.Document.Properties
