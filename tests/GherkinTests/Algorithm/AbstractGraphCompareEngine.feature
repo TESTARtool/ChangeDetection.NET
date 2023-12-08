@@ -70,13 +70,14 @@ And an egde e53 in graph 5 to connect vertices n52 and n53 with the following da
     | actionId | gov1      |
 And an egde e54 in graph 5 to connect vertices n53 and n52 with the following data
     | Name     | Value     |
-    | actionId | tomain    |
+    | actionId | v1G5_tomain    |
 And an egde e55 in graph 5 to connect vertices n52 and n54 with the following data
     | Name     | Value     |
     | actionId | gov2      |
 And an egde e56 in graph 5 to connect vertices n54 and n52 with the following data
     | Name     | Value     |
-    | actionId | tomain    |
+    | actionId | v2G5_tomain    |
+
 Given an initial abstract state n61 in graph 6 with the following data
     | Name    | Value    |
     | stateId | initG6   |
@@ -100,13 +101,51 @@ And an egde e63 in graph 6 to connect vertices n62 and n63 with the following da
     | actionId | gov2      |
 And an egde e64 in graph 6 to connect vertices n63 and n62 with the following data
     | Name     | Value     |
-    | actionId | tomain    |
+    | actionId | v2G6_tomain    |
 And an egde e65 in graph 6 to connect vertices n62 and n64 with the following data
     | Name     | Value     |
     | actionId | gov3      |
 And an egde e66 in graph 6 to connect vertices n64 and n62 with the following data
     | Name     | Value     |
-    | actionId | tomain    |
+    | actionId | v3G6_tomain    |
+
+Given an initial abstract state n71 in graph 7 with the following data
+    | Name    | Value    |
+    | stateId | initialOBS |
+And another abstract state n72 in graph 7 with the following data
+    | Name    | Value   |
+    | stateId | fileMenuState |
+And another abstract state n73 in graph 7 with the following data
+    | Name    | Value   |
+    | stateId | settingsPanelState |
+And an egde e71 in graph 7 to connect vertices n71 and n72 with the following data
+    | Name     | Value    |
+    | actionId | initialOBS_clickFileAction |
+And an egde e72 in graph 7 to connect vertices n72 and n73 with the following data
+    | Name     | Value    |
+    | actionId | fileMenuState_clickSettingsAction | 
+And an egde e73 in graph 7 to connect vertices n73 and n71 with the following data
+    | Name     | Value    |
+    | actionId | settingsPanelState_closeAction | 
+
+Given an initial abstract state n81 in graph 8 with the following data
+    | Name    | Value    |
+    | stateId | initialOBS |
+And another abstract state n82 in graph 8 with the following data
+    | Name    | Value   |
+    | stateId | fileMenuChangedState |
+And another abstract state n83 in graph 8 with the following data
+    | Name    | Value   |
+    | stateId | settingsPanelState |
+And an egde e81 in graph 8 to connect vertices n81 and n82 with the following data
+    | Name     | Value    |
+    | actionId | initialOBS_clickFileAction |
+And an egde e82 in graph 8 to connect vertices n82 and n83 with the following data
+    | Name     | Value    |
+    | actionId | fileMenuChangedState_clickSettingsAction | 
+And an egde e83 in graph 8 to connect vertices n83 and n81 with the following data
+    | Name     | Value    |
+    | actionId | settingsPanelState_closeAction | 
 
 Scenario: Initial states are marked as corresponding states
 For this test we use two graph that do not have a similar state id 
@@ -166,9 +205,10 @@ Given graph 5 as the old graph
 And graph 6 as the new graph
 When the comparison between the new and old graph has run
 And the comparison result is merged
-Then the merge contains 5 abstract states and 8 abstract actions
+Then the merge contains 5 abstract states and 9 abstract actions
 And abstract state with stateId initG6 has the following class
     | ClassName     |
+    | isInitial     |
     | Match         |
     | NewVersion    |
     | OldVersion    |
@@ -177,11 +217,13 @@ And abstract state with stateId startG6 has the following class
     | Match         |
     | NewVersion    |
     | OldVersion    |
+    | ContainsChanges |
 And abstract state with stateId v2G6 has the following class
     | ClassName     |
     | Match         |
     | NewVersion    |
     | OldVersion    |
+    | ContainsChanges |
 And abstract state with stateId v1G5 has the following class
     | ClassName     |
     | Removed       |
@@ -193,3 +235,27 @@ And abstract state with stateId v3G6 has the following class
 And abstract state with stateId initG5 is not included in the merge graph
 And abstract state with stateId startG5 is not included in the merge graph
 And abstract state with stateId v2G5 is not included in the merge graph
+
+Scenario: Two OBS graphs are doing a directional comparison
+Given graph 7 as the old graph
+And graph 8 as the new graph
+When the comparison between the new and old graph has run
+And the comparison result is merged
+Then the merge contains 3 abstract states and 4 abstract actions
+And abstract state with stateId initialOBS has the following class
+    | ClassName       |
+    | isInitial       |
+    | Match           |
+    | NewVersion      |
+    | OldVersion      |
+And abstract state with stateId fileMenuChangedState has the following class
+    | ClassName       |
+    | Match           |
+    | ContainsChanges |
+    | NewVersion      |
+    | OldVersion      |
+And abstract state with stateId settingsPanelState has the following class
+    | ClassName       |
+    | Match           |
+    | NewVersion      |
+    | OldVersion      |

@@ -72,51 +72,64 @@ public class AbstractGraphCompareEngine : ICompareGraph
         newAbstractState.IsHandled = true;
 
         verticesComparer.CompareProperties(oldAbstractState, newAbstractState);
-        if (detectChangeInCorrespondingStates.ContainsChanges(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp))
+        if (detectChangeInCorrespondingStates.ContainsChangesSource(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp))
+        {
+            newAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);
+            oldAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);
+        }
+        if (detectChangeInCorrespondingStates.ContainsChangesTarget(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp))
         {
             newAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);
             oldAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);
         }
 
-        var abstractActionsForOldState = oldGraphApp.FindAbstractActionsFor(oldAbstractState).ToArray();
-        var unhandeldActions = newGraphApp
-            .FindAbstractActionsFor(newAbstractState)
+        traverseOutputActions(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp);
+
+        traverseInputActions(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp);
+    }
+
+    private void traverseOutputActions(Vertex oldAbstractState, Vertex newAbstractState, AppGraph oldGraphApp, AppGraph newGraphApp)
+    {
+        // move from source state to output actions
+        var outputAbstractActionsForOldState = oldGraphApp.FindAbstractActionsFromSource(oldAbstractState).ToArray();
+        var outputUnhandeldActions = newGraphApp
+            .FindAbstractActionsFromSource(newAbstractState)
             .Where(x => !x.IsHandled)
             .ToList();
 
-        foreach (var action in unhandeldActions)
+        foreach (var outputAction in outputUnhandeldActions)
         {
-            CompareActions(action, abstractActionsForOldState, oldGraphApp, newGraphApp);
+            CompareOutputActions(outputAction, outputAbstractActionsForOldState, oldGraphApp, newGraphApp);
         }
     }
 
-    private void CompareActions(Edge action, Edge[] actionsStateFromApp1, AppGraph oldGraphApp, AppGraph graphApp2)
+    private void CompareOutputActions(Edge outputAction, Edge[] actionsStateFromApp1, AppGraph oldGraphApp, AppGraph graphApp2)
     {
         // always mark as handeld for prevent double handling
-        action.IsHandled = true;
+        outputAction.IsHandled = true;
         // actopm
-        var correspondingAction = actionsStateFromApp1.FirstOrDefault(x => x[comparableDataElementNameSetting.Value] == action[comparableDataElementNameSetting.Value]);
-        if (correspondingAction is null)
+        var correspondingOutputAction = actionsStateFromApp1.FirstOrDefault(x => x[comparableDataElementNameSetting.Value] == outputAction[comparableDataElementNameSetting.Value]);
+        if (correspondingOutputAction is null)
         {
             // this must be a new or altered action since a corresponding action
             // was not found in the abstract state.
             // not the first version lets mark it as new
 
-            action["CD_CompareResult"] = new PropertyValue("new");
+            outputAction["CD_CompareResult"] = new PropertyValue("new");
         }
         else
         {
-            action["CD_CompareResult"] = new PropertyValue("match");
+            outputAction["CD_CompareResult"] = new PropertyValue("match");
 
             // corresponding action found. continue with outgoing state
-            correspondingAction.IsHandled = true;
+            correspondingOutputAction.IsHandled = true;
 
             var targetState = graphApp2.AbstractStates
-                .First(x => x.Document.Id == action.TargetId)
+                .First(x => x.Document.Id == outputAction.TargetId)
                 .DocumentAsVertex();
 
             var correspondingTargetState = oldGraphApp.AbstractStates
-                .First(x => x.Document.Id == correspondingAction.TargetId)
+                .First(x => x.Document.Id == correspondingOutputAction.TargetId)
                 .DocumentAsVertex();
 
             // first check it handling is needed
@@ -125,6 +138,60 @@ public class AbstractGraphCompareEngine : ICompareGraph
                 // we now have two states that are coresponding in both graph.
                 // check the differences between the two states.
                 CompareAbstractStates(correspondingTargetState, targetState, oldGraphApp, graphApp2);
+            }
+        }
+    }
+
+    private void traverseInputActions(Vertex oldAbstractState, Vertex newAbstractState, AppGraph oldGraphApp, AppGraph newGraphApp)
+    {
+        // move from target state to input actions
+        var inputAbstractActionsForOldState = oldGraphApp.FindAbstractActionsForTarget(oldAbstractState).ToArray();
+        var inputtUnhandeldActions = newGraphApp
+            .FindAbstractActionsForTarget(newAbstractState)
+            .Where(x => !x.IsHandled)
+            .ToList();
+
+        foreach (var inputAction in inputtUnhandeldActions)
+        {
+            CompareInputActions(inputAction, inputAbstractActionsForOldState, oldGraphApp, newGraphApp);
+        }
+    }
+
+    private void CompareInputActions(Edge inputAction, Edge[] actionsStateFromApp1, AppGraph oldGraphApp, AppGraph graphApp2)
+    {
+        // always mark as handeld for prevent double handling
+        inputAction.IsHandled = true;
+        // actopm
+        var correspondingInputAction = actionsStateFromApp1.FirstOrDefault(x => x[comparableDataElementNameSetting.Value] == inputAction[comparableDataElementNameSetting.Value]);
+        if (correspondingInputAction is null)
+        {
+            // this must be a new or altered action since a corresponding action
+            // was not found in the abstract state.
+            // not the first version lets mark it as new
+
+            inputAction["CD_CompareResult"] = new PropertyValue("new");
+        }
+        else
+        {
+            inputAction["CD_CompareResult"] = new PropertyValue("match");
+
+            // corresponding action found. continue with outgoing state
+            correspondingInputAction.IsHandled = true;
+
+            var sourceState = graphApp2.AbstractStates
+                .First(x => x.Document.Id == inputAction.SourceId)
+                .DocumentAsVertex();
+
+            var correspondingSourceState = oldGraphApp.AbstractStates
+                .First(x => x.Document.Id == correspondingInputAction.SourceId)
+                .DocumentAsVertex();
+
+            // first check it handling is needed
+            if (!(sourceState.IsHandled || correspondingSourceState.IsHandled))
+            {
+                // we now have two states that are coresponding in both graph.
+                // check the differences between the two states.
+                CompareAbstractStates(correspondingSourceState, sourceState, oldGraphApp, graphApp2);
             }
         }
     }

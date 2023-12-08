@@ -18,10 +18,17 @@ public class AppGraph
 
     public Vertex? InitialAbstractState => AbstractStates.FirstOrDefault(x => x.IsInitial)?.DocumentAsVertex();
 
-    public IEnumerable<Edge> FindAbstractActionsFor(Vertex state)
+    public IEnumerable<Edge> FindAbstractActionsFromSource(Vertex state)
     {
         return AbstractActions
             .Where(x => x.Document.SourceId == state.Id)
+            .Select(x => x.DocumentAsEdge());
+    }
+
+    public IEnumerable<Edge> FindAbstractActionsForTarget(Vertex state)
+    {
+        return AbstractActions
+            .Where(x => x.Document.TargetId == state.Id)
             .Select(x => x.DocumentAsEdge());
     }
 }

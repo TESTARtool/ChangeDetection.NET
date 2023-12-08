@@ -4,6 +4,7 @@ using TechTalk.SpecFlow.Assist;
 using Testar.ChangeDetection.Core;
 using Testar.ChangeDetection.Core.Algorithm;
 using Testar.ChangeDetection.Core.Graph;
+using Testar.ChangeDetection.Core.Settings;
 using Testar.ChangeDetection.Core.Visualisation;
 
 namespace GherkinTests.Algorithm;
@@ -140,9 +141,11 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
     [When(@"the comparison between the new and old graph has run")]
     public async Task WhenTheComparisonBetweenTheNewAndOldGraphHasRunAsync()
     {
-        var starting = new InitialStartingAbstractState();
         var comparer = new CompareVertices();
-        var compareEngine = new AbstractGraphCompareEngine(this, comparer, starting);
+        var starting = new InitialStartingAbstractState();
+        var detectChange = new ContainsChangesWhenActionsDoNotMatch();
+        var settings = new ComparableDataElementNameSetting(new SaveLoadSettings());
+        var compareEngine = new AbstractGraphCompareEngine(this, comparer, starting, detectChange, settings);
         compareResult = await compareEngine.CompareAsync(oldModel, newModel);
     }
 
@@ -150,7 +153,8 @@ internal class AbstractGraphCompareEngineBindings : IRetrieveGraphForComparison
     public void WhenTheComparisonResultIsMerged()
     {
         compareResult.Should().NotBeNull();
-        var graphMerger = new MergeGraphFactory();
+        var settings = new CompareAbstractActionLabelSetting(new SaveLoadSettings());
+        var graphMerger = new MergeGraphFactory(settings);
 
         mergeGraph = graphMerger.Create(compareResult!);
     }
