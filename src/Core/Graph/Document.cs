@@ -27,15 +27,15 @@ public abstract class Document
     public string? TargetId { get; set; }
 
     [JsonIgnore]
-    public bool IsHandeld
+    public bool IsHandled
     {
         get
         {
-            return this["CD_IsHandeld"].AsBool();
+            return this["CD_IsHandled"].AsBool();
         }
         set
         {
-            AddProperty("CD_IsHandeld", value.ToString());
+            AddProperty("CD_IsHandled", value.ToString());
         }
     }
 

@@ -51,10 +51,10 @@ public class GraphElement
     public bool IsConcreteAction => Classes.Any(x => x == "ConcreteAction" && Document is Edge);
 
     [JsonIgnore]
-    public bool IsHandeld
+    public bool IsHandled
     {
-        get => Document.IsHandeld;
-        set => Document.IsHandeld = value;
+        get => Document.IsHandled;
+        set => Document.IsHandled = value;
     }
 
     public PropertyValue this[string name]

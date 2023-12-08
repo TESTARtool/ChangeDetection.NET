@@ -68,8 +68,8 @@ public class AbstractGraphCompareEngine : ICompareGraph
 
         // mark steps as handeld since we do not want to loop around
         // the graph and handeld states twice
-        oldAbstractState.IsHandeld = true;
-        newAbstractState.IsHandeld = true;
+        oldAbstractState.IsHandled = true;
+        newAbstractState.IsHandled = true;
 
         verticesComparer.CompareProperties(oldAbstractState, newAbstractState);
         if (detectChangeInCorrespondingStates.ContainsChanges(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp))
@@ -81,7 +81,7 @@ public class AbstractGraphCompareEngine : ICompareGraph
         var abstractActionsForOldState = oldGraphApp.FindAbstractActionsFor(oldAbstractState).ToArray();
         var unhandeldActions = newGraphApp
             .FindAbstractActionsFor(newAbstractState)
-            .Where(x => !x.IsHandeld)
+            .Where(x => !x.IsHandled)
             .ToList();
 
         foreach (var action in unhandeldActions)
@@ -93,7 +93,7 @@ public class AbstractGraphCompareEngine : ICompareGraph
     private void CompareActions(Edge action, Edge[] actionsStateFromApp1, AppGraph oldGraphApp, AppGraph graphApp2)
     {
         // always mark as handeld for prevent double handling
-        action.IsHandeld = true;
+        action.IsHandled = true;
         // actopm
         var correspondingAction = actionsStateFromApp1.FirstOrDefault(x => x[comparableDataElementNameSetting.Value] == action[comparableDataElementNameSetting.Value]);
         if (correspondingAction is null)
@@ -109,7 +109,7 @@ public class AbstractGraphCompareEngine : ICompareGraph
             action["CD_CompareResult"] = new PropertyValue("match");
 
             // corresponding action found. continue with outgoing state
-            correspondingAction.IsHandeld = true;
+            correspondingAction.IsHandled = true;
 
             var targetState = graphApp2.AbstractStates
                 .First(x => x.Document.Id == action.TargetId)
@@ -120,7 +120,7 @@ public class AbstractGraphCompareEngine : ICompareGraph
                 .DocumentAsVertex();
 
             // first check it handling is needed
-            if (!(targetState.IsHandeld || correspondingTargetState.IsHandeld))
+            if (!(targetState.IsHandled || correspondingTargetState.IsHandled))
             {
                 // we now have two states that are coresponding in both graph.
                 // check the differences between the two states.

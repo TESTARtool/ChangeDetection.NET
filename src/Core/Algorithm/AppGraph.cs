@@ -14,7 +14,7 @@ public class AppGraph
     public IEnumerable<GraphElement> AbstractActions => Elements.Where(x => x.IsAbstractAction);
     public IEnumerable<GraphElement> ConcreteActions => Elements.Where(x => x.IsConcreteAction);
     public IEnumerable<GraphElement> ConcreteStates => Elements.Where(x => x.IsConcreteState);
-    public bool ContainsUnhandledAbstractStates => AbstractStates.Any(x => !x.IsHandeld);
+    public bool ContainsUnhandledAbstractStates => AbstractStates.Any(x => !x.IsHandled);
 
     public Vertex? InitialAbstractState => AbstractStates.FirstOrDefault(x => x.IsInitial)?.DocumentAsVertex();
 
