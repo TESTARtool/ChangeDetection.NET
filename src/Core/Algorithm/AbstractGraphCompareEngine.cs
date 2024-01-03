@@ -106,7 +106,9 @@ public class AbstractGraphCompareEngine : ICompareGraph
         }
         else
         {
+            // Mark both new and old model actions as match
             action["CD_CompareResult"] = new PropertyValue("match");
+            correspondingAction["CD_CompareResult"] = new PropertyValue("match");
 
             // corresponding action found. continue with outgoing state
             correspondingAction.IsHandled = true;

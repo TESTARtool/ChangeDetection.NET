@@ -104,8 +104,9 @@ public class MergeGraphFactory : IMergeGraphFactory
         }
 
         // Finally, all edges from Go are added to Gm and wired
+        // Ignore edges that have been already matched
         var oldEdges = oldGraph
-            .Where(x => x.IsAbstractAction)
+            .Where(x => x.IsAbstractAction && x["CD_CompareResult"].Value != "match")
             .ToList();
 
         foreach (var edge in oldEdges)
@@ -141,6 +142,7 @@ public class MergeGraphFactory : IMergeGraphFactory
             {
                 edge.AddClass("OldVersion");
                 edge.AddClass("RemovedEdge");
+                edge["CD_CompareResult"] = new PropertyValue("old");
                 mergeGraph.Add(edge);
             }
         }
