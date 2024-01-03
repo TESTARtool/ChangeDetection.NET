@@ -72,7 +72,11 @@ public class AbstractGraphCompareEngine : ICompareGraph
         newAbstractState.IsHandled = true;
 
         verticesComparer.CompareProperties(oldAbstractState, newAbstractState);
-        if (detectChangeInCorrespondingStates.ContainsChanges(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp))
+        
+        // If the corresponding abstract states are different, or the abstract actions of the corresponding states do not match
+        // The states contain changes
+        if (detectChangeInCorrespondingStates.AreAbstractStatesDifferent(oldAbstractState, newAbstractState) ||
+            detectChangeInCorrespondingStates.AreAbstractActionsDifferent(oldAbstractState, newAbstractState, oldGraphApp, newGraphApp))
         {
             newAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);
             oldAbstractState["CD_ContainsChanges"] = new PropertyValue(bool.TrueString);

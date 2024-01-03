@@ -4,12 +4,17 @@ namespace Testar.ChangeDetection.Core.Algorithm;
 
 public interface IDetectChangeInCorrespondingStates
 {
-    bool ContainsChanges(Vertex oldAbstractState, Vertex newAbstractState, AppGraph oldGraphApp, AppGraph newGraphApp);
+    bool AreAbstractStatesDifferent(Vertex oldAbstractState, Vertex newAbstractState);
+    bool AreAbstractActionsDifferent(Vertex oldAbstractState, Vertex newAbstractState, AppGraph oldGraphApp, AppGraph newGraphApp);
 }
 
-public class ContainsChangesWhenActionsDoNotMatch : IDetectChangeInCorrespondingStates
+public class CorrespondingStatesContainsChanges : IDetectChangeInCorrespondingStates
 {
-    public bool ContainsChanges(Vertex oldAbstractState, Vertex newAbstractState, AppGraph oldGraphApp, AppGraph newGraphApp)
+    public bool AreAbstractStatesDifferent(Vertex oldAbstractState, Vertex newAbstractState)
+    {
+        return oldAbstractState["stateId"].Value != newAbstractState["stateId"].Value;
+    }
+    public bool AreAbstractActionsDifferent(Vertex oldAbstractState, Vertex newAbstractState, AppGraph oldGraphApp, AppGraph newGraphApp)
     {
         var abstractActionsForOldState = oldGraphApp.FindAbstractActionsFor(oldAbstractState)
             .Select(x => x["actionId"].Value)
