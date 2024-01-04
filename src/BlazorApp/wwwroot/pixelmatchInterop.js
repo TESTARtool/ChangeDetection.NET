@@ -1,5 +1,5 @@
 ﻿window.pixelmatchInterop = {
-    compareImages: (newImage, oldImage) => {
+    compareImages: (newImage, oldImage, thresholdValue) => {
         return new Promise((resolve, reject) => {
             // Create image elements for the new and old images
             const newImg = new Image();
@@ -33,11 +33,12 @@
                     // Use pixelmatch to compare images and generate diff
                     const diff = new Uint8Array(newImageData.data.length);
                     const numDiffPixels = pixelmatch(oldImageData.data, newImageData.data, diff, diffCanvas.width, diffCanvas.height, {
-                        threshold: 0.05,
-                        includeAA: false,
-                        alpha: 0.8,
-                        aaColor: [255, 255, 0],
+                        threshold: thresholdValue,
+                        includeAA: true,
+                        alpha: 0.6,
+                        aaColor: [0, 0, 0],
                         diffColor: [255, 0, 0],
+                        diffColorAlt: [0, 0, 255],
                         diffMask: null
                     });
 

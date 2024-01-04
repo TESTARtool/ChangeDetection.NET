@@ -194,7 +194,7 @@
 
         if (newScreenshot != null && oldScreenshot != null)
         {
-            CompareScreenshot = await JS.InvokeAsync<string>("pixelmatchInterop.compareImages", newScreenshot.ToString(), oldScreenshot.ToString());
+            CompareScreenshot = await JS.InvokeAsync<string>("pixelmatchInterop.compareImages", newScreenshot.ToString(), oldScreenshot.ToString(), 0.3);
         }
         else
         {
