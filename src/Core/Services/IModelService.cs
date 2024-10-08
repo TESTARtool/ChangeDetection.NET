@@ -152,7 +152,7 @@ public class ModelService : IModelService
             return string.Empty;
         }
 
-        var state = await new OrientDbCommand("SELECT screenshot FROM concreteState WHERE ConcreteIDCustom = :concreteId")
+        var state = await new OrientDbCommand("SELECT screenshot FROM concreteState WHERE ConcreteID = :concreteId")
               .AddParameter("concreteId", sequenceNode.ConcreteStateId)
               .ExecuteOn<ScreenshotJson>(client)
               .FirstAsync();

@@ -18,12 +18,12 @@ public class ConcreteStateEntityRequestHandler : IRequestHandler<ConcreteStateEn
 
     public async Task<ConcreteState?> Handle(ConcreteStateEntityRequest request, CancellationToken cancellationToken)
     {
-        return await new OrientDbCommand("SELECT FROM ConcreteState WHERE ConcreteIDCustom = :concreteIDCustom LIMIT 1")
-            .AddParameter("concreteIDCustom", request.ConcreteStateId.Value)
+        return await new OrientDbCommand("SELECT FROM ConcreteState WHERE ConcreteID = :concreteID LIMIT 1")
+            .AddParameter("concreteID", request.ConcreteStateId.Value)
             .ExecuteOn<ConcreteStateJson>(client)
             .Select(x => new ConcreteState
             {
-                ConcreteIDCustom = new ConcreteIDCustom(x.ConcreteIDCustom),
+                ConcreteID = new ConcreteID(x.ConcreteID),
                 Screenshot = new OrientDbId(x.Screenshot),
             })
             .FirstOrDefaultAsync();
@@ -31,7 +31,7 @@ public class ConcreteStateEntityRequestHandler : IRequestHandler<ConcreteStateEn
 
     public class ConcreteStateJson
     {
-        public string ConcreteIDCustom { get; set; }
+        public string ConcreteID { get; set; }
         public string Screenshot { get; set; }
     }
 }

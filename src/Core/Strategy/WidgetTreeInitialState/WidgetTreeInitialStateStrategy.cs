@@ -146,10 +146,10 @@ public class WidgetTreeInitialStateStrategy : IChangeDetectionStrategy
         return diffb.Differences.ToArray();
     }
 
-    private async Task<Widget> GetWidgetTreeFromConcreteStateIdAsync(ConcreteStateId concreteIDCustom)
+    private async Task<Widget> GetWidgetTreeFromConcreteStateIdAsync(ConcreteStateId concreteID)
     {
-        var command = new OrientDbCommand("SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteIDCustom = :concreteIDCustom))")
-            .AddParameter("concreteIDCustom", concreteIDCustom.Value);
+        var command = new OrientDbCommand("SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteID = :concreteID))")
+            .AddParameter("concreteID", concreteID.Value);
 
         var widgetsjson = await client.QueryAsync<JsonElement>(command);
 

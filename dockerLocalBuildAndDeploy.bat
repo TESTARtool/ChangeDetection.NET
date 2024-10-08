@@ -1,3 +1,5 @@
+dotnet clean "./ChangeDetection.sln"
+
 dotnet restore "./ChangeDetection.sln"
 
 @rem build both docker images

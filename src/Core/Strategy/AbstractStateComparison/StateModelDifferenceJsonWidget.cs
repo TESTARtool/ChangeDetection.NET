@@ -6,7 +6,7 @@ public interface IStateModelDifferenceJsonWidget
 {
     IAsyncEnumerable<WidgetJson> GetNewWidgets(DeltaState removedState, DeltaState addedState, IFileOutputHandler fileOutputHandler);
 
-    Task<WidgetJson[]> FetchWidgetTreeInfo(ConcreteIDCustom concreteIDCustom);
+    Task<WidgetJson[]> FetchWidgetTreeInfo(ConcreteID concreteID);
 }
 
 public class StateModelDifferenceJsonWidget : IStateModelDifferenceJsonWidget
@@ -20,13 +20,13 @@ public class StateModelDifferenceJsonWidget : IStateModelDifferenceJsonWidget
 
     public async IAsyncEnumerable<WidgetJson> GetNewWidgets(DeltaState removedState, DeltaState addedState, IFileOutputHandler fileOutputHandler)
     {
-        var removedStateId = removedState.ConcreteStates.First().ConcreteIDCustom;
+        var removedStateId = removedState.ConcreteStates.First().ConcreteID;
         var removedStateWidgetTree = await FetchWidgetTreeInfo(removedStateId);
         var removedStateJson = JsonConvert.SerializeObject(removedStateWidgetTree);
         var removedStatePath = fileOutputHandler.GetFilePath($"wigettree_{removedStateId.Value}.json");
         File.WriteAllText(removedStatePath, removedStateJson);
 
-        var addedStateId = addedState.ConcreteStates.First().ConcreteIDCustom;
+        var addedStateId = addedState.ConcreteStates.First().ConcreteID;
         var addedStateWidgetTree = await FetchWidgetTreeInfo(addedStateId);
         var addedStateJdon = JsonConvert.SerializeObject(addedStateWidgetTree);
         var addedStatePath = fileOutputHandler.GetFilePath($"wigettree_{addedStateId.Value}.json");
@@ -36,11 +36,11 @@ public class StateModelDifferenceJsonWidget : IStateModelDifferenceJsonWidget
 
         foreach (var widget in addedStateWidgetTree)
         {
-            if (!widget.AbstractIDCustom.Contains("SAC"))
+            if (!widget.AbstractID.Contains("SA"))
             {
-                var removedAbstractIdCustoms = removedStateWidgetTree.Select(x => x.AbstractIDCustom);
+                var removedAbstractIds = removedStateWidgetTree.Select(x => x.AbstractID);
 
-                if (!removedAbstractIdCustoms.Contains(widget.AbstractIDCustom))
+                if (!removedAbstractIds.Contains(widget.AbstractID))
                 {
                     // widget is new
                     yield return widget;
@@ -49,10 +49,10 @@ public class StateModelDifferenceJsonWidget : IStateModelDifferenceJsonWidget
         }
     }
 
-    public async Task<WidgetJson[]> FetchWidgetTreeInfo(ConcreteIDCustom concreteIDCustom)
+    public async Task<WidgetJson[]> FetchWidgetTreeInfo(ConcreteID concreteID)
     {
-        var widgets = new OrientDbCommand("SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteIDCustom = :concreteIDCustom))")
-            .AddParameter("concreteIDCustom", concreteIDCustom.Value)
+        var widgets = new OrientDbCommand("SELECT FROM (TRAVERSE IN('isChildOf') FROM (SELECT FROM Widget WHERE ConcreteID = :concreteID))")
+            .AddParameter("concreteID", concreteID.Value)
             .ExecuteOn<WidgetJson>(client);
 
         return await widgets.ToArrayAsync();
@@ -124,8 +124,8 @@ public class WidgetJson
     [JsonPropertyName("UIAIsWindowModal")]
     public bool UIAIsWindowModal { get; set; }
 
-    [JsonPropertyName("AbstractIDCustom")]
-    public string AbstractIDCustom { get; set; }
+    [JsonPropertyName("AbstractID")]
+    public string AbstractID { get; set; }
 
     [JsonPropertyName("UIAName")]
     public string UIAName { get; set; }
@@ -147,9 +147,6 @@ public class WidgetJson
 
     [JsonPropertyName("Abs(R)ID")]
     public string AbsRID { get; set; }
-
-    [JsonPropertyName("ConcreteIDCustom")]
-    public string ConcreteIDCustom { get; set; }
 
     [JsonPropertyName("Role")]
     public string Role { get; set; }
@@ -177,7 +174,4 @@ public class WidgetJson
 
     [JsonPropertyName("Blocked")]
     public bool Blocked { get; set; }
-
-    [JsonPropertyName("AbstractID")]
-    public string AbstractID { get; set; }
 }

@@ -3,6 +3,6 @@
 public class ConcreteStateLabelSetting : SettingBase<string>
 {
     public ConcreteStateLabelSetting(ISaveLoadSettings storage) :
-        base(storage, nameof(ConcreteStateLabelSetting), "ConcreteIDCustom")
+        base(storage, nameof(ConcreteStateLabelSetting), "ConcreteID")
     { }
 }

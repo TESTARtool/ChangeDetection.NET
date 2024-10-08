@@ -65,8 +65,8 @@ public class HtmlOutputter : IHtmlOutputter
 
                 if (intersection.Any())
                 {
-                    var newConcreteStateFileName = addedState.ConcreteStates.First().ConcreteIDCustom.Value;
-                    var removedConcreteState = removedState.ConcreteStates.First().ConcreteIDCustom.Value;
+                    var newConcreteStateFileName = addedState.ConcreteStates.First().ConcreteID.Value;
+                    var removedConcreteState = removedState.ConcreteStates.First().ConcreteID.Value;
 
                     var comparisonBytes = compareImages.Comparer
                         (
@@ -96,7 +96,7 @@ public class HtmlOutputter : IHtmlOutputter
 
                     foreach (var widget in newWidgets)
                     {
-                        html.AppendLine($"<p>This Widget is completely new in the new Model: {widget.AbstractIDCustom}</p>");
+                        html.AppendLine($"<p>This Widget is completely new in the new Model: {widget.AbstractID}</p>");
                         html.Append("<p>");
 
                         foreach (var tag in tags)
@@ -188,7 +188,7 @@ public class HtmlOutputter : IHtmlOutputter
     private async Task<string> SaveScreenshotAsync(DeltaState state, IFileOutputHandler fileOutputHandler)
     {
         var concreteState = state.ConcreteStates.First();
-        var fileName = concreteState.ConcreteIDCustom.Value.ToString() + ".png";
+        var fileName = concreteState.ConcreteID.Value.ToString() + ".png";
         var filePath = fileOutputHandler.GetFilePath(fileName);
         var screenshotBytes = await client.DocumentAsync(concreteState.Screenshot);
         await File.WriteAllBytesAsync(filePath, screenshotBytes);

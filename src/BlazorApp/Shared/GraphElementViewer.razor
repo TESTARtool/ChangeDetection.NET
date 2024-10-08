@@ -41,7 +41,7 @@
             @foreach (var concreteState in SelectedElement["concreteStateIds"].AsArray())
             {
                 <img alt="Concrete state screenshot" class="ps-3 p3-3"
-                src ="data:image/png;base64, @AppGraph.ConcreteStates.FirstOrDefault(x => x["ConcreteIDCustom"] == concreteState)?["screenshot"].Value">
+                src ="data:image/png;base64, @AppGraph.ConcreteStates.FirstOrDefault(x => x["ConcreteID"] == concreteState)?["screenshot"].Value">
             }
 
         }
