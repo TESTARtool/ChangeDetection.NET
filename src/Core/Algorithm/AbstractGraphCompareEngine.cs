@@ -98,8 +98,18 @@ public class AbstractGraphCompareEngine : ICompareGraph
     {
         // always mark as handeld for prevent double handling
         action.IsHandled = true;
-        // actopm
+        // check in the model for the corresponding action
         var correspondingAction = actionsStateFromApp1.FirstOrDefault(x => x[comparableDataElementNameSetting.Value] == action[comparableDataElementNameSetting.Value]);
+        
+        // WORKAROUND: TESTAR must provide actions with valuable descriptions
+        // However, if the action value contains an empty description
+        if ((action[comparableDataElementNameSetting.Value].Value).Contains("at ''"))
+        {
+            // Use the action id to find the corresponding action
+            var actionId = action.Property("actionId");
+            correspondingAction = actionsStateFromApp1.FirstOrDefault(x => x.Property("actionId") == actionId);
+        }
+        
         if (correspondingAction is null)
         {
             // this must be a new or altered action since a corresponding action
